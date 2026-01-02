@@ -1,4 +1,492 @@
 \newpage
 \section{Kiểm thử chương trình}
+
+% Định nghĩa column type mới với raggedright để tránh warning
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
 \subsection{Kiểm thử các chức năng đã thực hiện}
+
+Phần này mô tả chi tiết quá trình kiểm thử các chức năng cốt lõi của hệ thống ``Đi chợ tiện lợi'' nhằm đảm bảo phần mềm hoạt động đúng yêu cầu thiết kế và xử lý tốt các logic nghiệp vụ đặc thù.
+
+\textbf{Kỹ thuật kiểm thử sử dụng:}
+\begin{itemize}
+    \item \textbf{Kiểm thử hộp đen (Black-box Testing):} Tập trung vào đầu vào và đầu ra dựa trên mô tả Use Case.
+    \item \textbf{Phân vùng tương đương (Equivalence Partitioning):} Chia nhóm dữ liệu hợp lệ (đúng định dạng, logic đúng) và không hợp lệ (sai định dạng, logic sai).
+    \item \textbf{Phân tích giá trị biên (Boundary Value Analysis):} Kiểm tra số lượng (0, số âm, số cực lớn), độ dài mật khẩu, ngày hết hạn (quá khứ/tương lai).
+\end{itemize}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Đăng ký tài khoản (UC-09.1)}
+
+\textbf{Mô tả chức năng:} Đăng ký tài khoản mới cho người dùng.
+
+\textbf{Lưu ý:} Mật khẩu tối thiểu 8 ký tự, có chữ hoa và số. Email và SĐT là duy nhất.
+
+\vspace{0.5cm}
+\textbf{A. Thiết kế Test Case chi tiết}
+
+\begin{table}[H]
+\centering
+
+\begin{tabular}{|p{3.5cm}|p{11cm}|}
+\hline
+\textbf{Mục} & \textbf{Nội dung chi tiết} \\
+\hline
+Test No. & TC\_AUTH\_01 \\
+\hline
+Current status & $\boxtimes$ Passed \hspace{0.5cm} $\square$ Failed \hspace{0.5cm} $\square$ Pending \\
+\hline
+Title & Đăng ký tài khoản thành công với dữ liệu hợp lệ \\
+\hline
+Description & Đảm bảo người dùng tạo được tài khoản khi nhập đúng định dạng và đủ độ mạnh mật khẩu. \\
+\hline
+Approach & Kiểm thử luồng cơ bản (Happy Path). \\
+\hline
+\end{tabular}
+\caption{Thông tin Test Case TC\_AUTH\_01}
+\end{table}
+
+\textbf{Các bước thực hiện:}
+
+\begin{longtable}{|c|p{4cm}|p{3.5cm}|p{5cm}|c|}
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endhead
+1 & Mở màn hình Đăng ký & Truy cập chức năng & Form đăng ký hiển thị đầy đủ các trường & $\checkmark$ \\
+\hline
+2 & Nhập "Họ tên": Nguyễn Văn A & Nhập dữ liệu text & Dữ liệu được ghi nhận & $\checkmark$ \\
+\hline
+3 & Nhập "Email": nva@test.com (chưa tồn tại) & Nhập khóa định danh & Dữ liệu được ghi nhận & $\checkmark$ \\
+\hline
+4 & Nhập "SĐT": 0987654321 & Nhập thông tin liên hệ & Dữ liệu được ghi nhận & $\checkmark$ \\
+\hline
+5 & Nhập "Mật khẩu": Abc12345 (có hoa, có số, 8 ký tự) & Nhập bảo mật & Dữ liệu được ghi nhận, hiển thị độ mạnh pass & $\checkmark$ \\
+\hline
+6 & Nhập "Xác nhận mật khẩu": Abc12345 & Kiểm tra khớp & Không báo lỗi không khớp & $\checkmark$ \\
+\hline
+7 & Nhấn "Đăng ký" & Gửi yêu cầu & Hệ thống gửi mã OTP về email/SMS, chuyển sang màn hình nhập OTP & $\checkmark$ \\
+\hline
+\caption{Các bước thực hiện Test Case TC\_AUTH\_01}
+\end{longtable}
+
+\textbf{Nhận xét:} Chức năng hoạt động đúng luồng với dữ liệu chuẩn.
+
+\vspace{0.5cm}
+\textbf{B. Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|p{4cm}|p{4.5cm}|p{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Để trống bất kỳ trường bắt buộc nào (Tên, Email, Pass...) & Button Đăng ký bị disable hoặc báo đỏ trường thiếu & Đã xử lý (Validation) & \textbf{PASS} \\
+\hline
+2 & Nhập Email đã tồn tại trong DB & Hiển thị thông báo "Email đã được sử dụng" & Đã xử lý (Check Duplicate) & \textbf{PASS} \\
+\hline
+3 & Mật khẩu: "password" (không hoa, không số) & Hiển thị lỗi "Mật khẩu cần chữ hoa và số" & Đã xử lý (Regex check) & \textbf{PASS} \\
+\hline
+4 & Mật khẩu xác nhận không khớp & Hiển thị lỗi "Mật khẩu không khớp" & Đã xử lý (Validation) & \textbf{PASS} \\
+\hline
+5 & Nhập mã OTP sai quá 3 lần & Tài khoản tạm khóa hoặc yêu cầu gửi lại mã sau X phút & Logic bảo mật & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Đăng ký tài khoản}
+\end{longtable}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Theo dõi danh sách mua sắm (UC-01.3)}
+
+\textbf{Mô tả chức năng:} Tick chọn đã mua hàng khi đi chợ.
+
+\textbf{Lưu ý logic nghiệp vụ đặc thù:} Nếu số lượng thực tế < số lượng dự định $\rightarrow$ Đánh dấu đã mua phần đó VÀ tạo thêm 1 mục mới cho phần còn thiếu.
+
+\vspace{0.5cm}
+\textbf{A. Thiết kế Test Case chi tiết}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{11cm}|}
+\hline
+\textbf{Mục} & \textbf{Nội dung chi tiết} \\
+\hline
+Test No. & TC\_SHOP\_01 \\
+\hline
+Current status & $\boxtimes$ Passed \hspace{0.5cm} $\square$ Failed \hspace{0.5cm} $\square$ Pending \\
+\hline
+Title & Kiểm tra logic tách mục khi mua thiếu số lượng (Partial Purchase) \\
+\hline
+Description & Đảm bảo hệ thống tự động tạo mục mới khi người dùng không mua đủ số lượng yêu cầu. \\
+\hline
+Approach & Kiểm thử logic nghiệp vụ (Business Logic Testing). \\
+\hline
+\end{tabular}
+\caption{Thông tin Test Case TC\_SHOP\_01}
+\end{table}
+
+\textbf{Các bước thực hiện:}
+
+\begin{longtable}{|c|L{4cm}|L{3.5cm}|L{5cm}|c|}
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endhead
+1 & Mở danh sách mua sắm có mục: "Thịt bò", SL dự định: 5kg & Chuẩn bị dữ liệu & Mục hiển thị trạng thái "Chưa mua" & $\checkmark$ \\
+\hline
+2 & Tick vào ô checkbox của "Thịt bò" & Xác nhận hành động & Hộp thoại nhập "Số lượng thực tế" hiện ra & $\checkmark$ \\
+\hline
+3 & Nhập số lượng: 3 (nhỏ hơn 5) & Nhập tình huống thiếu & Nút xác nhận sáng lên & $\checkmark$ \\
+\hline
+4 & Nhấn "Xác nhận" & Gửi dữ liệu & 1. Mục "Thịt bò 3kg" chuyển trạng thái "Đã mua". 2. Xuất hiện mục mới "Thịt bò 2kg" trạng thái "Chưa mua". & $\checkmark$ \\
+\hline
+5 & Kiểm tra thông báo & Kiểm tra đồng bộ & Thành viên khác trong nhóm nhận thông báo cập nhật list & $\checkmark$ \\
+\hline
+\caption{Các bước thực hiện Test Case TC\_SHOP\_01}
+\end{longtable}
+
+\textbf{Nhận xét:} Đây là tính năng quan trọng để tránh quên đồ khi đi chợ.
+
+\vspace{0.5cm}
+\textbf{B. Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|L{4cm}|L{4.5cm}|L{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Nhập số lượng thực tế = Số lượng dự định & Mục chuyển sang "Đã mua", không tạo mục mới & Logic chuẩn & \textbf{PASS} \\
+\hline
+2 & Nhập số lượng thực tế > Số lượng dự định & Mục chuyển sang "Đã mua" với số lượng mới & Logic chuẩn (Over-buying) & \textbf{PASS} \\
+\hline
+3 & Nhập số lượng thực tế = 0 hoặc số âm & Báo lỗi "Số lượng không hợp lệ" & Validation & \textbf{PASS} \\
+\hline
+4 & Nhấn "Hoàn thành đi chợ" khi vẫn còn mục chưa tick & Hiển thị cảnh báo "Vẫn còn đồ chưa mua. Bạn chắc chắn chứ?" & UX/Confirm Dialog & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Theo dõi danh sách mua sắm}
+\end{longtable}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Quản lý thực phẩm trong bếp (UC-03.1 \& UC-03.4)}
+
+\textbf{Mô tả chức năng:} Thêm thực phẩm vào bếp và logic nhắc hạn sử dụng.
+
+\textbf{Lưu ý:} Yêu cầu nhắc nhở trước 3 ngày.
+
+\vspace{0.5cm}
+\textbf{A. Thiết kế Test Case chi tiết}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{11cm}|}
+\hline
+\textbf{Mục} & \textbf{Nội dung chi tiết} \\
+\hline
+Test No. & TC\_KITCHEN\_01 \\
+\hline
+Current status & $\boxtimes$ Passed \hspace{0.5cm} $\square$ Failed \hspace{0.5cm} $\square$ Pending \\
+\hline
+Title & Thêm thực phẩm với ngày hết hạn gần và kiểm tra cảnh báo \\
+\hline
+Description & Kiểm tra việc thêm thực phẩm và hệ thống nhận diện trạng thái "Sắp hết hạn". \\
+\hline
+Approach & Kiểm thử biên thời gian (Time boundary testing). \\
+\hline
+\end{tabular}
+\caption{Thông tin Test Case TC\_KITCHEN\_01}
+\end{table}
+
+\textbf{Các bước thực hiện:}
+
+\begin{longtable}{|c|L{4cm}|L{3.5cm}|L{5cm}|c|}
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endhead
+1 & Vào màn hình "Bếp của tôi" $\rightarrow$ Chọn "Thêm thực phẩm" & Truy cập chức năng & Form thêm thực phẩm hiển thị & $\checkmark$ \\
+\hline
+2 & Chọn thực phẩm: "Sữa tươi", SL: 1, Đơn vị: Hộp & Nhập thông tin cơ bản & Dữ liệu hợp lệ & $\checkmark$ \\
+\hline
+3 & Chọn "Ngày hết hạn": [Ngày hiện tại + 2 ngày] & Nhập điều kiện biên (nhỏ hơn 3 ngày) & Ngày được chọn & $\checkmark$ \\
+\hline
+4 & Nhấn "Lưu" & Lưu trữ & Thực phẩm được thêm vào danh sách & $\checkmark$ \\
+\hline
+5 & Quan sát danh sách thực phẩm vừa thêm & Kiểm tra hiển thị & Item "Sữa tươi" có nhãn cảnh báo màu vàng/đỏ (Sắp hết hạn) & $\checkmark$ \\
+\hline
+\caption{Test Case TC\_KITCHEN\_01 - Các bước thực hiện}
+\end{longtable}
+
+\textbf{Nhận xét:} Hệ thống cần tính toán đúng số ngày còn lại để gắn nhãn warning.
+
+\vspace{0.5cm}
+\textbf{B. Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|L{4cm}|L{4.5cm}|L{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Thêm thực phẩm đã có sẵn trong bếp (trùng tên) & Hiển thị thông báo hỏi: "Cập nhật số lượng hay tạo mới?" hoặc chuyển sang màn hình Edit & Xử lý trùng lặp (Duplicate) & \textbf{PASS} \\
+\hline
+2 & Chọn ngày hết hạn là ngày trong quá khứ & Hiển thị cảnh báo "Thực phẩm đã hết hạn?" nhưng vẫn cho lưu $\rightarrow$ Gắn nhãn "Hết hạn" ngay lập tức & Logic nghiệp vụ & \textbf{PASS} \\
+\hline
+3 & Xóa thực phẩm đang có trong một Công thức nấu ăn & Hệ thống vẫn cho xóa khỏi Bếp (nhưng không xóa khỏi CSDL Công thức) & Ràng buộc quan hệ & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Quản lý thực phẩm trong bếp}
+\end{longtable}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Tạo nhóm và Thêm thành viên (UC-06.1 \& UC-06.2)}
+
+\textbf{Mô tả chức năng:} Tạo nhóm gia đình mới và mời thành viên tham gia.
+
+\textbf{Lưu ý:} Người tạo sẽ là Trưởng nhóm. Mời thành viên cần thông qua email/SĐT và hệ thống phải tìm thấy tài khoản đó trước khi gửi lời mời.
+
+\vspace{0.5cm}
+\textbf{A. Thiết kế Test Case chi tiết}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{11cm}|}
+\hline
+\textbf{Mục} & \textbf{Nội dung chi tiết} \\
+\hline
+Test No. & TC\_GROUP\_01 \\
+\hline
+Current status & $\boxtimes$ Passed \hspace{0.5cm} $\square$ Failed \hspace{0.5cm} $\square$ Pending \\
+\hline
+Title & Tạo nhóm mới và mời thành viên thành công \\
+\hline
+Description & Đảm bảo quy trình tạo nhóm hoạt động và quyền trưởng nhóm được gán đúng, cơ chế mời thành viên hoạt động chính xác. \\
+\hline
+Approach & Kiểm thử luồng nghiệp vụ (Business Flow). \\
+\hline
+\end{tabular}
+\caption{Thông tin Test Case TC\_GROUP\_01}
+\end{table}
+
+\textbf{Các bước thực hiện:}
+
+\begin{longtable}{|c|L{4cm}|L{3.5cm}|L{5cm}|c|}
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endhead
+1 & Tại màn hình Nhóm, chọn "Tạo nhóm mới" & Truy cập chức năng & Form tạo nhóm hiển thị & $\checkmark$ \\
+\hline
+2 & Nhập tên nhóm: "Gia đình hạnh phúc" & Nhập thông tin & Dữ liệu hợp lệ & $\checkmark$ \\
+\hline
+3 & Nhấn "Tạo nhóm" & Xác nhận tạo & Nhóm được tạo, User hiện tại hiển thị là "Trưởng nhóm" (Admin) & $\checkmark$ \\
+\hline
+4 & Chọn chức năng "Thêm thành viên" & Mở rộng nhóm & Popup tìm kiếm thành viên hiện ra & $\checkmark$ \\
+\hline
+5 & Nhập SĐT của User B (đã có tài khoản) & Tìm user & Hệ thống hiển thị tên và avatar của User B & $\checkmark$ \\
+\hline
+6 & Nhấn "Gửi lời mời" & Gửi request & Thông báo "Đã gửi lời mời" xuất hiện & $\checkmark$ \\
+\hline
+7 & (Trên thiết bị User B) Kiểm tra thông báo & Kiểm tra phía người nhận & User B nhận được Notification mời tham gia nhóm & $\checkmark$ \\
+\hline
+\caption{Các bước thực hiện Test Case TC\_GROUP\_01}
+\end{longtable}
+
+\textbf{Nhận xét:} Chức năng chia sẻ dữ liệu phụ thuộc hoàn toàn vào việc nhóm có được tạo thành công hay không.
+
+\vspace{0.5cm}
+\textbf{B. Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|L{4cm}|L{4.5cm}|L{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Để trống tên nhóm khi tạo & Button "Tạo" bị vô hiệu hóa hoặc báo lỗi đỏ & Validation (Required field) & \textbf{PASS} \\
+\hline
+2 & Mời một SĐT/Email chưa đăng ký App & Hệ thống báo lỗi "Không tìm thấy người dùng" & Xử lý dữ liệu không tồn tại & \textbf{PASS} \\
+\hline
+3 & Mời một thành viên đã ở trong nhóm rồi & Hệ thống báo "Thành viên này đã tham gia nhóm" & Logic trùng lặp & \textbf{PASS} \\
+\hline
+4 & User thường (không phải trưởng nhóm) cố xóa thành viên khác & Nút xóa bị ẩn hoặc báo "Không có quyền" & Kiểm tra phân quyền (RBAC) & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Tạo nhóm và Thêm thành viên}
+\end{longtable}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Quản lý Công thức nấu ăn (UC-04.1 \& UC-04.3)}
+
+\textbf{Mô tả chức năng:} Tạo công thức nấu ăn mới (Cá nhân hoặc Chung).
+
+\textbf{Lưu ý:} Bắt buộc phải có ít nhất 1 nguyên liệu chính.
+
+\vspace{0.5cm}
+\textbf{A. Thiết kế Test Case chi tiết}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{11cm}|}
+\hline
+\textbf{Mục} & \textbf{Nội dung chi tiết} \\
+\hline
+Test No. & TC\_RECIPE\_01 \\
+\hline
+Current status & $\boxtimes$ Passed \hspace{0.5cm} $\square$ Failed \hspace{0.5cm} $\square$ Pending \\
+\hline
+Title & Tạo công thức nấu ăn cá nhân mới \\
+\hline
+Description & Kiểm tra khả năng tạo công thức với đầy đủ nguyên liệu chính và phụ. \\
+\hline
+Approach & Kiểm thử hộp đen (Black-box). \\
+\hline
+\end{tabular}
+\caption{Thông tin Test Case TC\_RECIPE\_01}
+\end{table}
+
+\textbf{Các bước thực hiện:}
+
+\begin{longtable}{|c|L{4cm}|L{3.5cm}|L{5cm}|c|}
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Hành động} & \textbf{Mục đích} & \textbf{Kết quả mong muốn} & \textbf{OK} \\
+\hline
+\endhead
+1 & Vào màn hình "Công thức", chọn "Tạo công thức mới" & Truy cập chức năng & Form nhập liệu hiển thị & $\checkmark$ \\
+\hline
+2 & Nhập Tên món: "Canh chua cá lóc" & Nhập thông tin & Text được ghi nhận & $\checkmark$ \\
+\hline
+3 & Phần Nguyên liệu chính: Chọn "Cá lóc", SL: 1, Đơn vị: Con & Nhập nguyên liệu bắt buộc & Dữ liệu được ghi nhận & $\checkmark$ \\
+\hline
+4 & Phần Nguyên liệu phụ: Chọn "Cà chua", SL: 2, Đơn vị: Quả & Nhập nguyên liệu phụ & Dữ liệu được ghi nhận & $\checkmark$ \\
+\hline
+5 & Nhấn "Lưu công thức" & Lưu trữ & Thông báo "Tạo công thức thành công" & $\checkmark$ \\
+\hline
+6 & Tìm kiếm lại món "Canh chua cá lóc" & Kiểm tra hiển thị & Món ăn hiển thị đúng trong danh sách công thức của nhóm & $\checkmark$ \\
+\hline
+\caption{Các bước thực hiện Test Case TC\_RECIPE\_01}
+\end{longtable}
+
+\textbf{Nhận xét:} Cần đảm bảo công thức cá nhân/nhóm thì các nhóm khác không nhìn thấy.
+
+\vspace{0.5cm}
+\textbf{B. Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|L{4cm}|L{4.5cm}|L{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Nhập tên món nhưng không nhập nguyên liệu nào & Báo lỗi "Cần ít nhất 1 nguyên liệu chính" & Validate nghiệp vụ & \textbf{PASS} \\
+\hline
+2 & Nhập số lượng nguyên liệu là số âm (-5 gram) & Báo lỗi "Số lượng phải lớn hơn 0" & Validate dữ liệu số & \textbf{PASS} \\
+\hline
+3 & User thường cố gắng chỉnh sửa "Công thức chung" (do Admin tạo) & Nút Sửa/Xóa bị ẩn hoặc báo "Không có quyền" & Phân quyền dữ liệu & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Quản lý Công thức nấu ăn}
+\end{longtable}
+
+%----------------------------------------------------------
+\subsubsection{Kiểm thử cho chức năng: Lên thực đơn (UC-02.1)}
+
+\textbf{Mô tả chức năng:} Lên kế hoạch bữa ăn cho các ngày trong tuần.
+
+\textbf{Lưu ý:} Một bữa có thể có nhiều món.
+
+\vspace{0.5cm}
+\textbf{Bảng tổng hợp kết quả kiểm thử}
+
+\begin{longtable}{|c|L{4cm}|L{4.5cm}|L{3cm}|c|}
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Input} & \textbf{Output} & \textbf{Exception} & \textbf{KQ} \\
+\hline
+\endhead
+1 & Thêm 3 món ăn khác nhau vào cùng một bữa "Tối Thứ 2" & Hệ thống ghi nhận cả 3 món cho bữa tối đó & Logic Multi-item & \textbf{PASS} \\
+\hline
+2 & Thêm món ăn vào ngày trong quá khứ & Hệ thống vẫn cho phép (để lưu ký ức/thống kê) hoặc cảnh báo nhẹ & Logic thời gian & \textbf{PASS} \\
+\hline
+3 & Xóa một món khỏi thực đơn đã lên lịch & Món ăn biến mất khỏi lịch, không ảnh hưởng các món khác & Thao tác Delete & \textbf{PASS} \\
+\hline
+\caption{Bảng tổng hợp kết quả kiểm thử chức năng Lên thực đơn}
+\end{longtable}
+
+%----------------------------------------------------------
 \subsection{Kiểm thử yêu cầu phi chức năng}
+
+Phần này đánh giá các khía cạnh hiệu năng, bảo mật và tính khả dụng.
+
+\begin{longtable}{|L{3.5cm}|L{9cm}|L{2cm}|}
+\hline
+\textbf{Tiêu chí} & \textbf{Nội dung đánh giá} & \textbf{Trạng thái} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tiêu chí} & \textbf{Nội dung đánh giá} & \textbf{Trạng thái} \\
+\hline
+\endhead
+\textbf{Hiệu năng} & 
+\begin{itemize}[leftmargin=*,nosep]
+    \item Thời gian phản hồi thao tác tick chọn mua hàng < 1 giây.
+    \item Tìm kiếm thực phẩm trả về kết quả < 1 giây.
+    \item Đồng bộ dữ liệu khi user khác thêm món < 5 giây (Realtime).
+\end{itemize} & \textbf{Tốt} \\
+\hline
+\textbf{Offline Mode} & 
+\begin{itemize}[leftmargin=*,nosep]
+    \item Ngắt mạng internet, mở App $\rightarrow$ Vẫn xem được Danh sách mua sắm đã lưu.
+    \item Tick chọn "Đã mua" khi offline $\rightarrow$ Lưu local.
+    \item Bật lại mạng $\rightarrow$ Dữ liệu tự động đồng bộ lên server.
+\end{itemize} & \textbf{Tốt} \\
+\hline
+\textbf{Tính khả dụng} & 
+\begin{itemize}[leftmargin=*,nosep]
+    \item Giao diện tiếng Việt chuẩn, không lỗi font.
+    \item Các nút bấm trên màn hình nhỏ (iPhone SE/Android cũ) không bị chồng chéo.
+\end{itemize} & \textbf{Tốt} \\
+\hline
+\textbf{Bảo mật} & 
+\begin{itemize}[leftmargin=*,nosep]
+    \item Dữ liệu password trong Database phải được mã hóa (không thấy plain text).
+    \item User A không thể xem danh sách mua sắm của Group B (Test qua API).
+\end{itemize} & \textbf{Ổn định} \\
+\hline
+\caption{Bảng đánh giá yêu cầu phi chức năng}
+\end{longtable}
