@@ -1,0 +1,330 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc} % Bắt buộc để hiển thị đúng chữ đ
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[table]{xcolor}
+\usepackage{fontawesome5}
+\usepackage{alltt}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage{amsmath}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+\usepackage{fancyhdr}  % Thêm gói để tạo header, footer
+\usepackage{titlesec}   % Để thay đổi kích thước của title section
+\usepackage{tocloft}    % Để tùy chỉnh table of contents
+\usepackage{geometry}
+\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{Báo Cáo IT4788}}
+\fancyhead[R]{Nhóm 11}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{Fresh Fridge}
+
+\setlength{\headheight}{20pt}
+\setlength{\footskip}{30pt}
+
+% Định nghĩa màu sắc giống IDE Light Theme
+\definecolor{commentgreen}{rgb}{0,0.4,0}
+\definecolor{keywordblue}{rgb}{0,0,0.8}
+\definecolor{stringred}{rgb}{0.6,0,0}
+\definecolor{graynumber}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+    backgroundcolor=\color{white},   
+    commentstyle=\color{commentgreen},
+    keywordstyle=\color{keywordblue}\bfseries,
+    numberstyle=\tiny\color{graynumber},
+    stringstyle=\color{stringred},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!10},
+    % Xử lý tiếng Việt bên trong code
+    literate={á}{{\'a}}1 {à}{{\`a}}1 {ả}{{\?a}}1 {ã}{{\~a}}1 {ạ}{{.a}}1
+             {é}{{\'e}}1 {è}{{\`e}}1 {ẻ}{{\?e}}1 {ẽ}{{\~e}}1 {ẹ}{{.e}}1
+             {í}{{\'i}}1 {ì}{{\`i}}1 {ỉ}{{\?i}}1 {ĩ}{{\~i}}1 {ị}{{.i}}1
+             {ó}{{\'o}}1 {ò}{{\`o}}1 {ỏ}{{\?o}}1 {õ}{{\~o}}1 {ọ}{{.o}}1
+             {ú}{{\'u}}1 {ù}{{\`u}}1 {ủ}{{\?u}}1 {ũ}{{\~u}}1 {ụ}{{.u}}1
+             {ý}{{\'y}}1 {ỳ}{{\`y}}1 {ỷ}{{\?y}}1 {ỹ}{{\~y}}1 {ỵ}{{.y}}1
+             {đ}{{\textsubscript{d}}}1
+}
+% Đổi tên tiêu đề danh mục
+\renewcommand{\lstlistlistingname}{Danh mục mã nguồn}
+
+% Đổi tên nhãn tại mỗi đoạn code (Ví dụ: Mã nguồn 1: ...)
+\renewcommand{\lstlistingname}{Mã nguồn}
+
+\addto\captionsvietnamese{
+  \renewcommand{\listfigurename}{Danh mục hình ảnh}
+  \renewcommand{\listtablename}{Danh mục bảng biểu}
+}
+% --- ĐỊNH NGHĨA MÀU SẮC ---
+\definecolor{headergreen}{RGB}{198, 239, 206} % Màu xanh nhẹ dịu mắt
+\definecolor{headerorange}{RGB}{255, 235, 156} % Màu cam nhạt làm nổi bật tiêu đề cột
+\definecolor{graybg}{gray}{0.95}
+
+% --- TĂNG CHIỀU CAO DÒNG ---
+\renewcommand{\arraystretch}{1.4} % Giúp bảng không bị bí
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+    \textbf{\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\[0.5em]
+    \textbf{\large TRƯỜNG CÔNG NGHỆ THÔNG TIN \& TRUYỀN THÔNG}
+
+    \includegraphics[width=0.2\textwidth]{divider.png}\\[2em]
+
+    \includegraphics[width=0.7\textwidth]{soict.jpg}
+
+    \vspace{1cm}
+
+    \textbf{\Large GVHD: ThS. Nguyễn Mạnh Tuấn,} \\
+    \textbf{\Large TS. Nguyễn Quốc Tuấn}
+    \\[1em]
+
+    \textbf{\Large Chủ đề thực hiện:}\\[0.5em]
+    {\Large \textbf{XÂY DỰNG ỨNG DỤNG ``ĐI CHỢ TIỆN LỢI''}}\\[1em]
+
+    \normalsize
+    Mã lớp: \textbf{162304} \hspace{2em}
+    Nhóm: \textbf{11} \hspace{2em} \\[1em]
+
+    Môn học: \textbf{Phát triển ứng dụng đa nền tảng} \hspace{0.5em} Mã môn học: \textbf{IT4788}\\[2em]
+
+    \textbf{Các thành viên trong nhóm:}
+
+    \vspace{1em}
+    \setlength{\tabcolsep}{6pt} 
+    \renewcommand{\arraystretch}{1.3}
+    
+    \begin{tabular}{|c|p{4cm}|c|p{7cm}|}
+        \hline
+        % Sử dụng \multicolumn để căn giữa tiêu đề
+        \textbf{STT} & \multicolumn{1}{c|}{\textbf{Họ và tên}} & \textbf{MSSV} & \multicolumn{1}{c|}{\textbf{Email}} \\
+        \hline
+        1 & Nguyễn Thế Anh & 20224921 & anh.nt224921@sis.hust.edu.vn \\ \hline
+        2 & Quản Tuấn Huy & 20225014 & huy.qt225014@sis.hust.edu.vn \\ \hline
+        3 & Phạm Trung Kiên & 20225026 & kien.pt225026@sis.hust.edu.vn \\ \hline
+        4 & Nhữ Ngọc Minh & 20225046 & minh.nn225046@sis.hust.edu.vn \\
+        \hline
+        5 & Trần Bảo Long & 20225038 & long.tb225038@sis.hust.edu.vn \\ \hline
+    \end{tabular}
+    \end{center}
+
+\vfill
+\begin{center}
+    \textit{Hà Nội, tháng 12 năm 2025}
+\end{center}
+
+\end{titlepage}
+
+\renewcommand{\abstractname}{Lời nói đầu}
+\begin{abstract}
+Trong bối cảnh cuộc sống hiện đại ngày càng bận rộn, việc quản lý công việc gia đình, đặc biệt là khâu mua sắm và chuẩn bị bữa ăn hàng ngày, trở thành một thách thức không nhỏ. Việc đi chợ hay siêu thị thường tốn nhiều thời gian và dễ xảy ra tình trạng mua thừa hoặc thiếu thực phẩm. Thêm vào đó, việc không theo dõi sát sao thực phẩm trong tủ lạnh dẫn đến tình trạng lãng phí do hết hạn sử dụng. Nhận thấy nhu cầu thực tế này, chúng tôi đã quyết định xây dựng dự án ``Xây dựng ứng dụng di động đa nền tảng ``Đi chợ tiện lợi'' ''. Ứng dụng này ra đời với mong muốn cung cấp một công cụ hữu ích, giúp người dùng đơn giản hóa và tối ưu hóa các công việc liên quan đến mua sắm và quản lý thực phẩm. 
+
+Đề tài ``Đi chợ tiện lợi'' mang ý nghĩa thiết thực, giải quyết trực tiếp những vấn đề hàng ngày mà nhiều cá nhân và gia đình gặp phải. Ứng dụng không chỉ giúp tiết kiệm thời gian và công sức trong việc mua sắm và nấu nướng mà còn đóng vai trò quan trọng trong việc quản lý chi tiêu và dinh dưỡng hiệu quả hơn. Bằng cách cung cấp các công cụ để theo dõi thực phẩm, lên kế hoạch bữa ăn và nhắc nhở thông minh về hạn sử dụng, ứng dụng góp phần giảm thiểu lãng phí thực phẩm – một vấn đề đang được xã hội quan tâm. Hơn nữa, với tính năng chia sẻ danh sách mua sắm trong gia đình, ứng dụng còn tăng cường sự phối hợp giữa các thành viên, giúp việc mua sắm trở nên khoa học và hiệu quả, từ đó nâng cao chất lượng cuộc sống.
+\end{abstract}
+
+\vspace{0.5cm}
+
+\hspace*{10cm}  % Cách mép trái 10cm
+\parbox{5cm}{
+    \raggedleft
+    \textbf{Nhóm 1}
+}
+
+\newpage
+\tableofcontents
+\listoffigures   % Hiển thị Danh mục hình ảnh
+\listoftables    % Hiển thị Danh mục bảng biểu
+\lstlistoflistings
+
+\newpage
+\section*{Phân công thành viên trong nhóm}
+
+\noindent
+\begin{table}[H]
+    \small % Sử dụng cỡ chữ nhỏ hơn để bảng vừa vặn với lề trang
+    \centering
+    \renewcommand{\arraystretch}{1.5} % Tăng khoảng cách dòng để dễ đọc
+    \setlength{\tabcolsep}{4pt}      % Giảm khoảng cách lề cột để tối ưu không gian
+    
+    % Định nghĩa độ rộng các cột để tránh chồng lấn:
+    % Cột 1: 2.8cm, Cột 2: 4.2cm (tự ngắt dòng), Cột 3: 2.2cm, Cột 4: Tự giãn (X), Cột 5: 1.5cm
+    \begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{4.2cm}|>{\centering\arraybackslash}p{2.2cm}|X|>{\centering\arraybackslash}p{1.5cm}|}
+        \hline
+        \rowcolor{gray!20} 
+        \textbf{Họ và tên} & \textbf{Email} & \textbf{SĐT} & \textbf{Tổng hợp công việc thực hiện} & \textbf{Đánh giá} \\ \hline
+        
+        Nguyễn Thế Anh & anh.nt224921@ \newline sis.hust.edu.vn & 0912345xxx & 
+        \begin{itemize}[leftmargin=*, nosep, topsep=0pt]
+            \item Phát triển Frontend.
+            \item Viết báo cáo.
+        \end{itemize} & 100\% \\ \hline
+        
+        Quản Tuấn Huy & huy.qt225014@ \newline sis.hust.edu.vn & 0987654xxx & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Phát triển Frontend.
+        \end{itemize} & 100\% \\ \hline
+        
+        Phạm Trung Kiên & kien.pt225026@ \newline sis.hust.edu.vn & 0901122xxx & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Phân tích yêu cầu.
+            \item Viết tài liệu.
+        \end{itemize} & 100\% \\ \hline
+        
+        Nhữ Ngọc Minh & minh.nn225046@ \newline sis.hust.edu.vn & 0933445xxx & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Phát triển Backend.
+        \end{itemize} & 100\% \\ \hline
+        
+        Trần Bảo Long & long.tb225038@ \newline sis.hust.edu.vn & 0977889xxx & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Phát triển Backend.
+        \end{itemize} & 100\% \\ \hline
+    \end{tabularx}
+    \caption{Bảng phân công nhiệm vụ và đánh giá thành viên}
+    \label{tab:phan-cong}
+\end{table}
+
+
+\newpage
+\section{Khảo sát bài toán}
+\subsection{Mô tả yêu cầu bài toán}
+Trong cuộc sống hiện đại, người dùng thường gặp khó khăn trong việc quản lý danh sách các mặt hàng cần mua, theo dõi thực phẩm đã có trong tủ lạnh, cũng như lên kế hoạch cho các bữa ăn hàng ngày sao cho tiết kiệm và khoa học. Ứng dụng “Đi chợ tiện lợi” được xây dựng nhằm giải quyết các vấn đề đó bằng cách hỗ trợ người dùng quản lý toàn bộ quy trình mua sắm và tiêu thụ thực phẩm một cách thông minh và hiệu quả. 
+
+Cụ thể, ứng dụng cho phép người dùng tạo và chia sẻ danh sách mua sắm với các thành viên trong gia đình, giúp phối hợp việc mua hàng và tránh trùng lặp. Người dùng có thể lưu trữ thông tin thực phẩm trong tủ lạnh, theo dõi ngày hết hạn và nhận thông báo nhắc nhở khi thực phẩm sắp hỏng. Hệ thống hỗ trợ lên kế hoạch bữa ăn theo ngày hoặc tuần, đồng thời đề xuất món ăn dựa trên các nguyên liệu sẵn có, giúp người dùng tận dụng thực phẩm hiệu quả hơn. 
+
+Ngoài ra, ứng dụng còn cho phép quản lý công thức nấu ăn yêu thích, tìm kiếm và phân loại thực phẩm, cũng như cung cấp báo cáo thống kê về hoạt động mua sắm và tiêu thụ, giúp người dùng theo dõi thói quen chi tiêu và cải thiện chế độ dinh dưỡng. 
+
+Để đảm bảo hoạt động ổn định và đầy đủ chức năng, hệ thống yêu cầu phát triển server lưu trữ dữ liệu, dịch vụ web xử lý yêu cầu từ ứng dụng di động, chức năng quản trị dành cho admin, cũng như giao diện người dùng thân thiện và push notification thông minh. Toàn bộ ứng dụng được phát triển theo hướng đa nền tảng, đảm bảo khả năng sử dụng linh hoạt trên nhiều thiết bị di động khác nhau. 
+
+\subsection{Xác định thông tin cơ bản cho nghiệp vụ của bài toán}
+\noindent
+\begin{table}[H]
+    \small % Giảm cỡ chữ để chứa được nhiều nội dung hơn
+    \centering
+    \renewcommand{\arraystretch}{1.4}
+    \setlength{\tabcolsep}{4pt}
+    
+    % Sử dụng tabularx để tự động giãn độ rộng các cột
+    \begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{3cm}|X|X|X|}
+        \hline
+        \rowcolor{gray!20} 
+        \textbf{Nghiệp vụ} & \textbf{Input} & \textbf{Process} & \textbf{Output} \\ \hline
+        
+        % Use Case 1
+        1. Tạo danh sách mua sắm & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Thực phẩm (tên, số lượng, đơn vị)
+            \item Người đảm nhận (trong group)
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Kiểm tra thực đơn gợi ý món
+            \item Lưu danh sách vào CSDL
+            \item Gửi thông báo
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Danh sách được tạo
+            \item Thông báo gửi đi
+        \end{itemize} \\ \hline
+        
+        % Use Case 2
+        2. Tạo thực đơn cho bữa ăn & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Ngày/bữa ăn
+            \item Danh sách món ăn
+            \item Thực phẩm trong bếp
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Gợi ý món phù hợp thực phẩm sẵn có
+            \item Lưu thực đơn vào CSDL
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Thực đơn mới
+            \item Gợi ý món ăn
+        \end{itemize} \\ \hline
+        
+        % Use Case 3
+        3. Thêm thực phẩm vào bếp & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Tên, số lượng, đơn vị
+            \item Ngày hết hạn
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Kiểm tra trùng lặp
+            \item Nếu trùng $\rightarrow$ chỉnh sửa
+            \item Nếu mới $\rightarrow$ lưu CSDL
+        \end{itemize} & 
+        Thực phẩm mới được thêm vào danh sách bếp \\ \hline
+        
+        % Use Case 4
+        4. Tạo công thức nấu ăn & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Tên món ăn
+            \item Nguyên liệu
+            \item Người tạo
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Kiểm tra thông tin hợp lệ
+            \item Lưu công thức vào CSDL
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Công thức mới được tạo
+            \item Sẵn sàng tìm kiếm
+        \end{itemize} \\ \hline
+        
+        % Use Case 5
+        5. Tạo thực phẩm & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Tên thực phẩm
+            \item Danh mục
+        \end{itemize} & 
+        \begin{itemize}[leftmargin=*, nosep]
+            \item Kiểm tra trùng tên
+            \item Lưu vào CSDL cá nhân
+        \end{itemize} & 
+        Thực phẩm cá nhân được tạo và thêm vào nhóm \\ \hline
+    \end{tabularx}
+    \caption{Chi tiết luồng xử lý các nghiệp vụ chính của ứng dụng}
+    \label{tab:nghiep-vu}
+\end{table}
+
+\include{dac_ta_yeu_cau}
+\include{thiet_ke_giao_dien}
+\include{thiet_ke_backend}
+\include{xay_dung_ung_dung_dnt}
+\include{kiem_thu}
+\include{ket_luan}
+\include{tai_lieu_tham_khao}
+\include{phu_luc}
+
+
+\end{document}

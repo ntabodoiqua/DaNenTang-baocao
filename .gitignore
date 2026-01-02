@@ -1,0 +1,45 @@
+## Core latex/pdflatex auxiliary files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+## Intermediate documents
+*.dvi
+*.xdv
+*-converted-to.*
+# Gỡ bỏ dấu # bên dưới nếu bạn KHÔNG muốn push file PDF lên GitHub
+# *.pdf
+
+## Bibliography markers (BibTeX)
+*.bbl
+*.blg
+*.bench
+*.brf
+*.pbm
+*.pyg
+
+## Glossary markers
+*.glo
+*.gls
+*.glg
+*.ist
+
+## Latexmk tạo ra
+*.fdb_latexmk
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+## Editor specific (VS Code, TeXstudio, etc.)
+.vscode/
+*.swp
+*.swo
