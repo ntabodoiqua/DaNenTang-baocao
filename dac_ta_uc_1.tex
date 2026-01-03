@@ -1,0 +1,979 @@
+\paragraph{UC1 - Quản lý danh sách mua sắm}
+
+\textbf{Mô tả chung:} UC1 quản lý toàn bộ quy trình mua sắm của nhóm, bao gồm: tạo danh sách mua sắm, thêm/sửa/xóa các món cần mua, giao việc mua sắm cho thành viên, theo dõi tiến độ mua sắm và đánh dấu hoàn thành. Hệ thống hỗ trợ nhiều danh sách song song với các trạng thái khác nhau (PENDING, IN\_PROGRESS, COMPLETED).
+
+\subparagraph{API 1.1: Tạo Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{POST /shopping/lists}
+
+\textbf{Mô tả:} API thực hiện việc tạo một danh sách mua sắm mới cho nhóm. Người dùng có thể tạo danh sách với tên, ghi chú, ngày mua dự kiến và giao cho một thành viên cụ thể trong nhóm để thực hiện việc mua sắm. Các món cần mua sẽ được thêm sau bằng API riêng.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Có & Tên danh sách mua sắm (1-100 ký tự) \\
+\hline
+assignedToUserId & Long & Có & ID người dùng được giao nhiệm vụ mua sắm (phải là thành viên nhóm) \\
+\hline
+note & String & Không & Ghi chú cho danh sách \\
+\hline
+shoppingDate & Date & Không & Ngày dự định đi mua (định dạng: YYYY-MM-DD) \\
+\hline
+\caption{Tham số Request Body - API Tạo Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 123,
+    "name": "Weekend Shopping List",
+    "groupId": 10,
+    "assignedToUserId": 456,
+    "assignedToEmail": "member@example.com",
+    "assignedToName": "Nguyen Van A",
+    "note": "Buy in the morning",
+    "shoppingDate": "2026-01-05",
+    "status": "PENDING",
+    "items": [],
+    "totalItems": 0,
+    "purchasedItems": 0,
+    "createdBy": 789,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.1.1 & Tạo với đầy đủ thông tin: name, assignedToUserId, note, shoppingDate & 1000 | OK & Danh sách được tạo thành công với status = PENDING \\
+\hline
+1.1.2 & Tạo không có shoppingDate (chỉ name và assignedToUserId) & 1000 | OK & shoppingDate = null, các trường khác hợp lệ \\
+\hline
+1.1.3 & assignedToUserId không thuộc nhóm (ID = 999) & 1003 | Parameter value is invalid & assignedToUserId phải là thành viên nhóm \\
+\hline
+1.1.4 & Tên rỗng (name = "") & 1003 | Parameter value is invalid & Tên không được để trống, frontend nên kiểm tra trước \\
+\hline
+1.1.5 & Thiếu assignedToUserId & 1002 | Parameter is not enough & assignedToUserId là tham số bắt buộc \\
+\hline
+1.1.6 & Tên vượt quá 100 ký tự & 1003 | Parameter value is invalid & Tên tối đa 100 ký tự \\
+\hline
+1.1.7 & Không có token xác thực & 9998 | Token is invalid & Yêu cầu đăng nhập \\
+\hline
+\caption{Test Cases - API 1.1 Tạo Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.2: Lấy Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{GET /shopping/lists}
+
+\textbf{Mô tả:} API lấy tất cả danh sách mua sắm của nhóm hiện tại. Hỗ trợ lọc theo trạng thái (PENDING/IN\_PROGRESS/COMPLETED) và tìm kiếm gần đúng theo tên danh sách.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+status & String & Không & Trạng thái danh sách: PENDING, IN\_PROGRESS, COMPLETED \\
+\hline
+name & String & Không & Tên danh sách (tìm kiếm gần đúng, không phân biệt hoa thường) \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "lists": [
+      {
+        "id": 123,
+        "name": "Weekend Shopping List",
+        "groupId": 10,
+        "assignedToUserId": 456,
+        "assignedToEmail": "member@example.com",
+        "assignedToName": "Nguyen Van A",
+        "note": "Buy in the morning",
+        "shoppingDate": "2026-01-05",
+        "status": "PENDING",
+        "items": [],
+        "totalItems": 5,
+        "purchasedItems": 2,
+        "createdBy": 789,
+        "createdAt": "2026-01-03T10:30:00Z",
+        "updatedAt": "2026-01-03T10:30:00Z"
+      }
+    ],
+    "total": 10,
+    "pendingCount": 3,
+    "inProgressCount": 2,
+    "completedCount": 5
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.2.1 & Không có query parameters & 1000 | OK & Trả về tất cả danh sách mua sắm của nhóm \\
+\hline
+1.2.2 & ?status=PENDING & 1000 | OK & Chỉ trả về các danh sách chờ xử lý \\
+\hline
+1.2.3 & ?status=IN\_PROGRESS & 1000 | OK & Chỉ trả về các danh sách đang thực hiện \\
+\hline
+1.2.4 & ?status=COMPLETED & 1000 | OK & Chỉ trả về các danh sách đã hoàn thành \\
+\hline
+1.2.5 & ?name=cuối tuần & 1000 | OK & Trả về danh sách có tên chứa "cuối tuần" \\
+\hline
+1.2.6 & ?status=PENDING\&name=mua sắm & 1000 | OK & Kết hợp nhiều filter \\
+\hline
+1.2.7 & Người dùng chưa có nhóm & 1004 | User is not validated & Người dùng chưa tham gia nhóm nào \\
+\hline
+1.2.8 & Nhóm không có danh sách nào & 1000 | OK & data.lists = [], total = 0 \\
+\hline
+\caption{Test Cases - API 1.2 Lấy Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.3: Xem Chi Tiết Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{GET /shopping/lists/\{listId\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết một danh sách mua sắm cụ thể, bao gồm tất cả các món trong danh sách với đầy đủ thông tin về thực phẩm, đơn vị, số lượng và trạng thái mua.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+listId & Long & Có & ID của danh sách mua sắm \\
+\hline
+\caption{Path Parameters - API Chi Tiết Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 123,
+    "name": "Weekend Shopping List",
+    "groupId": 10,
+    "assignedToUserId": 456,
+    "assignedToEmail": "member@example.com",
+    "assignedToName": "Nguyen Van A",
+    "note": "Buy in the morning",
+    "shoppingDate": "2026-01-05",
+    "status": "PENDING",
+    "items": [
+      {
+        "id": 1,
+        "foodId": 100,
+        "foodName": "Tomato",
+        "categoryName": "Vegetables",
+        "unitId": 1,
+        "unitName": "kg",
+        "quantity": 2.0,
+        "actualQuantity": null,
+        "isPurchased": false
+      },
+      {
+        "id": 2,
+        "foodId": 101,
+        "foodName": "Beef",
+        "categoryName": "Meat",
+        "unitId": 1,
+        "unitName": "kg",
+        "quantity": 1.5,
+        "actualQuantity": 1.5,
+        "isPurchased": true
+      }
+    ],
+    "totalItems": 2,
+    "purchasedItems": 1,
+    "createdBy": 789,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T11:45:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.3.1 & listId hợp lệ (thuộc nhóm của user) & 1000 | OK & Trả về đầy đủ thông tin danh sách và các món \\
+\hline
+1.3.2 & listId không tồn tại (99999) & 9994 | No data or end of list data & Danh sách không tồn tại trong hệ thống \\
+\hline
+1.3.3 & listId của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền truy cập \\
+\hline
+1.3.4 & listId không hợp lệ ("abc") & 1003 | Parameter value is invalid & listId phải là số nguyên dương \\
+\hline
+1.3.5 & Danh sách rỗng (không có items) & 1000 | OK & data.items = [], totalItems = 0 \\
+\hline
+\caption{Test Cases - API 1.3 Chi Tiết Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.4: Lấy Danh Sách Được Giao Cho Tôi}
+
+\textbf{Endpoint:} \texttt{GET /shopping/lists/my-assigned}
+
+\textbf{Mô tả:} API lấy các danh sách mua sắm được giao cho người dùng hiện tại để thực hiện việc mua sắm. Giúp người dùng dễ dàng xem nhiệm vụ của mình.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "lists": [
+      {
+        "id": 123,
+        "name": "Weekend Shopping List",
+        "status": "PENDING",
+        "createdBy": {
+          "id": 789,
+          "fullName": "Tran Van B"
+        },
+        "totalItems": 5,
+        "purchasedItems": 2,
+        "createdAt": "2026-01-03T10:30:00Z"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.4.1 & Người dùng có danh sách được giao & 1000 | OK & Trả về tất cả danh sách được giao cho user \\
+\hline
+1.4.2 & Người dùng không có danh sách nào & 1000 | OK & data.lists = [] \\
+\hline
+1.4.3 & Chỉ hiển thị PENDING & 1000 | OK & Chỉ hiển thị danh sách chưa hoàn thành \\
+\hline
+1.4.4 & Người dùng chưa tham gia nhóm & 1004 | User is not validated & Cần tham gia nhóm trước \\
+\hline
+\caption{Test Cases - API 1.4 Danh Sách Được Giao}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.5: Cập Nhật Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{PUT /shopping/lists/\{listId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin danh sách mua sắm bao gồm tên, người được giao, ghi chú, ngày mua và trạng thái. Chỉ thành viên trong nhóm mới có quyền cập nhật.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+listId & Long & Có & ID của danh sách mua sắm \\
+\hline
+\caption{Path Parameters - API Cập Nhật Danh Sách}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tên danh sách mới (1-100 ký tự) \\
+\hline
+assignedToUserId & Long & Không & ID người dùng mới được giao (phải là thành viên) \\
+\hline
+note & String & Không & Ghi chú mới \\
+\hline
+shoppingDate & Date & Không & Ngày mua sắm mới (YYYY-MM-DD) \\
+\hline
+status & String & Không & Trạng thái mới: PENDING, IN\_PROGRESS, COMPLETED \\
+\hline
+\caption{Request Body - API Cập Nhật Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 123,
+    "name": "Next Week Shopping",
+    "assignedToUserId": 456,
+    "assignedToName": "Nguyen Van A",
+    "note": "Buy in the afternoon",
+    "shoppingDate": "2026-01-10",
+    "status": "IN_PROGRESS",
+    "updatedAt": "2026-01-03T14:20:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.5.1 & Cập nhật tên danh sách & 1000 | OK & Tên được cập nhật thành công \\
+\hline
+1.5.2 & Thay đổi người được giao (assignedUserId = 456) & 1000 | OK & Phải là thành viên trong nhóm \\
+\hline
+1.5.3 & Cập nhật trạng thái thành COMPLETED & 1000 | OK & Trạng thái được cập nhật \\
+\hline
+1.5.4 & assignedUserId không thuộc nhóm (999) & 1003 | Parameter value is invalid & ID không hợp lệ \\
+\hline
+1.5.5 & listId không tồn tại (99999) & 9994 | No data or end of list data & Danh sách không tồn tại \\
+\hline
+1.5.6 & Cập nhật danh sách của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+1.5.7 & Cập nhật với tên rỗng & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+\caption{Test Cases - API 1.5 Cập Nhật Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.6: Xóa Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{DELETE /shopping/lists/\{listId\}}
+
+\textbf{Mô tả:} API xóa một danh sách mua sắm và tất cả các món trong danh sách đó. Thao tác này không thể hoàn tác, nên cần xác nhận từ người dùng trước khi thực hiện.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+listId & Long & Có & ID của danh sách mua sắm cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thành công API 1.6]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.6.1 & listId hợp lệ & 1000 | OK & Danh sách và tất cả items bị xóa \\
+\hline
+1.6.2 & listId không tồn tại (99999) & 9994 | No data or end of list data & Danh sách không tồn tại \\
+\hline
+1.6.3 & listId của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền xóa \\
+\hline
+1.6.4 & Xóa danh sách đã COMPLETED & 1000 | OK & Vẫn có thể xóa, nên có xác nhận \\
+\hline
+1.6.5 & listId không hợp lệ ("abc") & 1003 | Parameter value is invalid & listId phải là số \\
+\hline
+\caption{Test Cases - API 1.6 Xóa Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.7: Hoàn Thành Danh Sách Mua Sắm}
+
+\textbf{Endpoint:} \texttt{POST /shopping/lists/\{listId\}/complete}
+
+\textbf{Mô tả:} API đánh dấu danh sách mua sắm là đã hoàn thành. Thường được gọi sau khi người được giao đã mua xong tất cả các món hoặc kết thúc chuyến mua sắm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+listId & Long & Có & ID của danh sách mua sắm \\
+\hline
+\caption{Path Parameters - API Hoàn Thành Danh Sách}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.7]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 123,
+    "name": "Weekend Shopping List",
+    "status": "COMPLETED",
+    "completedAt": "2026-01-03T16:00:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.7.1 & listId PENDING hợp lệ & 1000 | OK & Status chuyển sang COMPLETED \\
+\hline
+1.7.2 & listId đã COMPLETED trước đó & 1009 | Action has been done previously by this user & Đã hoàn thành rồi \\
+\hline
+1.7.3 & listId không tồn tại (99999) & 9994 | No data or end of list data & Danh sách không tồn tại \\
+\hline
+1.7.4 & listId của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+1.7.5 & Bất kỳ thành viên nào cũng có thể hoàn thành & 1000 | OK & Không giới hạn chỉ người được giao \\
+\hline
+\caption{Test Cases - API 1.7 Hoàn Thành Danh Sách}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.8: Thêm Món Vào Danh Sách}
+
+\textbf{Endpoint:} \texttt{POST /shopping/lists/\{listId\}/items}
+
+\textbf{Mô tả:} API thêm một hoặc nhiều món mới vào danh sách mua sắm đã có. Mỗi món bao gồm thông tin về thực phẩm, số lượng và đơn vị đo.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+listId & Long & Có & ID của danh sách mua sắm \\
+\hline
+\caption{Path Parameters - API Thêm Món}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\begin{lstlisting}[language=json, caption=Request Body API 1.8]
+{
+  "items": [
+    {
+      "foodId": 100,
+      "quantity": 1.5,
+      "unitId": 1
+    },
+    {
+      "foodId": 101,
+      "quantity": 2.0,
+      "unitId": 2
+    }
+  ]
+}
+\end{lstlisting}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+items & Array & Có & Danh sách các món cần thêm \\
+\hline
+items[].foodId & Long & Có & ID thực phẩm (phải tồn tại) \\
+\hline
+items[].quantity & BigDecimal & Có & Số lượng (phải > 0) \\
+\hline
+items[].unitId & Long & Có & ID đơn vị đo (phải tồn tại) \\
+\hline
+\caption{Request Body Parameters - API Thêm Món}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.8]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 123,
+    "name": "Weekend Shopping List",
+    "items": [
+      {
+        "id": 10,
+        "foodId": 100,
+        "foodName": "Tomato",
+        "categoryName": "Vegetables",
+        "unitId": 1,
+        "unitName": "kg",
+        "quantity": 1.5,
+        "actualQuantity": null,
+        "isPurchased": false
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.8.1 & Thêm một món với thông tin hợp lệ & 1000 | OK & Món được thêm vào danh sách \\
+\hline
+1.8.2 & Thêm nhiều món cùng lúc (array) & 1000 | OK & Tất cả món được thêm vào \\
+\hline
+1.8.3 & quantity <= 0 & 1003 | Parameter value is invalid & Số lượng phải > 0 \\
+\hline
+1.8.4 & foodId không tồn tại (99999) & 9994 | No data or end of list data & foodId không hợp lệ \\
+\hline
+1.8.5 & listId không tồn tại (99999) & 9994 | No data or end of list data & Danh sách không tồn tại \\
+\hline
+1.8.6 & Thêm vào danh sách đã COMPLETED & 1009 | Action has been done previously by this user & Không thể thêm vào DS hoàn thành \\
+\hline
+1.8.7 & Thêm món trùng với món đã có & 1000 | OK & Tạo item mới hoặc cộng dồn (tùy logic) \\
+\hline
+\caption{Test Cases - API 1.8 Thêm Món}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.9: Cập Nhật Món Trong Danh Sách}
+
+\textbf{Endpoint:} \texttt{PUT /shopping/items/\{itemId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin một món trong danh sách mua sắm, bao gồm số lượng và đơn vị đo. Không thể thay đổi loại thực phẩm, nếu muốn đổi món khác thì xóa và thêm mới.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của món trong danh sách \\
+\hline
+\caption{Path Parameters - API Cập Nhật Món}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+quantity & BigDecimal & Có & Số lượng mới (phải > 0) \\
+\hline
+unitId & Long & Có & ID đơn vị mới (phải tồn tại) \\
+\hline
+\caption{Request Body - API Cập Nhật Món}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.9]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 10,
+    "foodId": 100,
+    "foodName": "Tomato",
+    "unitId": 1,
+    "unitName": "kg",
+    "quantity": 5.0,
+    "actualQuantity": null,
+    "isPurchased": false
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.9.1 & Cập nhật số lượng hợp lệ & 1000 | OK & Số lượng được cập nhật thành công \\
+\hline
+1.9.2 & Thay đổi đơn vị (unitId = 3) & 1000 | OK & Đơn vị được thay đổi \\
+\hline
+1.9.3 & quantity <= 0 & 1003 | Parameter value is invalid & Số lượng phải > 0 \\
+\hline
+1.9.4 & unitId không tồn tại (99999) & 9994 | No data or end of list data & unitId không hợp lệ \\
+\hline
+1.9.5 & itemId không tồn tại (99999) & 9994 | No data or end of list data & Món không tồn tại \\
+\hline
+1.9.6 & Cập nhật món của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+\caption{Test Cases - API 1.9 Cập Nhật Món}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.10: Xóa Món Khỏi Danh Sách}
+
+\textbf{Endpoint:} \texttt{DELETE /shopping/items/\{itemId\}}
+
+\textbf{Mô tả:} API xóa một món khỏi danh sách mua sắm. Thao tác này không thể hoàn tác, nên cần xác nhận từ người dùng.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của món cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Món}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thành công API 1.10]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.10.1 & itemId hợp lệ & 1000 | OK & Món bị xóa khỏi danh sách \\
+\hline
+1.10.2 & itemId không tồn tại (99999) & 9994 | No data or end of list data & Món không tồn tại \\
+\hline
+1.10.3 & Xóa món của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền xóa \\
+\hline
+1.10.4 & Xóa món đã purchased (true) & 1000 | OK & Vẫn có thể xóa \\
+\hline
+1.10.5 & Xóa món khỏi DS đã COMPLETED & 1009 | Action has been done previously by this user & Không thể xóa \\
+\hline
+\caption{Test Cases - API 1.10 Xóa Món}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 1.11: Đánh Dấu Món Đã Mua}
+
+\textbf{Endpoint:} \texttt{POST /shopping/items/\{itemId\}/purchased}
+
+\textbf{Mô tả:} API đánh dấu một món trong danh sách là đã mua hoặc chưa mua. Người được giao đi mua sắm sẽ sử dụng API này khi mua được món hoặc muốn bỏ đánh dấu. API này thường được gọi nhiều lần trong quá trình mua sắm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của món cần đánh dấu \\
+\hline
+\caption{Path Parameters - API Đánh Dấu Món}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+isPurchased & Boolean & Có & true = đã mua, false = chưa mua \\
+\hline
+\caption{Request Body - API Đánh Dấu Món}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 1.11]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 10,
+    "foodId": 100,
+    "foodName": "Tomato",
+    "unitId": 1,
+    "unitName": "kg",
+    "quantity": 2.0,
+    "actualQuantity": 2.0,
+    "isPurchased": true
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1.11.1 & isPurchased = true & 1000 | OK & Món được đánh dấu đã mua \\
+\hline
+1.11.2 & isPurchased = false (bỏ đánh dấu) & 1000 | OK & Món chuyển về chưa mua \\
+\hline
+1.11.3 & itemId không tồn tại (99999) & 9994 | No data or end of list data & Món không tồn tại \\
+\hline
+1.11.4 & Đánh dấu món của nhóm khác & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+1.11.5 & Đánh dấu món trong DS COMPLETED & 1000 | OK & Vẫn có thể thay đổi trạng thái \\
+\hline
+1.11.6 & Thiếu tham số isPurchased & 1002 | Parameter is not enough & isPurchased là bắt buộc \\
+\hline
+1.11.7 & Đánh dấu tất cả món là đã mua & 1000 | OK & Có thể tự động complete DS (tùy logic) \\
+\hline
+\caption{Test Cases - API 1.11 Đánh Dấu Món}
+\end{longtable}
+
+\normalsize

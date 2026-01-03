@@ -1,0 +1,748 @@
+\paragraph{UC2 - Quản lý kế hoạch bữa ăn}
+
+\textbf{Mô tả chung:} UC2 quản lý toàn bộ quy trình lập kế hoạch bữa ăn của nhóm, bao gồm: tạo kế hoạch cho các bữa ăn (sáng, trưa, tối), xem chi tiết kế hoạch, cập nhật và xóa kế hoạch. Hệ thống cho phép lên kế hoạch theo ngày, theo khoảng thời gian hoặc xem kế hoạch sắp tới. Mỗi kế hoạch bữa ăn được liên kết với một công thức nấu ăn cụ thể.
+
+\subparagraph{API 2.1: Tạo Kế Hoạch Bữa Ăn}
+
+\textbf{Endpoint:} \texttt{POST /meal-plans}
+
+\textbf{Mô tả:} API thực hiện việc tạo một kế hoạch bữa ăn mới cho nhóm. Người dùng có thể lên kế hoạch cho các bữa sáng, trưa, tối, hoặc ăn vặt trong ngày, mỗi kế hoạch liên kết với một công thức nấu ăn cụ thể và số phần ăn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Có & ID công thức nấu ăn \\
+\hline
+mealDate & Date & Có & Ngày của bữa ăn (định dạng ISO: YYYY-MM-DD) \\
+\hline
+mealName & String & Có & Tên bữa ăn (ví dụ: "sáng", "trưa", "tối") \\
+\hline
+servings & Integer & Không & Số phần ăn (mặc định: 1, tối thiểu: 1) \\
+\hline
+note & String & Không & Ghi chú cho bữa ăn \\
+\hline
+\caption{Tham số Request Body - API Tạo Kế Hoạch Bữa Ăn}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "recipeId": 5,
+    "recipeName": "Pho Bo",
+    "recipeDescription": "Traditional Vietnamese beef noodle soup",
+    "recipeImageUrl": "https://example.com/images/pho.jpg",
+    "mealDate": "2026-01-15",
+    "mealName": "sang",
+    "mealDisplayName": "Bua sang",
+    "servings": 2,
+    "note": "Bua sang dinh duong",
+    "groupId": 10,
+    "createdBy": 123,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.1.1 & Tạo với đầy đủ thông tin: recipeId=5, mealDate="2026-01-15", mealName="sáng", servings=2, note & 1000 | OK & Kế hoạch được tạo thành công với công thức đính kèm \\
+\hline
+2.1.2 & Tạo không có servings (recipeId=3, mealDate="2026-01-15", mealName="trưa") & 1000 | OK & Kế hoạch được tạo với servings = 1 (mặc định) \\
+\hline
+2.1.3 & Tạo với ngày trong quá khứ (mealDate="2025-12-01") & 1000 | OK & Cho phép tạo kế hoạch cho ngày trong quá khứ (để ghi nhận) \\
+\hline
+2.1.4 & Thiếu mealName & 1002 | Parameter is not enough & mealName là tham số bắt buộc \\
+\hline
+2.1.5 & Thiếu recipeId & 1002 | Parameter is not enough & recipeId là tham số bắt buộc \\
+\hline
+2.1.6 & mealDate sai định dạng ("15/01/2026") & 1003 | Parameter value is invalid & Định dạng ngày không hợp lệ, phải là YYYY-MM-DD \\
+\hline
+2.1.7 & recipeId không tồn tại (99999) & 9994 | No data or end of list data & recipeId không tồn tại trong hệ thống \\
+\hline
+2.1.8 & Tạo kế hoạch trùng (cùng ngày và mealName) & 1000 | OK & Cho phép nhiều kế hoạch cùng ngày và mealName \\
+\hline
+\caption{Test Cases - API 2.1 Tạo Kế Hoạch Bữa Ăn}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.2: Lấy Danh Sách Kế Hoạch Bữa Ăn}
+
+\textbf{Endpoint:} \texttt{GET /meal-plans}
+
+\textbf{Mô tả:} API lấy tất cả kế hoạch bữa ăn của nhóm hiện tại, sắp xếp theo thời gian. Bao gồm cả kế hoạch trong quá khứ và tương lai.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": [
+    {
+      "id": 1,
+      "recipeId": 5,
+      "recipeName": "Pho Bo",
+      "recipeDescription": "Traditional Vietnamese beef noodle soup",
+      "recipeImageUrl": "https://example.com/images/pho.jpg",
+      "mealDate": "2026-01-15",
+      "mealName": "sang",
+      "mealDisplayName": "Bua sang",
+      "servings": 2,
+      "note": "Bua sang dinh duong",
+      "groupId": 10,
+      "createdBy": 123,
+      "createdAt": "2026-01-03T10:30:00Z",
+      "updatedAt": "2026-01-03T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "recipeId": 8,
+      "recipeName": "Com Tam",
+      "recipeDescription": "Broken rice with grilled pork",
+      "recipeImageUrl": "https://example.com/images/comtam.jpg",
+      "mealDate": "2026-01-15",
+      "mealName": "trua",
+      "mealDisplayName": "Bua trua",
+      "servings": 3,
+      "note": null,
+      "groupId": 10,
+      "createdBy": 456,
+      "createdAt": "2026-01-03T11:00:00Z",
+      "updatedAt": "2026-01-03T11:00:00Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.2.1 & Lấy tất cả kế hoạch & 1000 | OK & Trả về tất cả kế hoạch bữa ăn của nhóm, sắp xếp theo mealDate tăng dần \\
+\hline
+2.2.2 & Nhóm chưa có kế hoạch nào & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+2.2.3 & Người dùng chưa tham gia nhóm & 1004 | User is not validated & Người dùng chưa tham gia nhóm nào \\
+\hline
+2.2.4 & Token không hợp lệ & 9998 | Token is invalid & Yêu cầu đăng nhập lại \\
+\hline
+2.2.5 & Kế hoạch bao gồm cả quá khứ và tương lai & 1000 | OK & Trả về tất cả kế hoạch không giới hạn thời gian \\
+\hline
+\caption{Test Cases - API 2.2 Lấy Danh Sách Kế Hoạch}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.3: Xem Chi Tiết Kế Hoạch Bữa Ăn}
+
+\textbf{Endpoint:} \texttt{GET /meal-plans/\{id\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết một kế hoạch bữa ăn cụ thể, bao gồm đầy đủ thông tin công thức và nguyên liệu.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & Long & Có & ID của kế hoạch bữa ăn \\
+\hline
+\caption{Path Parameters - API Chi Tiết Kế Hoạch}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "recipeId": 5,
+    "recipeName": "Pho Bo",
+    "recipeDescription": "Traditional Vietnamese beef noodle soup",
+    "recipeImageUrl": "https://example.com/images/pho.jpg",
+    "mealDate": "2026-01-15",
+    "mealName": "sang",
+    "mealDisplayName": "Bua sang",
+    "servings": 2,
+    "note": "Bua sang dinh duong",
+    "groupId": 10,
+    "createdBy": 123,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.3.1 & id hợp lệ (id=1, thuộc nhóm của user) & 1000 | OK & Trả về đầy đủ thông tin kế hoạch và công thức \\
+\hline
+2.3.2 & id không tồn tại (99999) & 9994 | No data or end of list data & Kế hoạch không tồn tại trong hệ thống \\
+\hline
+2.3.3 & id của nhóm khác (id=50) & 1009 | Action has been done previously by this user & Không có quyền truy cập \\
+\hline
+2.3.4 & id không hợp lệ ("abc") & 1003 | Parameter value is invalid & id phải là số nguyên dương \\
+\hline
+2.3.5 & Xem chi tiết kế hoạch (có thể lấy thêm thông tin recipe từ API khác) & 1000 | OK & Response chỉ bao gồm recipeId, recipeName cơ bản \\
+\hline
+\caption{Test Cases - API 2.3 Chi Tiết Kế Hoạch}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.4: Cập Nhật Kế Hoạch Bữa Ăn}
+
+\textbf{Endpoint:} \texttt{PUT /meal-plans/\{id\}}
+
+\textbf{Mô tả:} API cập nhật thông tin kế hoạch bữa ăn (ngày, loại bữa, công thức, số phần ăn, ghi chú). Tất cả các trường đều là tùy chọn, chỉ cập nhật các trường được gửi lên.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & Long & Có & ID của kế hoạch bữa ăn cần cập nhật \\
+\hline
+\caption{Path Parameters - API Cập Nhật Kế Hoạch}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Không & ID công thức nấu ăn mới \\
+\hline
+mealDate & Date & Không & Ngày của bữa ăn mới (định dạng ISO: YYYY-MM-DD) \\
+\hline
+mealName & String & Không & Tên bữa ăn mới \\
+\hline
+servings & Integer & Không & Số phần ăn mới (tối thiểu: 1) \\
+\hline
+note & String & Không & Ghi chú mới \\
+\hline
+\caption{Tham số Request Body - API Cập Nhật Kế Hoạch}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "recipeId": 10,
+    "recipeName": "Bun Cha",
+    "recipeDescription": "Grilled pork with rice noodles",
+    "recipeImageUrl": "https://example.com/images/buncha.jpg",
+    "mealDate": "2026-01-20",
+    "mealName": "toi",
+    "mealDisplayName": "Bua toi",
+    "servings": 4,
+    "note": "Ghi chu moi",
+    "groupId": 10,
+    "createdBy": 123,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T14:20:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.4.1 & Cập nhật ngày bữa ăn (mealDate="2026-01-20", mealName="sáng", recipeId=5) & 1000 | OK & Ngày được cập nhật thành công \\
+\hline
+2.4.2 & Thay đổi tên bữa ăn (mealName="tối") & 1000 | OK & Tên bữa ăn được thay đổi \\
+\hline
+2.4.3 & Thay đổi công thức (recipeId=10) & 1000 | OK & Công thức được cập nhật (recipeId mới phải tồn tại) \\
+\hline
+2.4.4 & Cập nhật số phần ăn (servings=4) & 1000 | OK & Số phần ăn được cập nhật \\
+\hline
+2.4.5 & Cập nhật với servings không hợp lệ (servings=0) & 1003 | Parameter value is invalid & servings phải >= 1 \\
+\hline
+2.4.6 & Cập nhật với recipeId không tồn tại (recipeId=99999) & 9994 | No data or end of list data & recipeId không tồn tại trong hệ thống \\
+\hline
+2.4.7 & Cập nhật kế hoạch không tồn tại (id=99999) & 9994 | No data or end of list data & Kế hoạch không tồn tại \\
+\hline
+2.4.8 & Cập nhật kế hoạch của nhóm khác (id=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+2.4.9 & Chỉ cập nhật note (note="Ghi chú mới") & 1000 | OK & Chỉ note được cập nhật, các trường khác giữ nguyên \\
+\hline
+\caption{Test Cases - API 2.4 Cập Nhật Kế Hoạch}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.5: Xóa Kế Hoạch Bữa Ăn}
+
+\textbf{Endpoint:} \texttt{DELETE /meal-plans/\{id\}}
+
+\textbf{Mô tả:} API xóa một kế hoạch bữa ăn khỏi lịch trình. Bất kỳ thành viên nào trong nhóm cũng có thể xóa kế hoạch.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & Long & Có & ID của kế hoạch bữa ăn cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Kế Hoạch}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.5.1 & Xóa kế hoạch hợp lệ (id=1) & 1000 | OK & Kế hoạch bị xóa thành công \\
+\hline
+2.5.2 & Xóa kế hoạch không tồn tại (id=99999) & 9994 | No data or end of list data & Kế hoạch không tồn tại \\
+\hline
+2.5.3 & Xóa kế hoạch của nhóm khác (id=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+2.5.4 & Xóa kế hoạch trong quá khứ (id=5) & 1000 | OK & Vẫn có thể xóa kế hoạch trong quá khứ \\
+\hline
+2.5.5 & Xóa kế hoạch do thành viên khác tạo (id=8) & 1000 | OK & Bất kỳ thành viên nào cũng có thể xóa \\
+\hline
+\caption{Test Cases - API 2.5 Xóa Kế Hoạch}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.6: Lấy Kế Hoạch Theo Ngày}
+
+\textbf{Endpoint:} \texttt{GET /meal-plans/daily}
+
+\textbf{Mô tả:} API lấy tất cả các bữa ăn (sáng, trưa, tối) trong một ngày cụ thể, được nhóm theo loại bữa ăn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+date & String & Có & Ngày cần xem (định dạng ISO: YYYY-MM-DD) \\
+\hline
+\caption{Query Parameters - API Lấy Kế Hoạch Theo Ngày}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.6]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "date": "2026-01-15",
+    "breakfast": [
+      {
+        "id": 1,
+        "recipeId": 5,
+        "recipeName": "Pho Bo",
+        "recipeImageUrl": "https://example.com/images/pho.jpg",
+        "mealName": "sang",
+        "servings": 2,
+        "note": "Bua sang dinh duong"
+      }
+    ],
+    "lunch": [
+      {
+        "id": 2,
+        "recipeId": 8,
+        "recipeName": "Com Tam",
+        "recipeImageUrl": "https://example.com/images/comtam.jpg",
+        "mealName": "trua",
+        "servings": 3,
+        "note": null
+      }
+    ],
+    "dinner": [
+      {
+        "id": 3,
+        "recipeId": 10,
+        "recipeName": "Bun Cha",
+        "recipeImageUrl": "https://example.com/images/buncha.jpg",
+        "mealName": "toi",
+        "servings": 4,
+        "note": "Bua toi gia dinh"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.6.1 & ?date=2026-01-15 (ngày có đầy đủ bữa ăn) & 1000 | OK & Trả về tất cả bữa ăn trong ngày \\
+\hline
+2.6.2 & ?date=2026-02-01 (ngày chưa có bữa nào) & 1000 | OK & breakfast, lunch, dinner đều là mảng rỗng [] \\
+\hline
+2.6.3 & ?date=2026-01-16 (chỉ có một vài bữa) & 1000 | OK & breakfast và dinner có dữ liệu, lunch là [] \\
+\hline
+2.6.4 & Thiếu tham số date & 1002 | Parameter is not enough & date là tham số bắt buộc \\
+\hline
+2.6.5 & Định dạng date không hợp lệ (?date=15/01/2026) & 1003 | Parameter value is invalid & Định dạng không hợp lệ, phải là YYYY-MM-DD \\
+\hline
+2.6.6 & ?date=2026-01-03 (ngày hôm nay) & 1000 | OK & Trả về kế hoạch hôm nay \\
+\hline
+2.6.7 & ?date=2025-12-25 (ngày trong quá khứ) & 1000 | OK & Cho phép xem kế hoạch quá khứ \\
+\hline
+\caption{Test Cases - API 2.6 Lấy Kế Hoạch Theo Ngày}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.7: Lấy Kế Hoạch Theo Khoảng Thời Gian}
+
+\textbf{Endpoint:} \texttt{GET /meal-plans/range}
+
+\textbf{Mô tả:} API lấy tất cả kế hoạch bữa ăn trong một khoảng thời gian cụ thể (ví dụ: một tuần, một tháng). Hữu ích cho việc lập kế hoạch dài hạn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+startDate & String & Có & Ngày bắt đầu (định dạng ISO: YYYY-MM-DD) \\
+\hline
+endDate & String & Có & Ngày kết thúc (định dạng ISO: YYYY-MM-DD) \\
+\hline
+\caption{Query Parameters - API Lấy Kế Hoạch Theo Khoảng Thời Gian}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.7]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": [
+    {
+      "id": 1,
+      "recipeId": 5,
+      "recipeName": "Pho Bo",
+      "recipeDescription": "Traditional Vietnamese beef noodle soup",
+      "recipeImageUrl": "https://example.com/images/pho.jpg",
+      "mealDate": "2026-01-15",
+      "mealName": "sang",
+      "mealDisplayName": "Bua sang",
+      "servings": 2,
+      "note": "Bua sang dinh duong",
+      "groupId": 10,
+      "createdBy": 123,
+      "createdAt": "2026-01-03T10:30:00Z",
+      "updatedAt": "2026-01-03T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "recipeId": 8,
+      "recipeName": "Com Tam",
+      "recipeDescription": "Broken rice with grilled pork",
+      "recipeImageUrl": "https://example.com/images/comtam.jpg",
+      "mealDate": "2026-01-16",
+      "mealName": "trua",
+      "mealDisplayName": "Bua trua",
+      "servings": 3,
+      "note": null,
+      "groupId": 10,
+      "createdBy": 456,
+      "createdAt": "2026-01-03T11:00:00Z",
+      "updatedAt": "2026-01-03T11:00:00Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.7.1 & ?startDate=2026-01-13\&endDate=2026-01-19 (một tuần) & 1000 | OK & Trả về tất cả kế hoạch trong tuần, sắp xếp theo ngày và mealName \\
+\hline
+2.7.2 & ?startDate=2026-01-01\&endDate=2026-01-31 (một tháng) & 1000 | OK & Trả về tất cả kế hoạch trong tháng \\
+\hline
+2.7.3 & Khoảng thời gian không có kế hoạch (?startDate=2026-06-01\&endDate=2026-06-07) & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+2.7.4 & Thiếu startDate hoặc endDate (?startDate=2026-01-01) & 1002 | Parameter is not enough & Cả hai tham số đều bắt buộc \\
+\hline
+2.7.5 & endDate < startDate (?startDate=2026-01-20\&endDate=2026-01-10) & 1003 | Parameter value is invalid & Khoảng thời gian không hợp lệ \\
+\hline
+2.7.6 & Định dạng date không hợp lệ (?startDate=01/01/2026) & 1003 | Parameter value is invalid & Định dạng không hợp lệ \\
+\hline
+2.7.7 & Khoảng thời gian quá dài (?startDate=2026-01-01\&endDate=2026-12-31) & 1000 | OK hoặc 1003 & Có thể giới hạn tối đa 90 ngày để tránh quá tải \\
+\hline
+\caption{Test Cases - API 2.7 Lấy Kế Hoạch Theo Khoảng Thời Gian}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 2.8: Lấy Kế Hoạch Sắp Tới}
+
+\textbf{Endpoint:} \texttt{GET /meal-plans/upcoming}
+
+\textbf{Mô tả:} API lấy các kế hoạch bữa ăn sắp tới trong X ngày tiếp theo, kể từ ngày hiện tại. Hữu ích cho việc xem nhanh kế hoạch gần nhất.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+days & Integer & Không & Số ngày kể từ hôm nay (mặc định: 7) \\
+\hline
+\caption{Query Parameters - API Lấy Kế Hoạch Sắp Tới}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 2.8]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": [
+    {
+      "id": 1,
+      "recipeId": 5,
+      "recipeName": "Pho Bo",
+      "recipeDescription": "Traditional Vietnamese beef noodle soup",
+      "recipeImageUrl": "https://example.com/images/pho.jpg",
+      "mealDate": "2026-01-05",
+      "mealName": "sang",
+      "mealDisplayName": "Bua sang",
+      "servings": 2,
+      "note": "Bua sang dinh duong",
+      "groupId": 10,
+      "createdBy": 123,
+      "createdAt": "2026-01-03T10:30:00Z",
+      "updatedAt": "2026-01-03T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "recipeId": 8,
+      "recipeName": "Com Tam",
+      "recipeDescription": "Broken rice with grilled pork",
+      "recipeImageUrl": "https://example.com/images/comtam.jpg",
+      "mealDate": "2026-01-06",
+      "mealName": "trua",
+      "mealDisplayName": "Bua trua",
+      "servings": 3,
+      "note": null,
+      "groupId": 10,
+      "createdBy": 456,
+      "createdAt": "2026-01-03T11:00:00Z",
+      "updatedAt": "2026-01-03T11:00:00Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+2.8.1 & Không có query parameter & 1000 | OK & Trả về kế hoạch từ hôm nay đến 7 ngày sau (mặc định) \\
+\hline
+2.8.2 & ?days=3 & 1000 | OK & Trả về kế hoạch 3 ngày tới \\
+\hline
+2.8.3 & ?days=30 & 1000 | OK & Trả về kế hoạch 1 tháng tới \\
+\hline
+2.8.4 & Không có kế hoạch nào trong thời gian tới & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+2.8.5 & days <= 0 (?days=0 hoặc ?days=-5) & 1003 | Parameter value is invalid & days phải > 0 \\
+\hline
+2.8.6 & days không phải số (?days=abc) & 1003 | Parameter value is invalid & days phải là số nguyên dương \\
+\hline
+2.8.7 & days quá lớn (?days=1000) & 1000 | OK hoặc 1003 & Có thể giới hạn days tối đa (ví dụ 365 ngày) \\
+\hline
+\caption{Test Cases - API 2.8 Lấy Kế Hoạch Sắp Tới}
+\end{longtable}
+
+\normalsize

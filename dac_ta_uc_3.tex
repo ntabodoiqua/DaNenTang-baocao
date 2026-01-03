@@ -1,0 +1,592 @@
+\paragraph{UC3 - Quản lý thực phẩm trong bếp}
+
+\textbf{Mô tả chung:} UC3 quản lý toàn bộ quy trình theo dõi thực phẩm trong bếp/kho của nhóm, bao gồm: thêm thực phẩm mới vào bếp, theo dõi số lượng và hạn sử dụng, cập nhật thông tin khi sử dụng, và xóa thực phẩm đã hết. Hệ thống tự động tính toán ngày hết hạn, cảnh báo thực phẩm sắp hết hạn và phân loại trạng thái (FRESH, EXPIRING\_SOON, EXPIRED) để giúp nhóm quản lý hiệu quả và giảm lãng phí thực phẩm.
+
+\subparagraph{API 3.1: Thêm Thực Phẩm Vào Bếp}
+
+\textbf{Endpoint:} \texttt{POST /kitchen}
+
+\textbf{Mô tả:} API thực hiện việc thêm thực phẩm mới vào bếp/kho của nhóm. Người dùng có thể ghi nhận số lượng, hạn sử dụng (tự động tính từ số ngày), và ghi chú. Hệ thống tự động tính ngày hết hạn và phân loại trạng thái.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID thực phẩm \\
+\hline
+quantity & BigDecimal & Có & Số lượng (phải lớn hơn 0) \\
+\hline
+unitId & Long & Có & ID đơn vị đo \\
+\hline
+useWithin & Integer & Không & Số ngày sử dụng (tối thiểu: 1). expiryDate = ngày hiện tại + useWithin \\
+\hline
+note & String & Không & Ghi chú (giới hạn 500 ký tự) \\
+\hline
+\caption{Tham số Request Body - API Thêm Thực Phẩm Vào Bếp}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "foodId": 1,
+    "foodName": "Tomato",
+    "categoryName": "Vegetables",
+    "unitId": 1,
+    "unitName": "kg",
+    "foodImageUrl": "https://example.com/images/tomato.jpg",
+    "quantity": 2.5,
+    "useWithin": 30,
+    "expiryDate": "2026-02-02",
+    "daysUntilExpiry": 30,
+    "expiryStatus": "FRESH",
+    "note": "Moi mua hom nay",
+    "groupId": 10,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.1.1 & Thêm với đầy đủ thông tin: foodId=1, quantity=2.5, unitId=1, useWithin=30, note & 1000 | OK & Thực phẩm được thêm thành công, expiryDate tự động tính \\
+\hline
+3.1.2 & Thêm không có useWithin (foodId=5, quantity=1, unitId=2) & 1000 | OK & useWithin = null, expiryDate = null (thực phẩm không hết hạn) \\
+\hline
+3.1.3 & Thêm chỉ với thông tin bắt buộc (foodId=3, quantity=0.5, unitId=1) & 1000 | OK & useWithin và note có thể null \\
+\hline
+3.1.4 & Thêm với quantity <= 0 (quantity=0) & 1003 | Parameter value is invalid & Số lượng phải lớn hơn 0 \\
+\hline
+3.1.5 & Thiếu quantity (chỉ có foodId, unitId) & 1002 | Parameter is not enough & quantity là tham số bắt buộc \\
+\hline
+3.1.6 & foodId không tồn tại (foodId=99999) & 9994 | No data or end of list data & foodId không tồn tại trong hệ thống \\
+\hline
+3.1.7 & unitId không tồn tại (unitId=99999) & 9994 | No data or end of list data & unitId không hợp lệ \\
+\hline
+3.1.8 & useWithin không hợp lệ (useWithin=0) & 1003 | Parameter value is invalid & useWithin phải >= 1 nếu có giá trị \\
+\hline
+3.1.9 & Thêm thực phẩm trùng (cùng foodId đã có) & 1000 | OK & Tạo item mới (cho phép trùng vì mỗi lần mua có hạn khác nhau) \\
+\hline
+\caption{Test Cases - API 3.1 Thêm Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 3.2: Lấy Danh Sách Thực Phẩm Trong Bếp}
+
+\textbf{Endpoint:} \texttt{GET /kitchen}
+
+\textbf{Mô tả:} API lấy danh sách tất cả thực phẩm trong bếp của nhóm. Hỗ trợ lọc theo thực phẩm cụ thể, tìm kiếm theo tên, và lọc theo ngày hết hạn. Dữ liệu được sắp xếp ưu tiên thực phẩm sắp hết hạn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Không & Lọc theo ID thực phẩm cụ thể \\
+\hline
+foodName & String & Không & Tìm kiếm theo tên thực phẩm (không phân biệt hoa thường) \\
+\hline
+expiryBefore & String & Không & Lọc thực phẩm hết hạn trước ngày này (định dạng ISO: YYYY-MM-DD) \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Tomato",
+        "categoryName": "Vegetables",
+        "unitId": 1,
+        "unitName": "kg",
+        "foodImageUrl": "https://example.com/images/tomato.jpg",
+        "quantity": 2.5,
+        "useWithin": 30,
+        "expiryDate": "2026-02-02",
+        "daysUntilExpiry": 30,
+        "expiryStatus": "FRESH",
+        "note": "Moi mua hom nay",
+        "groupId": 10,
+        "createdAt": "2026-01-03T10:30:00Z",
+        "updatedAt": "2026-01-03T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "foodId": 5,
+        "foodName": "Beef",
+        "categoryName": "Meat",
+        "unitId": 1,
+        "unitName": "kg",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 1.0,
+        "useWithin": 5,
+        "expiryDate": "2026-01-08",
+        "daysUntilExpiry": 5,
+        "expiryStatus": "EXPIRING_SOON",
+        "note": null,
+        "groupId": 10,
+        "createdAt": "2026-01-02T14:20:00Z",
+        "updatedAt": "2026-01-02T14:20:00Z"
+      }
+    ],
+    "total": 15,
+    "expiringCount": 3,
+    "expiredCount": 1
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.2.1 & Không có query parameters & 1000 | OK & Trả về tất cả thực phẩm, sắp xếp theo expiryDate (gần nhất trước) \\
+\hline
+3.2.2 & Bếp không có thực phẩm nào & 1000 | OK & data.items = [], total = 0 \\
+\hline
+3.2.3 & Lọc theo foodId cụ thể (?foodId=5) & 1000 | OK & Chỉ trả về các items có foodId = 5 \\
+\hline
+3.2.4 & Tìm kiếm theo tên (?foodName=cà chua) & 1000 | OK & Trả về items có tên chứa "cà chua" \\
+\hline
+3.2.5 & Lọc hết hạn trước ngày cụ thể (?expiryBefore=2026-01-10) & 1000 | OK & Trả về items có expiryDate < 2026-01-10 \\
+\hline
+3.2.6 & Kết hợp nhiều filter (?foodName=thịt\&expiryBefore=2026-02-01) & 1000 | OK & Trả về thịt sắp hết hạn trước ngày chỉ định \\
+\hline
+3.2.7 & Người dùng chưa tham gia nhóm & 1004 | User is not validated & Cần tham gia nhóm trước \\
+\hline
+3.2.8 & expiryBefore sai định dạng (?expiryBefore=01/01/2026) & 1003 | Parameter value is invalid & Định dạng phải là YYYY-MM-DD \\
+\hline
+\caption{Test Cases - API 3.2 Lấy Danh Sách Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 3.3: Xem Chi Tiết Thực Phẩm Trong Bếp}
+
+\textbf{Endpoint:} \texttt{GET /kitchen/\{itemId\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết một thực phẩm cụ thể trong bếp, bao gồm đầy đủ thông tin về số lượng, hạn sử dụng, trạng thái và các thông tin liên quan.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của item trong bếp \\
+\hline
+\caption{Path Parameters - API Chi Tiết Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "foodId": 1,
+    "foodName": "Tomato",
+    "categoryName": "Vegetables",
+    "unitId": 1,
+    "unitName": "kg",
+    "foodImageUrl": "https://example.com/images/tomato.jpg",
+    "quantity": 2.5,
+    "useWithin": 30,
+    "expiryDate": "2026-02-02",
+    "daysUntilExpiry": 30,
+    "expiryStatus": "FRESH",
+    "note": "Moi mua hom nay",
+    "groupId": 10,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.3.1 & itemId hợp lệ (itemId=1, thuộc nhóm của user) & 1000 | OK & Trả về đầy đủ thông tin item \\
+\hline
+3.3.2 & itemId không tồn tại (99999) & 9994 | No data or end of list data & Item không tồn tại trong hệ thống \\
+\hline
+3.3.3 & itemId của nhóm khác (itemId=50) & 1009 | Action has been done previously by this user & Không có quyền truy cập \\
+\hline
+3.3.4 & Xem chi tiết item đã hết hạn (itemId=10) & 1000 | OK & expiryStatus = EXPIRED, daysUntilExpiry âm \\
+\hline
+3.3.5 & itemId không hợp lệ ("abc") & 1003 | Parameter value is invalid & itemId phải là số nguyên dương \\
+\hline
+3.3.6 & Xem item không có expiryDate (itemId=5) & 1000 | OK & expiryDate = null, daysUntilExpiry = null, expiryStatus = null \\
+\hline
+\caption{Test Cases - API 3.3 Chi Tiết Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 3.4: Lấy Thực Phẩm Sắp Hết Hạn}
+
+\textbf{Endpoint:} \texttt{GET /kitchen/expiring}
+
+\textbf{Mô tả:} API lấy danh sách thực phẩm sắp hết hạn trong X ngày tới. Rất hữu ích để nhắc nhở người dùng sử dụng thực phẩm trước khi hết hạn, giảm lãng phí. API này được sử dụng cho tính năng thông báo hàng ngày.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+days & Integer & Không & Số ngày tính từ hôm nay (mặc định: 3) \\
+\hline
+\caption{Query Parameters - API Lấy Thực Phẩm Sắp Hết Hạn}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": [
+    {
+      "id": 2,
+      "foodId": 5,
+      "foodName": "Beef",
+      "categoryName": "Meat",
+      "unitId": 1,
+      "unitName": "kg",
+      "foodImageUrl": "https://example.com/images/beef.jpg",
+      "quantity": 1.0,
+      "useWithin": 5,
+      "expiryDate": "2026-01-08",
+      "daysUntilExpiry": 5,
+      "expiryStatus": "EXPIRING_SOON",
+      "note": null,
+      "groupId": 10,
+      "createdAt": "2026-01-02T14:20:00Z",
+      "updatedAt": "2026-01-02T14:20:00Z"
+    },
+    {
+      "id": 7,
+      "foodId": 12,
+      "foodName": "Milk",
+      "categoryName": "Dairy",
+      "unitId": 3,
+      "unitName": "liter",
+      "foodImageUrl": "https://example.com/images/milk.jpg",
+      "quantity": 0.5,
+      "useWithin": 2,
+      "expiryDate": "2026-01-05",
+      "daysUntilExpiry": 2,
+      "expiryStatus": "EXPIRING_SOON",
+      "note": "Can su dung ngay",
+      "groupId": 10,
+      "createdAt": "2026-01-01T08:15:00Z",
+      "updatedAt": "2026-01-01T08:15:00Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.4.1 & Không có query parameter & 1000 | OK & Trả về items hết hạn trong 3 ngày tới (mặc định), bao gồm cả đã hết hạn \\
+\hline
+3.4.2 & ?days=7 & 1000 | OK & Trả về items hết hạn trong 7 ngày tới \\
+\hline
+3.4.3 & ?days=1 (hôm nay) & 1000 | OK & Chỉ trả về items hết hạn trong ngày hôm nay \\
+\hline
+3.4.4 & Không có thực phẩm nào sắp hết hạn & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+3.4.5 & days <= 0 (?days=0 hoặc ?days=-5) & 1003 | Parameter value is invalid & days phải > 0 \\
+\hline
+3.4.6 & days không phải số (?days=abc) & 1003 | Parameter value is invalid & days phải là số nguyên dương \\
+\hline
+3.4.7 & days quá lớn (?days=365) & 1000 | OK & Cho phép nhưng nên giới hạn tối đa 30 ngày \\
+\hline
+\caption{Test Cases - API 3.4 Lấy Thực Phẩm Sắp Hết Hạn}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 3.5: Cập Nhật Thực Phẩm Trong Bếp}
+
+\textbf{Endpoint:} \texttt{PUT /kitchen/\{itemId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin thực phẩm trong bếp (số lượng, đơn vị, hạn sử dụng, ghi chú). Thường được sử dụng khi sử dụng một phần thực phẩm (giảm số lượng) hoặc cần điều chỉnh thông tin. Tất cả các trường đều là tùy chọn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của item trong bếp cần cập nhật \\
+\hline
+\caption{Path Parameters - API Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+quantity & BigDecimal & Không & Số lượng mới (phải > 0) \\
+\hline
+unitId & Long & Không & ID đơn vị mới \\
+\hline
+useWithin & Integer & Không & Số ngày sử dụng mới (tối thiểu: 1) \\
+\hline
+note & String & Không & Ghi chú mới \\
+\hline
+foodId & Long & Không & Đổi sang thực phẩm khác (ít dùng) \\
+\hline
+\caption{Tham số Request Body - API Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "foodId": 1,
+    "foodName": "Tomato",
+    "categoryName": "Vegetables",
+    "unitId": 2,
+    "unitName": "piece",
+    "foodImageUrl": "https://example.com/images/tomato.jpg",
+    "quantity": 1.5,
+    "useWithin": 5,
+    "expiryDate": "2026-01-08",
+    "daysUntilExpiry": 5,
+    "expiryStatus": "EXPIRING_SOON",
+    "note": "Da dung mot nua",
+    "groupId": 10,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T15:45:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.5.1 & Cập nhật số lượng (quantity=1.5, unitId=1) & 1000 | OK & Số lượng được cập nhật (dùng khi sử dụng thực phẩm) \\
+\hline
+3.5.2 & Thay đổi useWithin (useWithin=5) & 1000 | OK & Hạn sử dụng được cập nhật, expiryDate tự động tính lại \\
+\hline
+3.5.3 & Cập nhật đầy đủ (quantity=0.8, unitId=2, useWithin=5, note) & 1000 | OK & Tất cả thông tin được cập nhật \\
+\hline
+3.5.4 & Cập nhật với quantity <= 0 (quantity=0) & 1003 | Parameter value is invalid & Số lượng phải > 0. Nếu hết nên xóa item \\
+\hline
+3.5.5 & Cập nhật với unitId không tồn tại (unitId=99999) & 9994 | No data or end of list data & unitId không hợp lệ \\
+\hline
+3.5.6 & Cập nhật item không tồn tại (itemId=99999) & 9994 | No data or end of list data & Item không tồn tại \\
+\hline
+3.5.7 & Cập nhật item của nhóm khác (itemId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+3.5.8 & Chỉ cập nhật note (note="Ghi chú mới") & 1000 | OK & Chỉ note được cập nhật, các trường khác giữ nguyên \\
+\hline
+3.5.9 & Thay đổi foodId (foodId=10) & 1000 | OK & Có thể chuyển item sang thực phẩm khác (ít dùng) \\
+\hline
+\caption{Test Cases - API 3.5 Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 3.6: Xóa Thực Phẩm Khỏi Bếp}
+
+\textbf{Endpoint:} \texttt{DELETE /kitchen/\{itemId\}}
+
+\textbf{Mô tả:} API xóa một thực phẩm khỏi bếp. Thường dùng khi đã sử dụng hết thực phẩm hoặc thực phẩm đã hỏng/hết hạn. Bất kỳ thành viên nào trong nhóm cũng có thể xóa.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+itemId & Long & Có & ID của item cần xóa khỏi bếp \\
+\hline
+\caption{Path Parameters - API Xóa Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 3.6]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+3.6.1 & Xóa item hợp lệ (itemId=1) & 1000 | OK & Item bị xóa khỏi bếp thành công \\
+\hline
+3.6.2 & Xóa item không tồn tại (itemId=99999) & 9994 | No data or end of list data & Item không tồn tại \\
+\hline
+3.6.3 & Xóa item của nhóm khác (itemId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+3.6.4 & Xóa item đã hết hạn (itemId=10) & 1000 | OK & Vẫn có thể xóa item đã hết hạn \\
+\hline
+3.6.5 & Xóa item do thành viên khác thêm (itemId=8) & 1000 | OK & Bất kỳ thành viên nào cũng có thể xóa \\
+\hline
+3.6.6 & Xóa với itemId không hợp lệ ("abc") & 1003 | Parameter value is invalid & itemId phải là số nguyên dương \\
+\hline
+\caption{Test Cases - API 3.6 Xóa Thực Phẩm}
+\end{longtable}
+
+\normalsize
