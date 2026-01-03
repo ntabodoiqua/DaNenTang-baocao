@@ -1,6 +1,728 @@
 \newpage
 \section{Thiết kế Backend}
 \subsection{Thiết kế cơ sở dữ liệu cho Backend}
+\subsubsection{Sơ đồ thực thể quan hệ (ERD)}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=1.0\textwidth]{bieu_do/ERD.png}
+    \caption{Sơ đồ thực thể quan hệ (ERD) của hệ thống}
+    \label{fig:ERD}
+\end{figure}
+
+\subsubsection{Đặc tả chi tiết các bảng dữ liệu}
+
+\paragraph{Bảng USER - Người dùng}
+\textbf{Mục đích:} Lưu trữ thông tin tài khoản và hồ sơ người dùng hệ thống.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất của người dùng \\
+\hline
+email & VARCHAR(255) & UNIQUE, NOT NULL & Email đăng nhập, phải là duy nhất trong hệ thống \\
+\hline
+password & VARCHAR(255) & NOT NULL & Mật khẩu đã được mã hóa (BCrypt) \\
+\hline
+name & VARCHAR(100) & NOT NULL & Họ và tên đầy đủ của người dùng \\
+\hline
+phone & VARCHAR(20) & UNIQUE & Số điện thoại liên hệ \\
+\hline
+avatar\_url & TEXT & NULL & URL ảnh đại diện của người dùng \\
+\hline
+role & VARCHAR(20) & NOT NULL, DEFAULT 'USER' & Vai trò: USER, ADMIN \\
+\hline
+is\_verified & BOOLEAN & NOT NULL, DEFAULT FALSE & Trạng thái xác thực email \\
+\hline
+is\_active & BOOLEAN & NOT NULL, DEFAULT TRUE & Trạng thái hoạt động của tài khoản \\
+\hline
+fcm\_token & VARCHAR(500) & NULL & Token Firebase Cloud Messaging cho push notification \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo tài khoản \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật gần nhất \\
+\hline
+\caption{Cấu trúc bảng USER}
+\end{longtable}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: email
+    \item INDEX: phone
+\end{itemize}
+
+\paragraph{Bảng GROUP - Nhóm gia đình}
+\textbf{Mục đích:} Quản lý các nhóm người dùng (gia đình, bạn bè) cùng sử dụng tủ lạnh chung.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất của nhóm \\
+\hline
+name & VARCHAR(100) & NOT NULL & Tên nhóm \\
+\hline
+admin\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID của người quản trị nhóm \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo nhóm \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng GROUP}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item admin\_id REFERENCES user(id) ON DELETE CASCADE
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: admin\_id
+    \item INDEX: admin\_id
+\end{itemize}
+
+\paragraph{Bảng GROUP\_MEMBER - Thành viên nhóm}
+\textbf{Mục đích:} Bảng trung gian quản lý quan hệ nhiều-nhiều giữa User và Group.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+group\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ group(id) & ID của nhóm \\
+\hline
+user\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID của người dùng \\
+\hline
+joined\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tham gia nhóm \\
+\hline
+\caption{Cấu trúc bảng GROUP\_MEMBER}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item user\_id REFERENCES user(id) ON DELETE CASCADE
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: user\_id (một user chỉ thuộc MỘT nhóm)
+    \item INDEX: group\_id
+    \item INDEX: user\_id
+\end{itemize}
+
+\paragraph{Bảng CATEGORY - Danh mục thực phẩm}
+\textbf{Mục đích:} Phân loại thực phẩm theo các nhóm (rau củ, thịt cá, gia vị...).
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+name & VARCHAR(100) & NOT NULL, UNIQUE & Tên danh mục \\
+\hline
+description & TEXT & NULL & Mô tả chi tiết về danh mục \\
+\hline
+image\_url & VARCHAR(500) & NULL & URL ảnh minh họa cho danh mục \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+\caption{Cấu trúc bảng CATEGORY}
+\end{longtable}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: name
+\end{itemize}
+
+\textbf{Dữ liệu mẫu:}
+\begin{itemize}
+    \item Rau củ quả
+    \item Thịt và gia cầm
+    \item Cá và hải sản
+    \item Trứng và sữa
+    \item Gia vị và nguyên liệu khô
+    \item Đồ uống
+    \item Bánh kẹo
+\end{itemize}
+
+\paragraph{Bảng FOOD - Thực phẩm}
+\textbf{Mục đích:} Lưu trữ thông tin các loại thực phẩm (hệ thống và do người dùng tạo).
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+name & VARCHAR(200) & NOT NULL & Tên thực phẩm \\
+\hline
+category\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ category(id) & ID danh mục \\
+\hline
+group\_id & BIGINT & NULL, FOREIGN KEY $\rightarrow$ group(id) & ID nhóm (NULL = thực phẩm hệ thống) \\
+\hline
+image\_url & VARCHAR(500) & NULL & URL ảnh thực phẩm \\
+\hline
+created\_by & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người tạo \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng FOOD}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item category\_id REFERENCES category(id) ON DELETE RESTRICT
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item created\_by REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: category\_id
+    \item INDEX: group\_id
+    \item INDEX: created\_by
+    \item INDEX: (name, group\_id)
+\end{itemize}
+
+\paragraph{Bảng UNIT - Đơn vị đo lường}
+\textbf{Mục đích:} Định nghĩa các đơn vị đo lường sử dụng trong hệ thống.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+name & VARCHAR(50) & NOT NULL, UNIQUE & Tên đơn vị (kilogram, lít, muỗng canh...) \\
+\hline
+abbreviation & VARCHAR(10) & NOT NULL, UNIQUE & Ký hiệu viết tắt (kg, l, tbsp...) \\
+\hline
+description & TEXT & NULL & Mô tả chi tiết về đơn vị \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+\caption{Cấu trúc bảng UNIT}
+\end{longtable}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: name
+    \item UNIQUE INDEX: abbreviation
+\end{itemize}
+
+\textbf{Dữ liệu mẫu:}
+\begin{itemize}
+    \item kilogram (kg), gram (g)
+    \item lít (l), mililít (ml)
+    \item muỗng canh (tbsp), muỗng cà phê (tsp)
+    \item cái, quả, củ, con
+\end{itemize}
+
+\paragraph{Bảng KITCHEN\_ITEM - Nguyên liệu trong tủ lạnh}
+\textbf{Mục đích:} Quản lý thực phẩm có sẵn trong tủ lạnh của từng nhóm.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+food\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ food(id) & ID thực phẩm \\
+\hline
+group\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ group(id) & ID nhóm sở hữu \\
+\hline
+unit\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ unit(id) & ID đơn vị đo \\
+\hline
+quantity & DECIMAL(10,2) & NOT NULL & Số lượng hiện có \\
+\hline
+use\_within & INT & NULL & Số ngày nên sử dụng hết \\
+\hline
+expiry\_date & DATE & NULL & Ngày hết hạn \\
+\hline
+note & TEXT & NULL & Ghi chú thêm \\
+\hline
+created\_by & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người thêm vào \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian thêm \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng KITCHEN\_ITEM}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item food\_id REFERENCES food(id) ON DELETE CASCADE
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item unit\_id REFERENCES unit(id) ON DELETE RESTRICT
+    \item created\_by REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: (food\_id, group\_id)
+    \item INDEX: food\_id
+    \item INDEX: group\_id
+    \item INDEX: expiry\_date
+    \item INDEX: created\_by
+\end{itemize}
+
+\paragraph{Bảng RECIPE - Công thức nấu ăn}
+\textbf{Mục đích:} Lưu trữ các công thức nấu ăn (hệ thống và do người dùng tạo).
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+name & VARCHAR(200) & NOT NULL & Tên món ăn \\
+\hline
+description & TEXT & NULL & Mô tả ngắn về món ăn \\
+\hline
+html\_content & TEXT & NOT NULL & Hướng dẫn nấu ăn chi tiết (HTML) \\
+\hline
+image\_url & VARCHAR(500) & NULL & URL ảnh món ăn \\
+\hline
+group\_id & BIGINT & NULL, FOREIGN KEY $\rightarrow$ group(id) & ID nhóm (NULL = công thức hệ thống) \\
+\hline
+is\_system & BOOLEAN & NOT NULL, DEFAULT FALSE & Đánh dấu công thức hệ thống \\
+\hline
+created\_by & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người tạo \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng RECIPE}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item created\_by REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: group\_id
+    \item INDEX: is\_system
+    \item INDEX: created\_by
+    \item FULLTEXT INDEX: name, description
+\end{itemize}
+
+\paragraph{Bảng RECIPE\_INGREDIENT - Nguyên liệu của công thức}
+\textbf{Mục đích:} Bảng trung gian liên kết Recipe và Food, xác định nguyên liệu cần thiết.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+recipe\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ recipe(id) & ID công thức \\
+\hline
+food\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ food(id) & ID thực phẩm \\
+\hline
+quantity & DECIMAL(10,2) & NOT NULL & Số lượng cần thiết \\
+\hline
+unit\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ unit(id) & ID đơn vị đo \\
+\hline
+is\_main\_ingredient & BOOLEAN & NOT NULL, DEFAULT FALSE & Đánh dấu nguyên liệu chính \\
+\hline
+note & TEXT & NULL & Ghi chú về nguyên liệu (tùy chọn, bắt buộc...) \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+\caption{Cấu trúc bảng RECIPE\_INGREDIENT}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item recipe\_id REFERENCES recipe(id) ON DELETE CASCADE
+    \item food\_id REFERENCES food(id) ON DELETE CASCADE
+    \item unit\_id REFERENCES unit(id) ON DELETE RESTRICT
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: recipe\_id
+    \item INDEX: food\_id
+    \item PARTIAL INDEX: is\_main\_ingredient WHERE is\_main\_ingredient = TRUE (tối ưu query nguyên liệu chính)
+\end{itemize}
+
+\paragraph{Bảng MEAL\_PLAN - Kế hoạch bữa ăn}
+\textbf{Mục đích:} Lập lịch các món ăn cho nhóm theo ngày và bữa.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+group\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ group(id) & ID nhóm \\
+\hline
+recipe\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ recipe(id) & ID công thức \\
+\hline
+meal\_date & DATE & NOT NULL & Ngày ăn \\
+\hline
+meal\_name & VARCHAR(50) & NOT NULL & Tên bữa ăn (Sáng, Trưa, Tối, Phụ) \\
+\hline
+servings & INT & NOT NULL, DEFAULT 1 & Số người ăn (số suất) \\
+\hline
+note & TEXT & NULL & Ghi chú thêm \\
+\hline
+created\_by & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người lên lịch \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng MEAL\_PLAN}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item recipe\_id REFERENCES recipe(id) ON DELETE CASCADE
+    \item created\_by REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: (group\_id, meal\_date) - composite index cho query theo nhóm và ngày
+    \item INDEX: recipe\_id
+\end{itemize}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item CHECK constraint: meal\_name IN ('SANG', 'TRUA', 'TOI')
+\end{itemize}
+
+\paragraph{Bảng SHOPPING\_LIST - Danh sách mua sắm}
+\textbf{Mục đích:} Quản lý danh sách đi chợ/mua sắm của nhóm.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+name & VARCHAR(200) & NOT NULL & Tên danh sách \\
+\hline
+group\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ group(id) & ID nhóm \\
+\hline
+assigned\_to\_user\_id & BIGINT & NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người được phân công đi mua \\
+\hline
+note & TEXT & NULL & Ghi chú \\
+\hline
+shopping\_date & DATE & NULL & Ngày dự kiến đi mua \\
+\hline
+status & VARCHAR(20) & NOT NULL, DEFAULT 'PENDING' & Trạng thái: PENDING, IN\_PROGRESS, COMPLETED \\
+\hline
+created\_by & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người tạo danh sách \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng SHOPPING\_LIST}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item group\_id REFERENCES group(id) ON DELETE CASCADE
+    \item assigned\_to\_user\_id REFERENCES user(id) ON DELETE SET NULL
+    \item created\_by REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: group\_id
+    \item INDEX: assigned\_to\_user\_id
+    \item INDEX: status
+    \item INDEX: shopping\_date
+\end{itemize}
+
+\paragraph{Bảng SHOPPING\_LIST\_ITEM - Mục trong danh sách mua sắm}
+\textbf{Mục đích:} Chi tiết các món cần mua trong danh sách mua sắm.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+shopping\_list\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ shopping\_list(id) & ID danh sách mua sắm \\
+\hline
+food\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ food(id) & ID thực phẩm cần mua \\
+\hline
+unit\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ unit(id) & ID đơn vị đo \\
+\hline
+quantity & DECIMAL(10,2) & NOT NULL & Số lượng dự kiến mua \\
+\hline
+actual\_quantity & DECIMAL(10,2) & NULL & Số lượng thực tế đã mua \\
+\hline
+is\_purchased & BOOLEAN & NOT NULL, DEFAULT FALSE & Đã mua hay chưa \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thời gian cập nhật \\
+\hline
+\caption{Cấu trúc bảng SHOPPING\_LIST\_ITEM}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item shopping\_list\_id REFERENCES shopping\_list(id) ON DELETE CASCADE
+    \item food\_id REFERENCES food(id) ON DELETE CASCADE
+    \item unit\_id REFERENCES unit(id) ON DELETE RESTRICT
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item UNIQUE INDEX: (shopping\_list\_id, food\_id)
+    \item INDEX: shopping\_list\_id
+    \item INDEX: food\_id
+    \item INDEX: is\_purchased
+\end{itemize}
+
+\paragraph{Bảng NOTIFICATION - Thông báo}
+\textbf{Mục đích:} Lưu trữ thông báo gửi đến người dùng.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+user\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người nhận \\
+\hline
+title & VARCHAR(200) & NOT NULL & Tiêu đề thông báo \\
+\hline
+message & TEXT & NOT NULL & Nội dung thông báo \\
+\hline
+type & VARCHAR(50) & NOT NULL & Loại thông báo \\
+\hline
+reference\_type & VARCHAR(50) & NULL & Loại đối tượng liên quan (RECIPE, MEAL\_PLAN...) \\
+\hline
+reference\_id & BIGINT & NULL & ID của đối tượng liên quan \\
+\hline
+is\_read & BOOLEAN & NOT NULL, DEFAULT FALSE & Đã đọc hay chưa \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+\caption{Cấu trúc bảng NOTIFICATION}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item user\_id REFERENCES user(id) ON DELETE CASCADE
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: user\_id
+    \item INDEX: is\_read
+    \item INDEX: (user\_id, is\_read, created\_at)
+    \item INDEX: type
+\end{itemize}
+
+\textbf{Các loại thông báo (type):}
+\begin{itemize}
+    \item EXPIRY\_WARNING: Cảnh báo thực phẩm sắp hết hạn
+    \item MEAL\_REMINDER: Nhắc nhở bữa ăn theo lịch
+    \item SHOPPING\_ASSIGNED: Được phân công đi mua
+    \item GROUP\_INVITE: Lời mời tham gia nhóm
+    \item RECIPE\_SHARED: Có công thức mới được chia sẻ
+    \item SYSTEM: Thông báo hệ thống
+\end{itemize}
+
+\paragraph{Bảng EMAIL\_VERIFICATION - Xác thực email}
+\textbf{Mục đích:} Lưu mã OTP để xác thực email khi đăng ký hoặc đổi mật khẩu.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+user\_id & BIGINT & NOT NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người dùng \\
+\hline
+code & VARCHAR(10) & NOT NULL & Mã OTP (6 số) \\
+\hline
+expires\_at & TIMESTAMP & NOT NULL & Thời điểm hết hạn \\
+\hline
+is\_used & BOOLEAN & NOT NULL, DEFAULT FALSE & Đã sử dụng hay chưa \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tạo \\
+\hline
+\caption{Cấu trúc bảng EMAIL\_VERIFICATION}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item user\_id REFERENCES user(id) ON DELETE CASCADE
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: user\_id
+    \item INDEX: (user\_id, code, is\_used)
+    \item INDEX: expires\_at
+\end{itemize}
+
+\paragraph{Bảng SYSTEM\_LOG - Nhật ký hệ thống}
+\textbf{Mục đích:} Ghi lại các hành động quan trọng trong hệ thống để audit và debug.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+id & BIGINT & PRIMARY KEY, AUTO\_INCREMENT & Mã định danh duy nhất \\
+\hline
+user\_id & BIGINT & NULL, FOREIGN KEY $\rightarrow$ user(id) & ID người thực hiện hành động \\
+\hline
+action & VARCHAR(100) & NOT NULL & Tên hành động \\
+\hline
+entity\_type & VARCHAR(50) & NOT NULL & Loại đối tượng bị tác động \\
+\hline
+entity\_id & BIGINT & NULL & ID của đối tượng bị tác động \\
+\hline
+details & JSONB & NULL & Thông tin chi tiết về hành động (JSONB cho indexing tốt hơn) \\
+\hline
+ip\_address & VARCHAR(45) & NULL & Địa chỉ IP của người thực hiện \\
+\hline
+user\_agent & TEXT & NULL & Thông tin trình duyệt/thiết bị \\
+\hline
+created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian xảy ra \\
+\hline
+\caption{Cấu trúc bảng SYSTEM\_LOG}
+\end{longtable}
+
+\textbf{Foreign Keys:}
+\begin{itemize}
+    \item user\_id REFERENCES user(id) ON DELETE SET NULL
+\end{itemize}
+
+\textbf{Indexes:}
+\begin{itemize}
+    \item PRIMARY KEY: id
+    \item INDEX: user\_id
+    \item INDEX: action
+    \item INDEX: entity\_type
+    \item INDEX: created\_at
+    \item INDEX: (entity\_type, entity\_id)
+\end{itemize}
+
+\textbf{Các hành động được log:}
+\begin{itemize}
+    \item LOGIN, LOGOUT
+    \item CREATE\_GROUP, UPDATE\_GROUP, DELETE\_GROUP
+    \item ADD\_KITCHEN\_ITEM, UPDATE\_KITCHEN\_ITEM, DELETE\_KITCHEN\_ITEM
+    \item CREATE\_RECIPE, UPDATE\_RECIPE, DELETE\_RECIPE
+    \item CREATE\_MEAL\_PLAN, UPDATE\_MEAL\_PLAN, DELETE\_MEAL\_PLAN
+    \item CREATE\_SHOPPING\_LIST, COMPLETE\_SHOPPING\_LIST
+    \item FAILED\_LOGIN\_ATTEMPT
+    \item CHANGE\_PASSWORD
+    \item EXPORT\_DATA
+\end{itemize}
+
 \subsection{Thiết kế API Backend}
 \subsubsection{Danh sách API}
 \subsubsection{Đặc tả chi tiết API}
