@@ -1,0 +1,631 @@
+\paragraph{UC bổ sung - Gợi Ý Công Thức Nấu Ăn}
+
+\textbf{Mô tả chung:}
+
+Use case này cung cấp các API để hỗ trợ gợi ý công thức nấu ăn thông minh dựa trên nguyên liệu có sẵn trong tủ lạnh của nhóm. Hệ thống tự động phân tích độ phù hợp giữa công thức và nguyên liệu hiện có, giúp người dùng tối ưu hóa việc sử dụng thực phẩm và giảm lãng phí. Bao gồm tính năng gợi ý tổng quát dựa trên tất cả nguyên liệu và gợi ý theo từng loại thực phẩm cụ thể.
+
+\subparagraph{API 10.1: Gợi Ý Công Thức Tổng Quát}~\\
+
+\textbf{Endpoint:} \texttt{GET /suggestions/recipes}
+
+\textbf{Mô tả:} API gợi ý các công thức nấu ăn dựa trên tất cả nguyên liệu có sẵn trong tủ lạnh của nhóm. Hệ thống tự động tính toán độ phù hợp giữa công thức và nguyên liệu, sắp xếp theo mức độ khớp từ cao đến thấp.
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & GET \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Query Parameters:}
+
+Không có (hệ thống tự động lấy tất cả nguyên liệu từ kitchen của group)
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": [
+    {
+      "id": "long",
+      "name": "string",
+      "description": "string",
+      "htmlContent": "string",
+      "imageUrl": "string",
+      "groupId": "long",
+      "isSystem": "boolean",
+      "createdBy": "long",
+      "ingredients": [
+        {
+          "id": "long",
+          "foodId": "long",
+          "foodName": "string",
+          "quantity": "decimal",
+          "unit": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string",
+      "matchedIngredients": "int",
+      "totalIngredients": "int"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Response Fields:}
+
+\begin{longtable}{|p{0.25\textwidth}|p{0.15\textwidth}|p{0.5\textwidth}|}
+\hline
+\textbf{Trường} & \textbf{Kiểu} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Trường} & \textbf{Kiểu} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+id & long & ID của công thức \\
+\hline
+name & string & Tên công thức \\
+\hline
+description & string & Mô tả công thức \\
+\hline
+htmlContent & string & Nội dung hướng dẫn chi tiết (HTML format) \\
+\hline
+imageUrl & string & URL ảnh minh họa \\
+\hline
+groupId & long & ID nhóm (null nếu isSystem = true) \\
+\hline
+isSystem & boolean & Công thức hệ thống hay tự tạo \\
+\hline
+createdBy & long & ID người tạo \\
+\hline
+ingredients & array & Danh sách nguyên liệu cần thiết \\
+\hline
+createdAt & string & Thời gian tạo \\
+\hline
+updatedAt & string & Thời gian cập nhật \\
+\hline
+matchedIngredients & int & Số nguyên liệu đã có trong kitchen \\
+\hline
+totalIngredients & int & Tổng số nguyên liệu cần cho công thức \\
+\hline
+\end{longtable}
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Gợi ý thành công & \texttt{1000 | OK} & Trả về danh sách recipes phù hợp. Tự động lấy tất cả kitchen items của group. Sắp xếp theo matchedIngredients/totalIngredients cao. Bao gồm cả system recipes và group recipes \\
+\hline
+2 & User chưa có nhóm & \texttt{4000 | Bad Request} & Cần tham gia nhóm trước khi sử dụng tính năng gợi ý \\
+\hline
+3 & Kitchen trống & \texttt{1000 | OK} với data = [] & Frontend hiển thị empty state "Hãy thêm nguyên liệu vào tủ lạnh" \\
+\hline
+4 & Không có recipe phù hợp & \texttt{1000 | OK} với data = [] & Có items nhưng không có recipe nào match với nguyên liệu hiện có \\
+\hline
+5 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập để sử dụng tính năng \\
+\hline
+\end{longtable}
+
+\subparagraph{API 10.2: Gợi Ý Công Thức Theo Thực Phẩm}~\\
+
+\textbf{Endpoint:} \texttt{GET /suggestions/recipes/by-food}
+
+\textbf{Mô tả:} API gợi ý các công thức nấu ăn có sử dụng một loại thực phẩm cụ thể. Hữu ích khi người dùng muốn tìm món ăn từ một nguyên liệu đang có sẵn hoặc muốn sử dụng nguyên liệu trước khi hết hạn.
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & GET \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Query Parameters:}
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.1\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+foodId & long & Có & ID của thực phẩm cần tìm công thức \\
+\hline
+\end{longtable}
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": [
+    {
+      "id": "long",
+      "name": "string",
+      "description": "string",
+      "htmlContent": "string",
+      "imageUrl": "string",
+      "groupId": "long",
+      "isSystem": "boolean",
+      "createdBy": "long",
+      "ingredients": [
+        {
+          "id": "long",
+          "foodId": "long",
+          "foodName": "string",
+          "quantity": "decimal",
+          "unit": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string",
+      "matchedIngredients": "int",
+      "totalIngredients": "int"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Response Fields:} Giống API 10.1
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Tìm công thức theo thực phẩm thành công & \texttt{1000 | OK} & Input: ?foodId=5. Trả về recipes có sử dụng food này. Tìm trong cả system recipes và group recipes. Mỗi recipe đảm bảo có foodId này trong ingredients \\
+\hline
+2 & Thiếu foodId & \texttt{1002 | Parameter is not enough} & foodId là tham số bắt buộc \\
+\hline
+3 & foodId không tồn tại & \texttt{4040 | Not Found} & Input: ?foodId=99999. Không tìm thấy food với ID này \\
+\hline
+4 & foodId không hợp lệ & \texttt{1003 | Parameter value is invalid} & Input: ?foodId=-1 hoặc foodId không phải số \\
+\hline
+5 & Không có recipe nào sử dụng food này & \texttt{1000 | OK} với data = [] & Gợi ý user tạo recipe mới với food này \\
+\hline
+6 & User chưa có nhóm & \texttt{4000 | Bad Request} & Cần tham gia nhóm trước \\
+\hline
+7 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập \\
+\hline
+\end{longtable}
+\paragraph{UC bổ sung - Quản Lý Thông Báo}
+
+\textbf{Mô tả chung:}
+
+Use case này cung cấp hệ thống thông báo toàn diện cho người dùng, giúp cập nhật các sự kiện quan trọng như thực phẩm sắp hết hạn, thành viên mới tham gia nhóm, công thức được chia sẻ, lời nhắc bữa ăn, và nhiệm vụ mua sắm được giao. Hệ thống hỗ trợ quản lý trạng thái đọc/chưa đọc, xóa thông báo, và đánh dấu hàng loạt, giúp người dùng kiểm soát hiệu quả các thông tin cập nhật.
+
+\subparagraph{API 11.1: Lấy Danh Sách Thông Báo}~\\
+
+\textbf{Endpoint:} \texttt{GET /notification}
+
+\textbf{Mô tả:} API lấy toàn bộ danh sách thông báo của người dùng hiện tại, bao gồm thống kê số thông báo chưa đọc. Thông báo được sắp xếp theo thời gian tạo giảm dần (mới nhất trước).
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & GET \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Query Parameters:}
+
+Không có query parameters. Backend tự động trả về tất cả notifications của user, sắp xếp theo createdAt DESC (mới nhất trước).
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": {
+    "notifications": [
+      {
+        "id": "long",
+        "title": "string",
+        "message": "string",
+        "type": "string",
+        "referenceType": "string",
+        "referenceId": "long",
+        "isRead": "boolean",
+        "createdAt": "timestamp"
+      }
+    ],
+    "unreadCount": "int",
+    "total": "int"
+  }
+}
+\end{lstlisting}
+
+\textbf{Response Fields:}
+
+\begin{longtable}{|p{0.25\textwidth}|p{0.15\textwidth}|p{0.5\textwidth}|}
+\hline
+\textbf{Trường} & \textbf{Kiểu} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Trường} & \textbf{Kiểu} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+\multicolumn{3}{|l|}{\textbf{Data Object}} \\
+\hline
+notifications & array & Danh sách thông báo \\
+\hline
+unreadCount & int & Số thông báo chưa đọc \\
+\hline
+total & int & Tổng số thông báo \\
+\hline
+\multicolumn{3}{|l|}{\textbf{Notification Object}} \\
+\hline
+id & long & ID của thông báo \\
+\hline
+title & string & Tiêu đề thông báo \\
+\hline
+message & string & Nội dung thông báo \\
+\hline
+type & string & Loại thông báo (EXPIRY\_ALERT, MEMBER\_ADDED, RECIPE\_SHARED, MEAL\_REMINDER, SHOPPING\_ASSIGNED, SYSTEM) \\
+\hline
+referenceType & string & Loại entity liên quan (FOOD, GROUP, RECIPE, MEAL, SHOPPING\_LIST) \\
+\hline
+referenceId & long & ID của entity liên quan \\
+\hline
+isRead & boolean & Trạng thái đã đọc \\
+\hline
+createdAt & timestamp & Thời điểm tạo thông báo (format: YYYY-MM-DDTHH:mm:ss) \\
+\hline
+\end{longtable}
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Lấy danh sách thông báo thành công & \texttt{1000 | OK} & Trả về toàn bộ notifications với unreadCount và total. Sắp xếp theo createdAt DESC. Bao gồm cả đã đọc và chưa đọc. Không có phân trang \\
+\hline
+2 & User chưa có thông báo nào & \texttt{1000 | OK} & User mới tạo tài khoản. Trả về notifications = [], unreadCount = 0, total = 0 \\
+\hline
+3 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập \\
+\hline
+\end{longtable}
+
+\subparagraph{API 11.2: Đánh Dấu Thông Báo Đã Đọc}~\\
+
+\textbf{Endpoint:} \texttt{POST /notification/\{notificationId\}/read}
+
+\textbf{Mô tả:} API đánh dấu một thông báo cụ thể là đã đọc. Cập nhật trường isRead = true và giảm unreadCount.
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & POST \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Path Parameters:}
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.1\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+notificationId & long & Có & ID của thông báo cần đánh dấu đã đọc \\
+\hline
+\end{longtable}
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Đánh dấu đã đọc thành công & \texttt{1000 | OK} & Input: POST /notification/123/read. isRead được set = true. Update unread count. Response trả về data = null \\
+\hline
+2 & Đánh dấu notification không tồn tại & \texttt{9994 | No data or end of list data} & Input: POST /notification/99999/read \\
+\hline
+3 & Đánh dấu notification của user khác & \texttt{1009 | Action has been done previously by this user} & notificationId thuộc về user khác. Không có quyền \\
+\hline
+4 & Đánh dấu notification đã được đọc trước đó & \texttt{1000 | OK} & Notification đã isRead = true. Vẫn thành công (Idempotent operation) \\
+\hline
+5 & notificationId không hợp lệ & \texttt{1003 | Parameter value is invalid} & Input: POST /notification/abc/read. ID phải là số \\
+\hline
+6 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập \\
+\hline
+\end{longtable}
+
+\subparagraph{API 11.3: Đánh Dấu Tất Cả Thông Báo Đã Đọc}~\\
+
+\textbf{Endpoint:} \texttt{POST /notification/read-all}
+
+\textbf{Mô tả:} API đánh dấu tất cả thông báo của user là đã đọc. Hữu ích khi user muốn clear tất cả notifications chưa đọc cùng lúc.
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & POST \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Đánh dấu tất cả thành công & \texttt{1000 | OK} & Input: POST /notification/read-all. Tất cả notifications được đánh dấu đã đọc. Chỉ update notifications chưa đọc (isRead = false) \\
+\hline
+2 & Không có notification chưa đọc & \texttt{1000 | OK} & Tất cả notifications đã isRead = true. Vẫn thành công \\
+\hline
+3 & User chưa có notification nào & \texttt{1000 | OK} & User mới, chưa có notifications \\
+\hline
+4 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập \\
+\hline
+5 & Gọi nhiều lần liên tiếp & \texttt{1000 | OK} & Gọi 2 lần liên tiếp. Cả 2 lần đều thành công (Idempotent operation) \\
+\hline
+\end{longtable}
+
+\subparagraph{API 11.4: Xóa Thông Báo}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /notification/\{notificationId\}}
+
+\textbf{Mô tả:} API xóa một thông báo cụ thể khỏi danh sách của user. Thao tác này không thể phục hồi.
+
+\textbf{Request Header:}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.65\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+Method & DELETE \\
+\hline
+Authorization & Bearer \{access\_token\} (bắt buộc) \\
+\hline
+\end{longtable}
+
+\textbf{Path Parameters:}
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.1\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tham số} & \textbf{Kiểu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+notificationId & long & Có & ID của thông báo cần xóa \\
+\hline
+\end{longtable}
+
+\textbf{Response Body:}
+
+\begin{lstlisting}[language=json]
+{
+  "code": "string",
+  "message": "string",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\begin{longtable}{|p{0.08\textwidth}|p{0.35\textwidth}|p{0.2\textwidth}|p{0.27\textwidth}|}
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{STT} & \textbf{Mô tả} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+1 & Xóa thông báo thành công & \texttt{1000 | OK} & Input: DELETE /notification/123. Notification bị xóa. Update unread count nếu notification chưa đọc. Không thể phục hồi sau khi xóa \\
+\hline
+2 & Xóa notification không tồn tại & \texttt{9994 | No data or end of list data} & Input: DELETE /notification/99999 \\
+\hline
+3 & Xóa notification của user khác & \texttt{1009 | Action has been done previously by this user} & notificationId thuộc user khác. Không có quyền \\
+\hline
+4 & Xóa notification đã xóa trước đó & \texttt{9994 | No data or end of list data} & Notification đã bị xóa. Không tồn tại \\
+\hline
+5 & notificationId không hợp lệ & \texttt{1003 | Parameter value is invalid} & Input: DELETE /notification/abc. ID phải là số \\
+\hline
+6 & Token không hợp lệ & \texttt{9998 | Token is invalid} & Cần đăng nhập \\
+\hline
+\end{longtable}

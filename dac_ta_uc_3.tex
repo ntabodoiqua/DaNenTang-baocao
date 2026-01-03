@@ -2,7 +2,7 @@
 
 \textbf{Mô tả chung:} UC3 quản lý toàn bộ quy trình theo dõi thực phẩm trong bếp/kho của nhóm, bao gồm: thêm thực phẩm mới vào bếp, theo dõi số lượng và hạn sử dụng, cập nhật thông tin khi sử dụng, và xóa thực phẩm đã hết. Hệ thống tự động tính toán ngày hết hạn, cảnh báo thực phẩm sắp hết hạn và phân loại trạng thái (FRESH, EXPIRING\_SOON, EXPIRED) để giúp nhóm quản lý hiệu quả và giảm lãng phí thực phẩm.
 
-\subparagraph{API 3.1: Thêm Thực Phẩm Vào Bếp}
+\subparagraph{API 3.1: Thêm Thực Phẩm Vào Bếp}~\\
 
 \textbf{Endpoint:} \texttt{POST /kitchen}
 
@@ -101,7 +101,7 @@ note & String & Không & Ghi chú (giới hạn 500 ký tự) \\
 
 \normalsize
 
-\subparagraph{API 3.2: Lấy Danh Sách Thực Phẩm Trong Bếp}
+\subparagraph{API 3.2: Lấy Danh Sách Thực Phẩm Trong Bếp}~\\
 
 \textbf{Endpoint:} \texttt{GET /kitchen}
 
@@ -218,7 +218,7 @@ expiryBefore & String & Không & Lọc thực phẩm hết hạn trước ngày 
 
 \normalsize
 
-\subparagraph{API 3.3: Xem Chi Tiết Thực Phẩm Trong Bếp}
+\subparagraph{API 3.3: Xem Chi Tiết Thực Phẩm Trong Bếp}~\\
 
 \textbf{Endpoint:} \texttt{GET /kitchen/\{itemId\}}
 
@@ -302,7 +302,7 @@ itemId & Long & Có & ID của item trong bếp \\
 
 \normalsize
 
-\subparagraph{API 3.4: Lấy Thực Phẩm Sắp Hết Hạn}
+\subparagraph{API 3.4: Lấy Thực Phẩm Sắp Hết Hạn}~\\
 
 \textbf{Endpoint:} \texttt{GET /kitchen/expiring}
 
@@ -408,7 +408,7 @@ days & Integer & Không & Số ngày tính từ hôm nay (mặc định: 3) \\
 
 \normalsize
 
-\subparagraph{API 3.5: Cập Nhật Thực Phẩm Trong Bếp}
+\subparagraph{API 3.5: Cập Nhật Thực Phẩm Trong Bếp}~\\
 
 \textbf{Endpoint:} \texttt{PUT /kitchen/\{itemId\}}
 
@@ -524,7 +524,7 @@ foodId & Long & Không & Đổi sang thực phẩm khác (ít dùng) \\
 
 \normalsize
 
-\subparagraph{API 3.6: Xóa Thực Phẩm Khỏi Bếp}
+\subparagraph{API 3.6: Xóa Thực Phẩm Khỏi Bếp}~\\
 
 \textbf{Endpoint:} \texttt{DELETE /kitchen/\{itemId\}}
 

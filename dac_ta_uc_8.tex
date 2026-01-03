@@ -1,0 +1,509 @@
+\paragraph{UC8 - Quản trị người dùng (Admin)}
+
+\textbf{Mô tả chung:} UC8 cung cấp các chức năng quản trị người dùng dành riêng cho admin, bao gồm: xem danh sách người dùng với các bộ lọc đa dạng, xem thống kê tổng quan về người dùng trong hệ thống, xem chi tiết thông tin từng người dùng, cập nhật thông tin và quyền hạn người dùng, bật/tắt trạng thái kích hoạt tài khoản, và xóa người dùng khỏi hệ thống. Tất cả các API trong UC này yêu cầu role ADMIN và có các cơ chế bảo vệ để ngăn admin tự xóa hoặc vô hiệu hóa chính mình.
+
+\subparagraph{API 8.1: Lấy Danh Sách Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{GET /admin/users}
+
+\textbf{Mô tả:} API lấy danh sách người dùng với khả năng lọc theo email, tên, vai trò và trạng thái kích hoạt. Bao gồm thống kê tổng số người dùng active, inactive, verified, unverified.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+email & String & Không & Lọc theo email (tìm kiếm tương đối, không phân biệt hoa thường) \\
+\hline
+name & String & Không & Lọc theo tên (tìm kiếm tương đối) \\
+\hline
+role & String & Không & Lọc theo vai trò (USER, ADMIN) \\
+\hline
+isActive & Boolean & Không & Lọc theo trạng thái kích hoạt \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách Người Dùng}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "email": "john@example.com",
+        "name": "John Doe",
+        "phone": "0123456789",
+        "avatarUrl": "https://example.com/avatar.jpg",
+        "role": "USER",
+        "isVerified": true,
+        "isActive": true,
+        "groupName": "Gia dinh John",
+        "groupId": 10,
+        "createdAt": "2026-01-01T10:00:00Z",
+        "updatedAt": "2026-01-02T15:30:00Z"
+      },
+      {
+        "id": 2,
+        "email": "admin@example.com",
+        "name": "Admin User",
+        "phone": "0987654321",
+        "avatarUrl": "https://example.com/admin.jpg",
+        "role": "ADMIN",
+        "isVerified": true,
+        "isActive": true,
+        "groupName": null,
+        "groupId": null,
+        "createdAt": "2025-12-01T08:00:00Z",
+        "updatedAt": "2026-01-03T09:00:00Z"
+      }
+    ],
+    "total": 2,
+    "activeCount": 2,
+    "inactiveCount": 0,
+    "verifiedCount": 2,
+    "unverifiedCount": 0
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.1.1 & Không có query parameters & 1000 | OK & Danh sách tất cả người dùng với thống kê \\
+\hline
+8.1.2 & ?email=john@example.com & 1000 | OK & Người dùng có email chứa "john@example.com" \\
+\hline
+8.1.3 & ?name=John & 1000 | OK & Người dùng có tên chứa "John" \\
+\hline
+8.1.4 & ?role=ADMIN & 1000 | OK & Chỉ các admin \\
+\hline
+8.1.5 & ?isActive=true & 1000 | OK & Chỉ người dùng đang active \\
+\hline
+8.1.6 & ?role=USER\&isActive=true & 1000 | OK & Kết hợp nhiều filter \\
+\hline
+8.1.7 & User không phải admin & 4030 | Forbidden & Chỉ admin mới truy cập được \\
+\hline
+8.1.8 & ?role=INVALID & 1003 | Parameter value is invalid & role chỉ nhận USER hoặc ADMIN \\
+\hline
+\caption{Test Cases - API 8.1 Lấy Danh Sách Người Dùng}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 8.2: Lấy Thống Kê Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{GET /admin/users/statistics}
+
+\textbf{Mô tả:} API lấy thống kê tổng quan về người dùng trong hệ thống. Hữu ích cho dashboard admin để hiển thị các số liệu tổng hợp.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "totalUsers": 150,
+    "activeUsers": 130,
+    "inactiveUsers": 20,
+    "verifiedUsers": 140,
+    "unverifiedUsers": 10
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.2.1 & Gọi API bình thường & 1000 | OK & Thống kê đầy đủ, totalUsers = activeUsers + inactiveUsers \\
+\hline
+8.2.2 & User không phải admin & 4030 | Forbidden & Chỉ admin mới xem được thống kê \\
+\hline
+8.2.3 & Hệ thống chưa có user nào & 1000 | OK & Tất cả giá trị = 0 \\
+\hline
+\caption{Test Cases - API 8.2 Lấy Thống Kê Người Dùng}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 8.3: Lấy Chi Tiết Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{GET /admin/users/\{userId\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết của một người dùng cụ thể, bao gồm cả thông tin nhóm nếu user đang tham gia.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+userId & Long & Có & ID của người dùng cần xem \\
+\hline
+\caption{Path Parameters - API Lấy Chi Tiết Người Dùng}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "email": "john@example.com",
+    "name": "John Doe",
+    "phone": "0123456789",
+    "avatarUrl": "https://example.com/avatar.jpg",
+    "role": "USER",
+    "isVerified": true,
+    "isActive": true,
+    "groupName": "Gia dinh John",
+    "groupId": 10,
+    "createdAt": "2026-01-01T10:00:00Z",
+    "updatedAt": "2026-01-02T15:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.3.1 & userId=1 (hợp lệ) & 1000 | OK & Thông tin đầy đủ của user, groupName/groupId null nếu chưa có nhóm \\
+\hline
+8.3.2 & userId=9999 (không tồn tại) & 4040 | Not Found & Không tìm thấy người dùng \\
+\hline
+8.3.3 & userId=-1 (không hợp lệ) & 1003 | Parameter value is invalid & userId phải là số dương \\
+\hline
+8.3.4 & User không phải admin & 4030 | Forbidden & Chỉ admin mới xem được \\
+\hline
+8.3.5 & userId="abc" (không phải số) & 1003 | Parameter value is invalid & userId phải là số \\
+\hline
+\caption{Test Cases - API 8.3 Lấy Chi Tiết Người Dùng}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 8.4: Cập Nhật Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{PUT /admin/users/\{userId\}}
+
+\textbf{Mô tả:} API cho phép admin cập nhật thông tin người dùng (tên, số điện thoại, vai trò, trạng thái). Tất cả các trường đều tùy chọn, chỉ gửi các trường cần cập nhật.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+userId & Long & Có & ID của người dùng cần cập nhật \\
+\hline
+\caption{Path Parameters - API Cập Nhật Người Dùng}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tên mới \\
+\hline
+phone & String & Không & Số điện thoại mới \\
+\hline
+role & String & Không & Vai trò mới (USER, ADMIN) \\
+\hline
+isActive & Boolean & Không & Trạng thái kích hoạt mới \\
+\hline
+isVerified & Boolean & Không & Trạng thái xác thực email mới \\
+\hline
+\caption{Request Body - API Cập Nhật Người Dùng}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.4]
+{
+  "code": "1000",
+  "message": "Cap nhat nguoi dung thanh cong",
+  "data": {
+    "id": 1,
+    "email": "john@example.com",
+    "name": "John Updated",
+    "phone": "0987654321",
+    "avatarUrl": "https://example.com/avatar.jpg",
+    "role": "ADMIN",
+    "isVerified": true,
+    "isActive": true,
+    "groupName": "Gia dinh John",
+    "groupId": 10,
+    "createdAt": "2026-01-01T10:00:00Z",
+    "updatedAt": "2026-01-03T12:00:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.4.1 & name="John Updated" & 1000 | OK & Tên được cập nhật \\
+\hline
+8.4.2 & role="ADMIN" & 1000 | OK & Role được nâng lên ADMIN \\
+\hline
+8.4.3 & name, phone, isVerified cùng lúc & 1000 | OK & Tất cả trường được cập nhật \\
+\hline
+8.4.4 & isActive=false & 1000 | OK & Tài khoản bị vô hiệu hóa \\
+\hline
+8.4.5 & userId=9999 (không tồn tại) & 4040 | Not Found & User không tồn tại \\
+\hline
+8.4.6 & role="SUPER\_ADMIN" & 1003 | Parameter value is invalid & Chỉ chấp nhận USER hoặc ADMIN \\
+\hline
+8.4.7 & Admin tự cập nhật quyền mình & 4000 | Bad Request & Admin không thể tự giáng cấp \\
+\hline
+8.4.8 & Request body rỗng \{\} & 1000 | OK & Không có thay đổi \\
+\hline
+8.4.9 & User không phải admin & 4030 | Forbidden & Chỉ admin mới cập nhật được \\
+\hline
+\caption{Test Cases - API 8.4 Cập Nhật Người Dùng}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 8.5: Bật/Tắt Trạng Thái Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{PATCH /admin/users/\{userId\}/toggle-status}
+
+\textbf{Mô tả:} API để bật/tắt trạng thái kích hoạt của người dùng (toggle isActive). Nếu đang active → inactive, nếu đang inactive → active. Admin không thể tắt chính mình.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+userId & Long & Có & ID của người dùng cần toggle status \\
+\hline
+\caption{Path Parameters - API Bật/Tắt Trạng Thái}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.5]
+{
+  "code": "1000",
+  "message": "Kich hoat tai khoan thanh cong",
+  "data": {
+    "id": 1,
+    "email": "john@example.com",
+    "name": "John Doe",
+    "phone": "0123456789",
+    "avatarUrl": "https://example.com/avatar.jpg",
+    "role": "USER",
+    "isVerified": true,
+    "isActive": true,
+    "groupName": "Gia dinh John",
+    "groupId": 10,
+    "createdAt": "2026-01-01T10:00:00Z",
+    "updatedAt": "2026-01-03T12:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.5.1 & User isActive=false & 1000 | OK & isActive=true, message "Kích hoạt tài khoản thành công" \\
+\hline
+8.5.2 & User isActive=true & 1000 | OK & isActive=false, message "Vô hiệu hóa tài khoản thành công" \\
+\hline
+8.5.3 & userId=9999 (không tồn tại) & 4040 | Not Found & User không tồn tại \\
+\hline
+8.5.4 & userId = current admin's ID & 4000 | Bad Request & Không thể vô hiệu hóa chính mình \\
+\hline
+8.5.5 & User không phải admin & 4030 | Forbidden & Chỉ admin mới toggle được \\
+\hline
+8.5.6 & Toggle nhiều lần liên tiếp & 1000 | OK & Trạng thái thay đổi mỗi lần \\
+\hline
+\caption{Test Cases - API 8.5 Bật/Tắt Trạng Thái}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 8.6: Xóa Người Dùng}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /admin/users/\{userId\}}
+
+\textbf{Mô tả:} API để xóa người dùng khỏi hệ thống. Xóa vĩnh viễn và không thể khôi phục. Admin không thể xóa chính mình và phải giữ ít nhất 1 admin trong hệ thống.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+    \item \texttt{Role Required: ADMIN}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+userId & Long & Có & ID của người dùng cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Người Dùng}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 8.6]
+{
+  "code": "1000",
+  "message": "Xoa nguoi dung thanh cong",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+8.6.1 & userId=5 (user thường) & 1000 | OK & User bị xóa vĩnh viễn, có thể xóa dữ liệu liên quan \\
+\hline
+8.6.2 & userId=9999 (không tồn tại) & 4040 | Not Found & User không tồn tại \\
+\hline
+8.6.3 & userId = current admin's ID & 4000 | Bad Request & Không thể xóa chính mình \\
+\hline
+8.6.4 & Xóa admin cuối cùng & 4000 | Bad Request & Phải có ít nhất 1 admin \\
+\hline
+8.6.5 & User không phải admin & 4030 | Forbidden & Chỉ admin mới xóa được \\
+\hline
+8.6.6 & Xóa user đang trong nhóm & 1000 | OK & User bị xóa, dữ liệu nhóm vẫn giữ \\
+\hline
+\caption{Test Cases - API 8.6 Xóa Người Dùng}
+\end{longtable}
+
+\normalsize

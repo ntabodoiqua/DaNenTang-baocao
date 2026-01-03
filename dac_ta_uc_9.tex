@@ -1,0 +1,396 @@
+\paragraph{UC9 - Xác thực và phân quyền}
+
+\textbf{Mô tả chung:} UC9 quản lý toàn bộ quy trình xác thực và phân quyền trong hệ thống, bao gồm: đăng ký tài khoản mới với gửi email xác thực, đăng nhập và cấp phát token, xác thực email bằng mã verification code, gửi lại mã xác thực khi cần thiết, và đổi mật khẩu cho người dùng đã đăng nhập. Hệ thống sử dụng JWT token cho authentication, yêu cầu xác thực email trước khi sử dụng đầy đủ tính năng, và có các cơ chế bảo vệ như rate limiting chống brute force và spam.
+
+\subparagraph{API 9.1: Đăng Ký}~\\
+
+\textbf{Endpoint:} \texttt{POST /auth/register}
+
+\textbf{Mô tả:} API cho phép người dùng mới tạo tài khoản trong hệ thống. Sau khi đăng ký thành công, hệ thống gửi email xác thực chứa mã 6 số đến địa chỉ email đã đăng ký và tự động đăng nhập (trả về access token).
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+email & String & Có & Email đăng ký (phải đúng định dạng và chưa tồn tại) \\
+\hline
+password & String & Có & Mật khẩu (tối thiểu 6 ký tự) \\
+\hline
+name & String & Có & Họ và tên đầy đủ (tối thiểu 2 ký tự) \\
+\hline
+phone & String & Không & Số điện thoại (10-11 số, bắt đầu bằng 0) \\
+\hline
+\caption{Request Body - API Đăng Ký}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 9.1]
+{
+  "code": "1000",
+  "message": "Dang ky thanh cong",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "tokenType": "Bearer",
+    "expiresIn": 86400,
+    "user": {
+      "id": 1,
+      "email": "newuser@example.com",
+      "name": "Nguyen Van A",
+      "phone": "0912345678",
+      "avatarUrl": null,
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-01-03T10:00:00Z"
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+9.1.1 & email, password, name, phone đầy đủ & 1000 | OK & Tài khoản được tạo, trả về token, HTTP 201, isVerified=false \\
+\hline
+9.1.2 & Email đã tồn tại & 4000 | Bad Request & Email đã được sử dụng \\
+\hline
+9.1.3 & Thiếu email & 1002 | Parameter is not enough & Email là trường bắt buộc \\
+\hline
+9.1.4 & Thiếu password & 1002 | Parameter is not enough & Password là trường bắt buộc \\
+\hline
+9.1.5 & Thiếu name & 1002 | Parameter is not enough & Tên là trường bắt buộc \\
+\hline
+9.1.6 & email="invalid-email" & 1003 | Parameter value is invalid & Email không đúng định dạng \\
+\hline
+9.1.7 & password="123" (< 6 ký tự) & 1003 | Parameter value is invalid & Password tối thiểu 6 ký tự \\
+\hline
+9.1.8 & phone="123" (không hợp lệ) & 1003 | Parameter value is invalid & Số điện thoại phải 10-11 số, bắt đầu bằng 0 \\
+\hline
+9.1.9 & name="A" (quá ngắn) & 1003 | Parameter value is invalid & Tên tối thiểu 2 ký tự \\
+\hline
+9.1.10 & Không có phone (optional) & 1000 | OK & Số điện thoại là trường tùy chọn \\
+\hline
+\caption{Test Cases - API 9.1 Đăng Ký}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 9.2: Đăng Nhập}~\\
+
+\textbf{Endpoint:} \texttt{POST /auth/login}
+
+\textbf{Mô tả:} API xác thực người dùng và trả về access token để sử dụng cho các API requests tiếp theo. Token có thời hạn và cần lưu vào secure storage.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+email & String & Có & Email đăng nhập \\
+\hline
+password & String & Có & Mật khẩu \\
+\hline
+\caption{Request Body - API Đăng Nhập}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 9.2]
+{
+  "code": "1000",
+  "message": "Dang nhap thanh cong",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "tokenType": "Bearer",
+    "expiresIn": 86400,
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "name": "Nguyen Van A",
+      "phone": "0912345678",
+      "avatarUrl": "https://example.com/avatar.jpg",
+      "role": "USER",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-01-01T10:00:00Z"
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+9.2.1 & email, password hợp lệ & 1000 | OK & Trả về user info và token, tokenType="Bearer" \\
+\hline
+9.2.2 & Thiếu email & 1002 | Parameter is not enough & Email là trường bắt buộc \\
+\hline
+9.2.3 & Thiếu password & 1002 | Parameter is not enough & Password là trường bắt buộc \\
+\hline
+9.2.4 & Email không tồn tại & 9994 | No data or end of list data & Tài khoản không tồn tại \\
+\hline
+9.2.5 & Password sai & 1003 | Parameter value is invalid & Mật khẩu không chính xác \\
+\hline
+9.2.6 & Email chưa xác thực & 9995 | User is not validated & Cần xác thực email trước, chuyển đến màn hình verify \\
+\hline
+9.2.7 & Tài khoản bị khóa (isActive=false) & 1009 | Action has been done previously by this user & Tài khoản bị khóa \\
+\hline
+9.2.8 & Đăng nhập sai 5 lần liên tiếp & 1009 | Action has been done previously by this user & Tài khoản tạm khóa 15 phút, có rate limiting \\
+\hline
+\caption{Test Cases - API 9.2 Đăng Nhập}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 9.3: Xác Thực Email}~\\
+
+\textbf{Endpoint:} \texttt{POST /verify-email}
+
+\textbf{Mô tả:} API xác thực email của người dùng bằng mã verification code (6 số) được gửi qua email sau khi đăng ký. User phải đã đăng nhập (có token) mới verify được.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+code & String & Có & Mã xác thực (6 ký tự số) \\
+\hline
+\caption{Request Body - API Xác Thực Email}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 9.3]
+{
+  "code": "1000",
+  "message": "Xac thuc email thanh cong",
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "name": "Nguyen Van A",
+      "isVerified": true
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+9.3.1 & code="123456" (đúng) & 1000 | OK & Email được xác thực, isVerified=true \\
+\hline
+9.3.2 & Thiếu code & 1002 | Parameter is not enough & Thiếu mã xác thực \\
+\hline
+9.3.3 & code="999999" (sai) & 1003 | Parameter value is invalid & Mã xác thực không chính xác \\
+\hline
+9.3.4 & Mã đã hết hạn (> 30 phút) & 1003 | Parameter value is invalid & Mã đã hết hạn, cần gửi lại \\
+\hline
+9.3.5 & Email đã verify rồi & 1009 | Action has been done previously by this user & Đã xác thực trước đó \\
+\hline
+9.3.6 & Nhập sai 5 lần liên tiếp & 1009 | Action has been done previously by this user & Mã bị vô hiệu, cần gửi lại \\
+\hline
+9.3.7 & Không có token & 4010 | Unauthorized & Cần đăng nhập trước \\
+\hline
+\caption{Test Cases - API 9.3 Xác Thực Email}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 9.4: Gửi Lại Mã Xác Thực}~\\
+
+\textbf{Endpoint:} \texttt{POST /auth/resend-verification}
+
+\textbf{Mô tả:} API gửi lại mã xác thực email khi mã cũ đã hết hạn hoặc người dùng không nhận được email. Lấy email từ token, có rate limit tối đa 3 lần/giờ.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 9.4]
+{
+  "code": "1000",
+  "message": "Gui lai ma xac thuc thanh cong",
+  "data": {
+    "email": "user@example.com",
+    "sentAt": "2026-01-03T10:30:00Z",
+    "expiresIn": 1800
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+9.4.1 & Gọi API với token hợp lệ & 1000 | OK & Mã mới được gửi, mã cũ vô hiệu, expiresIn=1800 (30 phút) \\
+\hline
+9.4.2 & Email đã xác thực & 1009 | Action has been done previously by this user & Email đã verify rồi \\
+\hline
+9.4.3 & Gửi lần thứ 4 trong 1 giờ & 1009 | Action has been done previously by this user & Vượt quá giới hạn 3 lần/giờ \\
+\hline
+9.4.4 & Gửi lại trong vòng 1 phút & 1009 | Action has been done previously by this user & Vui lòng đợi, chống spam \\
+\hline
+9.4.5 & Không có token & 4010 | Unauthorized & Cần đăng nhập \\
+\hline
+9.4.6 & Token hết hạn & 4010 | Unauthorized & Token không hợp lệ \\
+\hline
+\caption{Test Cases - API 9.4 Gửi Lại Mã Xác Thực}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 9.5: Đổi Mật Khẩu}~\\
+
+\textbf{Endpoint:} \texttt{POST /auth/change-password}
+
+\textbf{Mô tả:} API cho phép người dùng đã đăng nhập đổi mật khẩu của mình. Cần xác thực mật khẩu cũ và mật khẩu mới phải khớp với xác nhận.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+oldPassword & String & Có & Mật khẩu hiện tại \\
+\hline
+newPassword & String & Có & Mật khẩu mới (tối thiểu 6 ký tự) \\
+\hline
+confirmPassword & String & Có & Xác nhận mật khẩu mới (phải trùng newPassword) \\
+\hline
+\caption{Request Body - API Đổi Mật Khẩu}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 9.5]
+{
+  "code": "1000",
+  "message": "Doi mat khau thanh cong",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+9.5.1 & oldPassword, newPassword, confirmPassword hợp lệ & 1000 | OK & Password được đổi, token không bị revoke \\
+\hline
+9.5.2 & Thiếu oldPassword & 1002 | Parameter is not enough & Thiếu password cũ \\
+\hline
+9.5.3 & oldPassword sai & 1003 | Parameter value is invalid & Password cũ không chính xác \\
+\hline
+9.5.4 & newPassword="123" (< 6 ký tự) & 1003 | Parameter value is invalid & Password mới tối thiểu 6 ký tự \\
+\hline
+9.5.5 & confirmPassword không khớp newPassword & 1003 | Parameter value is invalid & Password xác nhận không khớp \\
+\hline
+9.5.6 & Thiếu newPassword & 1002 | Parameter is not enough & Thiếu password mới \\
+\hline
+9.5.7 & Thiếu confirmPassword & 1002 | Parameter is not enough & Thiếu xác nhận password \\
+\hline
+9.5.8 & Không có token & 4010 | Unauthorized & Cần đăng nhập \\
+\hline
+9.5.9 & Token hết hạn & 4010 | Unauthorized & Token không hợp lệ \\
+\hline
+\caption{Test Cases - API 9.5 Đổi Mật Khẩu}
+\end{longtable}
+
+\normalsize

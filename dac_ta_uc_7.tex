@@ -1,0 +1,531 @@
+\paragraph{UC7 - Báo cáo và thống kê}
+
+\textbf{Mô tả chung:} UC7 cung cấp hệ thống báo cáo và thống kê toàn diện về hoạt động của nhóm, bao gồm: báo cáo tổng quan về tủ lạnh và phân loại thực phẩm, báo cáo chi tiết về xu hướng sử dụng tủ lạnh, thống kê mua sắm và chi tiêu, phân tích kế hoạch bữa ăn và công thức, cũng như báo cáo đầy đủ kết hợp tất cả các thống kê. Hệ thống hỗ trợ nhiều khoảng thời gian (tuần, tháng, quý, năm) và cung cấp dữ liệu trực quan cho việc ra quyết định.
+
+\subparagraph{API 7.1: Lấy Báo Cáo Tổng Quan}~\\
+
+\textbf{Endpoint:} \texttt{GET /reports/overview}
+
+\textbf{Mô tả:} API lấy thống kê tổng quan về tủ lạnh, phân loại thực phẩm theo danh mục, các món phổ biến nhất, và giá trị lãng phí. Hữu ích cho dashboard trang chủ.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+period & String & Không & Khoảng thời gian (week, month, quarter, year). Mặc định: month \\
+\hline
+topItemsLimit & Integer & Không & Số lượng top items trả về. Mặc định: 5 \\
+\hline
+\caption{Query Parameters - API Báo Cáo Tổng Quan}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 7.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "totalItems": 45,
+    "expiringItems": 8,
+    "expiredItems": 2,
+    "goodItems": 35,
+    "categoryStats": [
+      {
+        "categoryId": 3,
+        "name": "Rau cu",
+        "count": 15,
+        "percentage": 0.33
+      },
+      {
+        "categoryId": 5,
+        "name": "Thit",
+        "count": 12,
+        "percentage": 0.27
+      }
+    ],
+    "topItems": [
+      {
+        "foodId": 10,
+        "foodName": "Ca chua",
+        "count": 8,
+        "categoryId": 3,
+        "categoryName": "Rau cu"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+7.1.1 & Không có query parameter & 1000 | OK & Trả về thống kê tháng này (mặc định) \\
+\hline
+7.1.2 & ?period=week & 1000 | OK & Trả về thống kê 7 ngày gần nhất \\
+\hline
+7.1.3 & ?period=quarter & 1000 | OK & Trả về thống kê 3 tháng gần nhất \\
+\hline
+7.1.4 & ?period=year & 1000 | OK & Trả về thống kê năm hiện tại \\
+\hline
+7.1.5 & ?topItemsLimit=10 & 1000 | OK & Trả về 10 món phổ biến nhất \\
+\hline
+7.1.6 & ?period=invalid & 1003 | Parameter value is invalid & period chỉ nhận: week, month, quarter, year \\
+\hline
+7.1.7 & ?topItemsLimit=-5 & 1003 | Parameter value is invalid & topItemsLimit phải là số dương \\
+\hline
+7.1.8 & Nhóm chưa có dữ liệu & 1000 | OK & Các giá trị = 0, mảng rỗng \\
+\hline
+\caption{Test Cases - API 7.1 Báo Cáo Tổng Quan}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 7.2: Lấy Báo Cáo Tủ Lạnh}~\\
+
+\textbf{Endpoint:} \texttt{GET /reports/kitchen}
+
+\textbf{Mô tả:} API lấy thống kê chi tiết về tủ lạnh, bao gồm xu hướng theo tuần (items added/used/expired), phân tích theo danh mục, và breakdown trạng thái thực phẩm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+startDate & String & Không & Ngày bắt đầu (YYYY-MM-DD). Mặc định: 7 ngày trước \\
+\hline
+endDate & String & Không & Ngày kết thúc (YYYY-MM-DD). Mặc định: hôm nay \\
+\hline
+\caption{Query Parameters - API Báo Cáo Tủ Lạnh}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 7.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "statusBreakdown": {
+      "totalItems": 45,
+      "goodItems": 35,
+      "warningItems": 8,
+      "expiredItems": 2
+    },
+    "weeklyTrend": [
+      {
+        "date": "2026-01-01",
+        "dayOfWeek": "T5",
+        "itemsAdded": 5,
+        "itemsUsed": 3,
+        "itemsExpired": 1
+      },
+      {
+        "date": "2026-01-02",
+        "dayOfWeek": "T6",
+        "itemsAdded": 8,
+        "itemsUsed": 4,
+        "itemsExpired": 0
+      }
+    ],
+    "categoryValues": [
+      {
+        "categoryId": 3,
+        "name": "Rau cu",
+        "itemCount": 15
+      },
+      {
+        "categoryId": 5,
+        "name": "Thit",
+        "itemCount": 12
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+7.2.1 & Không có query parameter & 1000 | OK & Trả về xu hướng 7 ngày gần nhất \\
+\hline
+7.2.2 & ?startDate=2026-01-01\&endDate=2026-01-15 & 1000 | OK & Trả về xu hướng từ 01/01 đến 15/01 \\
+\hline
+7.2.3 & ?startDate=2026-01-15\&endDate=2026-01-01 & 1003 | Parameter value is invalid & startDate phải trước endDate \\
+\hline
+7.2.4 & ?startDate=invalid-date & 1003 | Parameter value is invalid & Định dạng ngày không hợp lệ \\
+\hline
+7.2.5 & Tủ lạnh rỗng & 1000 | OK & statusBreakdown.totalItems = 0 \\
+\hline
+\caption{Test Cases - API 7.2 Báo Cáo Tủ Lạnh}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 7.3: Lấy Báo Cáo Mua Sắm}~\\
+
+\textbf{Endpoint:} \texttt{GET /reports/shopping}
+
+\textbf{Mô tả:} API lấy thống kê về danh sách mua sắm, chi tiêu theo thời gian, và các món hay mua nhất. Hỗ trợ theo dõi xu hướng mua sắm và lập kế hoạch ngân sách.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+period & String & Không & Khoảng thời gian (week, month, quarter). Mặc định: month \\
+\hline
+frequentItemsLimit & Integer & Không & Số lượng frequent items. Mặc định: 5 \\
+\hline
+\caption{Query Parameters - API Báo Cáo Mua Sắm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 7.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "listStats": {
+      "totalLists": 12,
+      "pendingLists": 2,
+      "inProgressLists": 1,
+      "completedLists": 9,
+      "totalItemsBought": 145
+    },
+    "weeklySpending": [
+      {
+        "date": "2026-01-01",
+        "dayOfWeek": "T5",
+        "itemCount": 15
+      },
+      {
+        "date": "2026-01-02",
+        "dayOfWeek": "T6",
+        "itemCount": 8
+      }
+    ],
+    "frequentItems": [
+      {
+        "foodId": 10,
+        "foodName": "Thit bo",
+        "purchaseCount": 8,
+        "totalQuantity": 4.5,
+        "unitName": "kg"
+      },
+      {
+        "foodId": 15,
+        "foodName": "Ca chua",
+        "purchaseCount": 7,
+        "totalQuantity": 3.2,
+        "unitName": "kg"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+7.3.1 & ?period=month & 1000 | OK & Trả về thống kê mua sắm tháng này \\
+\hline
+7.3.2 & ?period=week & 1000 | OK & Thống kê 7 ngày gần nhất \\
+\hline
+7.3.3 & ?period=quarter & 1000 | OK & Thống kê 3 tháng gần nhất \\
+\hline
+7.3.4 & Chưa có danh sách mua sắm & 1000 | OK & listStats.totalLists = 0 \\
+\hline
+7.3.5 & ?period=year & 1003 | Parameter value is invalid & period chỉ nhận: week, month, quarter \\
+\hline
+7.3.6 & ?frequentItemsLimit=-5 & 1003 | Parameter value is invalid & Phải là số dương \\
+\hline
+7.3.7 & ?frequentItemsLimit=20 & 1000 | OK & Trả về tối đa 20 món hay mua \\
+\hline
+\caption{Test Cases - API 7.3 Báo Cáo Mua Sắm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 7.4: Lấy Báo Cáo Bữa Ăn}~\\
+
+\textbf{Endpoint:} \texttt{GET /reports/meal}
+
+\textbf{Mô tả:} API lấy thống kê về kế hoạch bữa ăn, sử dụng công thức nấu ăn, xu hướng bữa ăn theo tuần, và các công thức phổ biến nhất. Giúp phân tích thói quen ăn uống của nhóm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+period & String & Không & Khoảng thời gian (week, month, quarter). Mặc định: month \\
+\hline
+topRecipesLimit & Integer & Không & Số công thức phổ biến (1-10). Mặc định: 5 \\
+\hline
+\caption{Query Parameters - API Báo Cáo Bữa Ăn}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 7.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "mealStats": {
+      "totalMeals": 90,
+      "breakfasts": 30,
+      "lunches": 30,
+      "dinners": 30
+    },
+    "recipeUsage": {
+      "totalRecipesUsed": 45,
+      "uniqueRecipes": 15,
+      "usagePercentage": 0.5
+    },
+    "topRecipes": [
+      {
+        "recipeId": 1,
+        "recipeName": "Pho bo",
+        "imageUrl": "https://example.com/pho.jpg",
+        "usageCount": 8,
+        "lastUsedDate": "2026-01-02"
+      },
+      {
+        "recipeId": 2,
+        "recipeName": "Com chien",
+        "imageUrl": "https://example.com/com-chien.jpg",
+        "usageCount": 6,
+        "lastUsedDate": "2026-01-03"
+      }
+    ],
+    "weeklyMealTrend": [
+      {
+        "date": "2026-01-01",
+        "dayOfWeek": "T5",
+        "breakfastCount": 1,
+        "lunchCount": 1,
+        "dinnerCount": 1,
+        "totalMeals": 3
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+7.4.1 & ?period=month & 1000 | OK & Thống kê bữa ăn tháng này \\
+\hline
+7.4.2 & ?topRecipesLimit=10 & 1000 | OK & Trả về 10 công thức phổ biến nhất \\
+\hline
+7.4.3 & ?period=week & 1000 | OK & Thống kê 7 ngày gần nhất \\
+\hline
+7.4.4 & Chưa có kế hoạch bữa ăn & 1000 | OK & mealStats.totalMeals = 0 \\
+\hline
+7.4.5 & ?topRecipesLimit=50 & 1003 | Parameter value is invalid & Phải từ 1-10 \\
+\hline
+7.4.6 & ?period=year & 1003 | Parameter value is invalid & period chỉ nhận: week, month, quarter \\
+\hline
+7.4.7 & ?topRecipesLimit=0 & 1003 | Parameter value is invalid & Phải >= 1 \\
+\hline
+\caption{Test Cases - API 7.4 Báo Cáo Bữa Ăn}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 7.5: Lấy Báo Cáo Đầy Đủ}~\\
+
+\textbf{Endpoint:} \texttt{GET /reports/full}
+
+\textbf{Mô tả:} API lấy tất cả thống kê trong một lần gọi, kết hợp overview, kitchen, shopping, và meal reports. Hữu ích cho dashboard tổng quan nhưng có thể tốn thời gian xử lý hơn.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+period & String & Không & Khoảng thời gian (week, month, quarter). Mặc định: month \\
+\hline
+\caption{Query Parameters - API Báo Cáo Đầy Đủ}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 7.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "overview": {
+      "totalItems": 45,
+      "expiringItems": 8,
+      "expiredItems": 2,
+      "goodItems": 35,
+      "categoryStats": [],
+      "topItems": []
+    },
+    "kitchen": {
+      "statusBreakdown": {
+        "totalItems": 45,
+        "goodItems": 35,
+        "warningItems": 8,
+        "expiredItems": 2
+      },
+      "weeklyTrend": [],
+      "categoryValues": []
+    },
+    "shopping": {
+      "listStats": {
+        "totalLists": 12,
+        "pendingLists": 2,
+        "inProgressLists": 1,
+        "completedLists": 9,
+        "totalItemsBought": 145
+      },
+      "weeklySpending": [],
+      "frequentItems": []
+    },
+    "meal": {
+      "mealStats": {
+        "totalMeals": 90,
+        "breakfasts": 30,
+        "lunches": 30,
+        "dinners": 30
+      },
+      "recipeUsage": {},
+      "topRecipes": [],
+      "weeklyMealTrend": []
+    },
+    "period": "month"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+7.5.1 & ?period=month & 1000 | OK & Trả về tất cả thống kê trong một response \\
+\hline
+7.5.2 & ?period=week & 1000 | OK & Báo cáo đầy đủ 7 ngày \\
+\hline
+7.5.3 & ?period=quarter & 1000 | OK & Báo cáo đầy đủ 3 tháng \\
+\hline
+7.5.4 & ?period=invalid & 1003 | Parameter value is invalid & period chỉ nhận: week, month, quarter \\
+\hline
+7.5.5 & Nhóm mới không có dữ liệu & 1000 | OK & Các giá trị mặc định hoặc rỗng \\
+\hline
+7.5.6 & Không có query parameter & 1000 | OK & Mặc định period=month \\
+\hline
+\caption{Test Cases - API 7.5 Báo Cáo Đầy Đủ}
+\end{longtable}
+
+\normalsize

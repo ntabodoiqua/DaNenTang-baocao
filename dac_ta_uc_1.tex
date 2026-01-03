@@ -2,7 +2,7 @@
 
 \textbf{Mô tả chung:} UC1 quản lý toàn bộ quy trình mua sắm của nhóm, bao gồm: tạo danh sách mua sắm, thêm/sửa/xóa các món cần mua, giao việc mua sắm cho thành viên, theo dõi tiến độ mua sắm và đánh dấu hoàn thành. Hệ thống hỗ trợ nhiều danh sách song song với các trạng thái khác nhau (PENDING, IN\_PROGRESS, COMPLETED).
 
-\subparagraph{API 1.1: Tạo Danh Sách Mua Sắm}
+\subparagraph{API 1.1: Tạo Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{POST /shopping/lists}
 
@@ -94,7 +94,7 @@ shoppingDate & Date & Không & Ngày dự định đi mua (định dạng: YYYY-
 
 \normalsize
 
-\subparagraph{API 1.2: Lấy Danh Sách Mua Sắm}
+\subparagraph{API 1.2: Lấy Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{GET /shopping/lists}
 
@@ -191,7 +191,7 @@ name & String & Không & Tên danh sách (tìm kiếm gần đúng, không phân
 
 \normalsize
 
-\subparagraph{API 1.3: Xem Chi Tiết Danh Sách Mua Sắm}
+\subparagraph{API 1.3: Xem Chi Tiết Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{GET /shopping/lists/\{listId\}}
 
@@ -295,7 +295,7 @@ listId & Long & Có & ID của danh sách mua sắm \\
 
 \normalsize
 
-\subparagraph{API 1.4: Lấy Danh Sách Được Giao Cho Tôi}
+\subparagraph{API 1.4: Lấy Danh Sách Được Giao Cho Tôi}~\\
 
 \textbf{Endpoint:} \texttt{GET /shopping/lists/my-assigned}
 
@@ -356,7 +356,7 @@ listId & Long & Có & ID của danh sách mua sắm \\
 
 \normalsize
 
-\subparagraph{API 1.5: Cập Nhật Danh Sách Mua Sắm}
+\subparagraph{API 1.5: Cập Nhật Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{PUT /shopping/lists/\{listId\}}
 
@@ -460,7 +460,7 @@ status & String & Không & Trạng thái mới: PENDING, IN\_PROGRESS, COMPLETED
 
 \normalsize
 
-\subparagraph{API 1.6: Xóa Danh Sách Mua Sắm}
+\subparagraph{API 1.6: Xóa Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{DELETE /shopping/lists/\{listId\}}
 
@@ -525,7 +525,7 @@ listId & Long & Có & ID của danh sách mua sắm cần xóa \\
 
 \normalsize
 
-\subparagraph{API 1.7: Hoàn Thành Danh Sách Mua Sắm}
+\subparagraph{API 1.7: Hoàn Thành Danh Sách Mua Sắm}~\\
 
 \textbf{Endpoint:} \texttt{POST /shopping/lists/\{listId\}/complete}
 
@@ -595,7 +595,7 @@ listId & Long & Có & ID của danh sách mua sắm \\
 
 \normalsize
 
-\subparagraph{API 1.8: Thêm Món Vào Danh Sách}
+\subparagraph{API 1.8: Thêm Món Vào Danh Sách}~\\
 
 \textbf{Endpoint:} \texttt{POST /shopping/lists/\{listId\}/items}
 
@@ -721,7 +721,7 @@ items[].unitId & Long & Có & ID đơn vị đo (phải tồn tại) \\
 
 \normalsize
 
-\subparagraph{API 1.9: Cập Nhật Món Trong Danh Sách}
+\subparagraph{API 1.9: Cập Nhật Món Trong Danh Sách}~\\
 
 \textbf{Endpoint:} \texttt{PUT /shopping/items/\{itemId\}}
 
@@ -817,7 +817,7 @@ unitId & Long & Có & ID đơn vị mới (phải tồn tại) \\
 
 \normalsize
 
-\subparagraph{API 1.10: Xóa Món Khỏi Danh Sách}
+\subparagraph{API 1.10: Xóa Món Khỏi Danh Sách}~\\
 
 \textbf{Endpoint:} \texttt{DELETE /shopping/items/\{itemId\}}
 
@@ -882,7 +882,7 @@ itemId & Long & Có & ID của món cần xóa \\
 
 \normalsize
 
-\subparagraph{API 1.11: Đánh Dấu Món Đã Mua}
+\subparagraph{API 1.11: Đánh Dấu Món Đã Mua}~\\
 
 \textbf{Endpoint:} \texttt{POST /shopping/items/\{itemId\}/purchased}
 

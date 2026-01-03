@@ -1,0 +1,389 @@
+\paragraph{UC6 - Quản lý nhóm}
+
+\textbf{Mô tả chung:} UC6 quản lý toàn bộ quy trình tạo và quản lý nhóm trong ứng dụng, bao gồm: tạo nhóm mới, xem thông tin nhóm hiện tại, thêm thành viên vào nhóm, xóa thành viên khỏi nhóm, và rời khỏi nhóm. Hệ thống quy định mỗi người dùng chỉ có thể tham gia một nhóm tại một thời điểm. Người tạo nhóm tự động trở thành chủ nhóm (admin) và có quyền quản lý thành viên.
+
+\subparagraph{API 6.1: Tạo Nhóm}~\\
+
+\textbf{Endpoint:} \texttt{POST /group}
+
+\textbf{Mô tả:} API thực hiện việc tạo một nhóm mới. Người tạo nhóm tự động trở thành chủ nhóm (owner) và có quyền quản lý thành viên. Một người dùng chỉ có thể tham gia một nhóm tại một thời điểm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Có & Tên nhóm (1-100 ký tự) \\
+\hline
+\caption{Tham số Request Body - API Tạo Nhóm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 6.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Gia dinh Nguyen Van A",
+    "adminId": 123,
+    "adminName": "Nguyen Van A",
+    "members": [
+      {
+        "userId": 123,
+        "name": "Nguyen Van A",
+        "email": "admin@example.com",
+        "avatarUrl": "https://example.com/avatar.jpg",
+        "isAdmin": true,
+        "joinedAt": "2026-01-03T10:30:00Z"
+      }
+    ],
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+6.1.1 & name="Gia đình Nguyễn Văn A" & 1000 | OK & Nhóm được tạo thành công, người tạo là admin \\
+\hline
+6.1.2 & name="Nhóm bạn thân" & 1000 | OK & Nhóm được tạo thành công với tên hợp lệ \\
+\hline
+6.1.3 & Thiếu field name & 1002 | Parameter is not enough & Thiếu tên nhóm \\
+\hline
+6.1.4 & name="" (tên rỗng) & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+6.1.5 & name có > 100 ký tự & 1003 | Parameter value is invalid & Tên quá dài, tối đa 100 ký tự \\
+\hline
+6.1.6 & User đã thuộc một nhóm khác & 1009 | Action has been done previously by this user & User phải rời nhóm cũ trước \\
+\hline
+6.1.7 & Tên trùng với nhóm khác & 1000 | OK & Cho phép trùng tên (mỗi nhóm có id riêng) \\
+\hline
+6.1.8 & User chưa xác thực email & 9995 | User is not validated & Cần xác thực email trước \\
+\hline
+6.1.9 & Token không hợp lệ & 9998 | Token is invalid & Yêu cầu đăng nhập lại \\
+\hline
+\caption{Test Cases - API 6.1 Tạo Nhóm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 6.2: Xem Thông Tin Nhóm}~\\
+
+\textbf{Endpoint:} \texttt{GET /group}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết nhóm mà người dùng hiện tại đang tham gia, bao gồm danh sách tất cả thành viên. API tự động lấy nhóm của user hiện tại, không cần tham số.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 6.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Gia dinh Nguyen Van A",
+    "adminId": 123,
+    "adminName": "Nguyen Van A",
+    "members": [
+      {
+        "userId": 123,
+        "name": "Nguyen Van A",
+        "email": "admin@example.com",
+        "avatarUrl": "https://example.com/avatar.jpg",
+        "isAdmin": true,
+        "joinedAt": "2026-01-03T10:30:00Z"
+      },
+      {
+        "userId": 456,
+        "name": "Nguyen Van B",
+        "email": "member@example.com",
+        "avatarUrl": "https://example.com/avatar2.jpg",
+        "isAdmin": false,
+        "joinedAt": "2026-01-03T11:00:00Z"
+      }
+    ],
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+6.2.1 & User đang là member của một nhóm & 1000 | OK & Trả về đầy đủ thông tin nhóm và danh sách members \\
+\hline
+6.2.2 & User chưa tham gia nhóm nào & 1004 | User is not validated & Chưa có nhóm, chuyển sang màn hình tạo/tham gia nhóm \\
+\hline
+6.2.3 & Token không hợp lệ & 9998 | Token is invalid & Yêu cầu đăng nhập \\
+\hline
+6.2.4 & Nhóm có nhiều thành viên (5+ members) & 1000 | OK & Trả về tất cả members, sắp xếp theo joinedAt \\
+\hline
+6.2.5 & Nhóm chỉ có admin & 1000 | OK & members array chỉ có 1 phần tử (admin) \\
+\hline
+\caption{Test Cases - API 6.2 Xem Thông Tin Nhóm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 6.3: Thêm Thành Viên Vào Nhóm}~\\
+
+\textbf{Endpoint:} \texttt{POST /group/add-member}
+
+\textbf{Mô tả:} API cho phép chủ nhóm (owner) thêm thành viên mới vào nhóm bằng email. Người được thêm phải chưa thuộc nhóm nào khác và đã xác thực email.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+email & String & Có & Email của người dùng cần thêm vào nhóm \\
+\hline
+\caption{Tham số Request Body - API Thêm Thành Viên}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 6.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Gia dinh Nguyen Van A",
+    "adminId": 123,
+    "adminName": "Nguyen Van A",
+    "members": [
+      {
+        "userId": 123,
+        "name": "Nguyen Van A",
+        "email": "admin@example.com",
+        "avatarUrl": "https://example.com/avatar.jpg",
+        "isAdmin": true,
+        "joinedAt": "2026-01-03T10:30:00Z"
+      },
+      {
+        "userId": 456,
+        "name": "Nguyen Van B",
+        "email": "member@example.com",
+        "avatarUrl": "https://example.com/avatar2.jpg",
+        "isAdmin": false,
+        "joinedAt": "2026-01-03T12:00:00Z"
+      }
+    ],
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+6.3.1 & email="member@example.com" (hợp lệ) & 1000 | OK & User được thêm vào nhóm, chỉ admin mới được thêm member \\
+\hline
+6.3.2 & Thiếu field email & 1002 | Parameter is not enough & Thiếu email \\
+\hline
+6.3.3 & email="" (rỗng) & 1003 | Parameter value is invalid & Email không hợp lệ \\
+\hline
+6.3.4 & email="notexist@example.com" & 9994 | No data or end of list data & User không tồn tại trong hệ thống \\
+\hline
+6.3.5 & email="invalid-email" (sai định dạng) & 1003 | Parameter value is invalid & Email không đúng định dạng \\
+\hline
+6.3.6 & User không phải admin gọi API & 1009 | Action has been done previously by this user & Không có quyền, chỉ admin mới thêm được member \\
+\hline
+6.3.7 & User đã thuộc nhóm khác & 1009 | Action has been done previously by this user & User phải rời nhóm cũ trước \\
+\hline
+6.3.8 & User đã là member của nhóm này & 1009 | Action has been done previously by this user & Đã là member rồi \\
+\hline
+6.3.9 & Admin cố thêm chính mình & 1009 | Action has been done previously by this user & Đã là member rồi \\
+\hline
+6.3.10 & User chưa có nhóm cố thêm member & 1004 | User is not validated & Chưa có nhóm \\
+\hline
+6.3.11 & User chưa xác thực email & 9995 | User is not validated & User cần xác thực email trước \\
+\hline
+\caption{Test Cases - API 6.3 Thêm Thành Viên}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 6.4: Xóa Thành Viên Khỏi Nhóm}~\\
+
+\textbf{Endpoint:} \texttt{POST /group/remove-member}
+
+\textbf{Mô tả:} API cho phép chủ nhóm (owner) xóa thành viên ra khỏi nhóm. Không thể xóa chính mình (owner). Dữ liệu của member vẫn giữ nguyên trong nhóm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+email & String & Có & Email của thành viên cần xóa \\
+\hline
+\caption{Tham số Request Body - API Xóa Thành Viên}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 6.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+6.4.1 & email="member@example.com" (hợp lệ) & 1000 | OK & Member bị xóa khỏi nhóm, dữ liệu vẫn giữ nguyên \\
+\hline
+6.4.2 & Thiếu field email & 1002 | Parameter is not enough & Thiếu email \\
+\hline
+6.4.3 & email="invalid-email" (không hợp lệ) & 1003 | Parameter value is invalid & Email không đúng định dạng \\
+\hline
+6.4.4 & email="notexist@example.com" & 9994 | No data or end of list data & User không tồn tại \\
+\hline
+6.4.5 & User không phải member của nhóm & 1009 | Action has been done previously by this user & Không phải member \\
+\hline
+6.4.6 & Admin cố xóa chính mình & 1009 | Action has been done previously by this user & Không thể xóa admin \\
+\hline
+6.4.7 & Thành viên thường cố xóa member khác & 1009 | Action has been done previously by this user & Không có quyền, chỉ admin mới xóa được \\
+\hline
+6.4.8 & User chưa có nhóm cố xóa member & 1004 | User is not validated & Chưa có nhóm \\
+\hline
+\caption{Test Cases - API 6.4 Xóa Thành Viên}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 6.5: Rời Khỏi Nhóm}~\\
+
+\textbf{Endpoint:} \texttt{POST /group/leave}
+
+\textbf{Mô tả:} API cho phép thành viên rời khỏi nhóm hiện tại. Owner không thể rời khỏi nhóm trừ khi transfer ownership hoặc xóa nhóm để tránh nhóm "mồ côi".
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 6.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+6.5.1 & Member thường (không phải admin) & 1000 | OK & Member rời khỏi nhóm, có thể tạo/tham gia nhóm khác \\
+\hline
+6.5.2 & Admin cố rời nhóm & 1009 | Action has been done previously by this user & Admin không thể rời, phải transfer ownership hoặc delete group \\
+\hline
+6.5.3 & User chưa có nhóm & 1004 | User is not validated & Chưa có nhóm \\
+\hline
+6.5.4 & Token không hợp lệ & 9998 | Token is invalid & Yêu cầu đăng nhập \\
+\hline
+6.5.5 & Rời nhóm nhiều lần liên tiếp & 1004 | User is not validated (lần 2) & Lần 1: 1000 | OK, Lần 2: đã rời rồi \\
+\hline
+6.5.6 & Member cuối cùng (ngoài admin) rời nhóm & 1000 | OK & Nhóm còn lại admin, gửi notification cho admin \\
+\hline
+\caption{Test Cases - API 6.5 Rời Khỏi Nhóm}
+\end{longtable}
+
+\normalsize

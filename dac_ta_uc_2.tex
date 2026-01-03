@@ -2,7 +2,7 @@
 
 \textbf{Mô tả chung:} UC2 quản lý toàn bộ quy trình lập kế hoạch bữa ăn của nhóm, bao gồm: tạo kế hoạch cho các bữa ăn (sáng, trưa, tối), xem chi tiết kế hoạch, cập nhật và xóa kế hoạch. Hệ thống cho phép lên kế hoạch theo ngày, theo khoảng thời gian hoặc xem kế hoạch sắp tới. Mỗi kế hoạch bữa ăn được liên kết với một công thức nấu ăn cụ thể.
 
-\subparagraph{API 2.1: Tạo Kế Hoạch Bữa Ăn}
+\subparagraph{API 2.1: Tạo Kế Hoạch Bữa Ăn}~\\
 
 \textbf{Endpoint:} \texttt{POST /meal-plans}
 
@@ -97,7 +97,7 @@ note & String & Không & Ghi chú cho bữa ăn \\
 
 \normalsize
 
-\subparagraph{API 2.2: Lấy Danh Sách Kế Hoạch Bữa Ăn}
+\subparagraph{API 2.2: Lấy Danh Sách Kế Hoạch Bữa Ăn}~\\
 
 \textbf{Endpoint:} \texttt{GET /meal-plans}
 
@@ -372,7 +372,7 @@ note & String & Không & Ghi chú mới \\
 
 \normalsize
 
-\subparagraph{API 2.5: Xóa Kế Hoạch Bữa Ăn}
+\subparagraph{API 2.5: Xóa Kế Hoạch Bữa Ăn}~\\
 
 \textbf{Endpoint:} \texttt{DELETE /meal-plans/\{id\}}
 
@@ -437,7 +437,7 @@ id & Long & Có & ID của kế hoạch bữa ăn cần xóa \\
 
 \normalsize
 
-\subparagraph{API 2.6: Lấy Kế Hoạch Theo Ngày}
+\subparagraph{API 2.6: Lấy Kế Hoạch Theo Ngày}~\\
 
 \textbf{Endpoint:} \texttt{GET /meal-plans/daily}
 
@@ -541,7 +541,7 @@ date & String & Có & Ngày cần xem (định dạng ISO: YYYY-MM-DD) \\
 
 \normalsize
 
-\subparagraph{API 2.7: Lấy Kế Hoạch Theo Khoảng Thời Gian}
+\subparagraph{API 2.7: Lấy Kế Hoạch Theo Khoảng Thời Gian}~\\
 
 \textbf{Endpoint:} \texttt{GET /meal-plans/range}
 
@@ -645,7 +645,7 @@ endDate & String & Có & Ngày kết thúc (định dạng ISO: YYYY-MM-DD) \\
 
 \normalsize
 
-\subparagraph{API 2.8: Lấy Kế Hoạch Sắp Tới}
+\subparagraph{API 2.8: Lấy Kế Hoạch Sắp Tới}~\\
 
 \textbf{Endpoint:} \texttt{GET /meal-plans/upcoming}
 
