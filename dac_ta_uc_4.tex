@@ -1,0 +1,924 @@
+\paragraph{UC4 - Quản lý công thức nấu ăn}
+
+\textbf{Mô tả chung:} UC4 quản lý toàn bộ quy trình tạo và quản lý công thức nấu ăn của nhóm, bao gồm: tạo công thức mới với thông tin chi tiết và danh sách nguyên liệu, xem và tìm kiếm công thức, cập nhật thông tin công thức, thêm/sửa/xóa nguyên liệu trong công thức, và xóa công thức. Hệ thống hỗ trợ tải lên ảnh món ăn, nội dung HTML chi tiết và tự động tính toán khả năng thực hiện công thức dựa trên nguyên liệu có sẵn trong bếp.
+
+\subparagraph{API 4.1: Tạo Công Thức Nấu Ăn}~\\
+
+\textbf{Endpoint:} \texttt{POST /recipes}
+
+\textbf{Mô tả:} API thực hiện việc tạo một công thức nấu ăn mới cho nhóm. Người dùng có thể tạo công thức với thông tin chi tiết, tải lên ảnh món ăn và danh sách nguyên liệu. Hệ thống tự động tính toán số nguyên liệu khớp với thực phẩm có sẵn trong bếp.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Có & Tên công thức (tối đa 200 ký tự) \\
+\hline
+description & String & Có & Mô tả ngắn gọn về món ăn \\
+\hline
+htmlContent & String & Có & Nội dung HTML của công thức (bao gồm hướng dẫn nấu ăn chi tiết) \\
+\hline
+image & File & Không & Ảnh món ăn (jpg, jpeg, png, gif. Tối đa 5MB) \\
+\hline
+ingredients & JSON Array & Không & Danh sách nguyên liệu (có thể thêm sau) \\
+\hline
+ingredients[].foodId & Long & Có & ID thực phẩm \\
+\hline
+ingredients[].quantity & BigDecimal & Có & Số lượng (phải > 0) \\
+\hline
+ingredients[].unitId & Long & Có & ID đơn vị đo \\
+\hline
+ingredients[].isMainIngredient & Boolean & Không & Là nguyên liệu chính hay không (mặc định: false) \\
+\hline
+ingredients[].note & String & Không & Ghi chú cho nguyên liệu \\
+\hline
+\caption{Tham số Request Body - API Tạo Công Thức Nấu Ăn}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Pho bo Ha Noi",
+    "description": "Mon pho truyen thong cua Viet Nam",
+    "htmlContent": "<h2>Nguyen lieu</h2><ul><li>Xuong bo: 1kg</li>...",
+    "imageUrl": "https://example.com/images/pho.jpg",
+    "groupId": 10,
+    "isSystem": false,
+    "createdBy": 123,
+    "ingredients": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Thit bo",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 500,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Thit bo tuoi",
+        "isAvailable": true
+      },
+      {
+        "id": 2,
+        "foodId": 2,
+        "foodName": "Banh pho",
+        "foodImageUrl": "https://example.com/images/noodles.jpg",
+        "quantity": 300,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Banh pho tuoi",
+        "isAvailable": false
+      }
+    ],
+    "matchedIngredients": 1,
+    "totalIngredients": 2,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.1.1 & Tạo với đầy đủ thông tin: name, description, htmlContent, image, ingredients & 1000 | OK & Công thức được tạo thành công với ảnh và nguyên liệu \\
+\hline
+4.1.2 & Tạo không có ảnh (name, description, htmlContent) & 1000 | OK & Công thức được tạo mà không có ảnh \\
+\hline
+4.1.3 & Tạo không có nguyên liệu (ingredients=[]) & 1000 | OK & Có thể thêm nguyên liệu sau \\
+\hline
+4.1.4 & Thiếu description & 1002 | Parameter is not enough & description là tham số bắt buộc \\
+\hline
+4.1.5 & Thiếu htmlContent & 1002 | Parameter is not enough & htmlContent là tham số bắt buộc \\
+\hline
+4.1.6 & Tên quá dài (> 200 ký tự) & 1003 | Parameter value is invalid & Tên tối đa 200 ký tự \\
+\hline
+4.1.7 & ingredients có quantity <= 0 & 1003 | Parameter value is invalid & quantity phải > 0 \\
+\hline
+4.1.8 & ingredients có foodId không tồn tại (99999) & 9994 | No data or end of list data & foodId không tồn tại trong hệ thống \\
+\hline
+4.1.9 & Ảnh không hợp lệ (upload .txt) & 1003 | Parameter value is invalid & File phải là ảnh (jpg, jpeg, png, gif) \\
+\hline
+\caption{Test Cases - API 4.1 Tạo Công Thức}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.2: Lấy Danh Sách Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{GET /recipes}
+
+\textbf{Mô tả:} API lấy danh sách tất cả công thức của nhóm, bao gồm cả công thức do thành viên tạo và công thức hệ thống. Hỗ trợ tìm kiếm theo tên công thức.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tìm kiếm theo tên công thức (gần đúng, không phân biệt hoa thường) \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách Công Thức}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": [
+    {
+      "id": 1,
+      "name": "Pho bo Ha Noi",
+      "description": "Mon pho truyen thong cua Viet Nam",
+      "htmlContent": "<h2>Nguyen lieu</h2><ul><li>Xuong bo: 1kg</li>...",
+      "imageUrl": "https://example.com/images/pho.jpg",
+      "groupId": 10,
+      "isSystem": false,
+      "createdBy": 123,
+      "ingredients": [
+        {
+          "id": 1,
+          "foodId": 1,
+          "foodName": "Thit bo",
+          "foodImageUrl": "https://example.com/images/beef.jpg",
+          "quantity": 500,
+          "unitId": 1,
+          "unitName": "gram",
+          "isMainIngredient": true,
+          "note": "Thit bo tuoi",
+          "isAvailable": true
+        }
+      ],
+      "matchedIngredients": 1,
+      "totalIngredients": 2,
+      "createdAt": "2026-01-03T10:30:00Z",
+      "updatedAt": "2026-01-03T10:30:00Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.2.1 & Không có query parameters & 1000 | OK & Trả về tất cả công thức của nhóm \\
+\hline
+4.2.2 & Nhóm chưa có công thức nào & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+4.2.3 & Tìm kiếm theo tên (?name=phở) & 1000 | OK & Trả về các công thức có tên chứa "phở" \\
+\hline
+4.2.4 & Tìm kiếm không có kết quả (?name=abcxyz123) & 1000 | OK & data = [] (mảng rỗng) \\
+\hline
+4.2.5 & Người dùng chưa tham gia nhóm & 1004 | User is not validated & Cần tham gia nhóm trước \\
+\hline
+4.2.6 & Token không hợp lệ & 9998 | Token is invalid & Yêu cầu đăng nhập lại \\
+\hline
+\caption{Test Cases - API 4.2 Lấy Danh Sách Công Thức}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.3: Xem Chi Tiết Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{GET /recipes/\{recipeId\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết một công thức, bao gồm hướng dẫn nấu đầy đủ và danh sách nguyên liệu chi tiết với trạng thái có sẵn trong bếp.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Có & ID của công thức nấu ăn \\
+\hline
+\caption{Path Parameters - API Chi Tiết Công Thức}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Pho bo Ha Noi",
+    "description": "Mon pho truyen thong cua Viet Nam",
+    "htmlContent": "<h2>Nguyen lieu</h2><ul><li>Xuong bo: 1kg</li>...",
+    "imageUrl": "https://example.com/images/pho.jpg",
+    "groupId": 10,
+    "isSystem": false,
+    "createdBy": 123,
+    "ingredients": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Thit bo",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 500,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Thit bo tuoi",
+        "isAvailable": true
+      }
+    ],
+    "matchedIngredients": 1,
+    "totalIngredients": 2,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.3.1 & recipeId hợp lệ (recipeId=1, thuộc nhóm của user) & 1000 | OK & Trả về đầy đủ thông tin công thức và nguyên liệu \\
+\hline
+4.3.2 & recipeId không tồn tại (99999) & 9994 | No data or end of list data & Công thức không tồn tại trong hệ thống \\
+\hline
+4.3.3 & recipeId của nhóm khác, không public (recipeId=50) & 1009 | Action has been done previously by this user & Không có quyền truy cập \\
+\hline
+4.3.4 & recipeId public của nhóm khác (recipeId=25) & 1000 | OK & Được phép xem công thức public \\
+\hline
+4.3.5 & recipeId không hợp lệ ("abc") & 1003 | Parameter value is invalid & recipeId phải là số nguyên dương \\
+\hline
+4.3.6 & Công thức không có nguyên liệu (recipeId=10) & 1000 | OK & ingredients = [], totalIngredients = 0 \\
+\hline
+\caption{Test Cases - API 4.3 Chi Tiết Công Thức}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.4: Cập Nhật Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{PUT /recipes/\{recipeId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin công thức nấu ăn (tên, mô tả, nội dung HTML, ảnh). Tất cả các trường đều là tùy chọn, chỉ cập nhật các trường được gửi lên. Không cập nhật nguyên liệu qua API này.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Có & ID của công thức cần cập nhật \\
+\hline
+\caption{Path Parameters - API Cập Nhật Công Thức}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tên công thức mới \\
+\hline
+description & String & Không & Mô tả mới \\
+\hline
+htmlContent & String & Không & Nội dung HTML mới \\
+\hline
+image & File & Không & Ảnh mới (thay thế ảnh cũ) \\
+\hline
+\caption{Tham số Request Body - API Cập Nhật Công Thức}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Pho bo Nam Dinh",
+    "description": "Mon pho dac san mien Bac",
+    "htmlContent": "<h2>Nguyen lieu</h2>...",
+    "imageUrl": "https://example.com/images/pho_new.jpg",
+    "groupId": 10,
+    "isSystem": false,
+    "createdBy": 123,
+    "ingredients": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Thit bo",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 500,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Thit bo tuoi",
+        "isAvailable": true
+      }
+    ],
+    "matchedIngredients": 1,
+    "totalIngredients": 2,
+    "createdAt": "2026-01-03T10:30:00Z",
+    "updatedAt": "2026-01-03T15:20:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.4.1 & Cập nhật tên (name="Phở bò Nam Định") & 1000 | OK & Tên được cập nhật thành công \\
+\hline
+4.4.2 & Cập nhật ảnh (upload ảnh mới) & 1000 | OK & Ảnh cũ bị thay thế bởi ảnh mới \\
+\hline
+4.4.3 & Cập nhật đầy đủ (name, description, htmlContent, image) & 1000 | OK & Tất cả thông tin được cập nhật \\
+\hline
+4.4.4 & Cập nhật với tên rỗng (name="") & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+4.4.5 & Cập nhật công thức không tồn tại (recipeId=99999) & 9994 | No data or end of list data & Công thức không tồn tại \\
+\hline
+4.4.6 & Cập nhật công thức của nhóm khác (recipeId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+4.4.7 & Cập nhật công thức do thành viên khác tạo (recipeId=8) & 1000 | OK & Bất kỳ thành viên nào cũng có thể cập nhật \\
+\hline
+\caption{Test Cases - API 4.4 Cập Nhật Công Thức}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.5: Xóa Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /recipes/\{recipeId\}}
+
+\textbf{Mô tả:} API xóa một công thức nấu ăn và tất cả nguyên liệu liên quan. Các kế hoạch bữa ăn sử dụng công thức này sẽ có recipe = null.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Có & ID của công thức cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Công Thức}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.5.1 & Xóa công thức hợp lệ (recipeId=1) & 1000 | OK & Công thức và tất cả ingredients bị xóa \\
+\hline
+4.5.2 & Xóa công thức không tồn tại (recipeId=99999) & 9994 | No data or end of list data & Công thức không tồn tại \\
+\hline
+4.5.3 & Xóa công thức của nhóm khác (recipeId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+4.5.4 & Xóa công thức đang dùng trong meal plan (recipeId=5) & 1000 | OK & Vẫn xóa được, meal plan sẽ có recipe = null \\
+\hline
+4.5.5 & Xóa với recipeId không hợp lệ ("abc") & 1003 | Parameter value is invalid & recipeId phải là số nguyên dương \\
+\hline
+\caption{Test Cases - API 4.5 Xóa Công Thức}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.6: Thêm Nguyên Liệu Vào Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{POST /recipes/\{recipeId\}/ingredients}
+
+\textbf{Mô tả:} API thêm một hoặc nhiều nguyên liệu vào công thức đã có. Cho phép bổ sung nguyên liệu sau khi đã tạo công thức.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+recipeId & Long & Có & ID của công thức \\
+\hline
+\caption{Path Parameters - API Thêm Nguyên Liệu}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID thực phẩm \\
+\hline
+quantity & BigDecimal & Có & Số lượng (phải > 0) \\
+\hline
+unitId & Long & Có & ID đơn vị đo \\
+\hline
+isMainIngredient & Boolean & Không & Là nguyên liệu chính hay không \\
+\hline
+note & String & Không & Ghi chú cho nguyên liệu \\
+\hline
+\caption{Tham số Request Body - API Thêm Nguyên Liệu}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.6]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Pho bo Ha Noi",
+    "ingredients": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Thit bo",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 500,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Thit bo tuoi",
+        "isAvailable": true
+      },
+      {
+        "id": 3,
+        "foodId": 5,
+        "foodName": "Hanh tay",
+        "foodImageUrl": "https://example.com/images/onion.jpg",
+        "quantity": 200,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": false,
+        "note": "Thit bo than",
+        "isAvailable": false
+      }
+    ],
+    "matchedIngredients": 1,
+    "totalIngredients": 3
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.6.1 & Thêm với đầy đủ thông tin (foodId=5, quantity=200, unitId=1, note) & 1000 | OK & Nguyên liệu được thêm vào công thức \\
+\hline
+4.6.2 & Thêm không có note (foodId=3, quantity=100, unitId=1) & 1000 | OK & note có thể null \\
+\hline
+4.6.3 & Thêm với quantity <= 0 (quantity=0) & 1003 | Parameter value is invalid & Số lượng phải > 0 \\
+\hline
+4.6.4 & Thêm với foodId không tồn tại (foodId=99999) & 9994 | No data or end of list data & foodId không tồn tại \\
+\hline
+4.6.5 & Thêm vào công thức không tồn tại (recipeId=99999) & 9994 | No data or end of list data & Công thức không tồn tại \\
+\hline
+4.6.6 & Thêm nguyên liệu trùng (cùng foodId) & 1000 | OK & Cho phép trùng (có thể cần ở các bước khác nhau) \\
+\hline
+4.6.7 & Thiếu quantity (chỉ có foodId, unitId) & 1002 | Parameter is not enough & quantity là tham số bắt buộc \\
+\hline
+\caption{Test Cases - API 4.6 Thêm Nguyên Liệu}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.7: Cập Nhật Nguyên Liệu Trong Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{PUT /recipes/ingredients/\{ingredientId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin một nguyên liệu trong công thức (số lượng, đơn vị, ghi chú). Không cho phép thay đổi foodId.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: application/json}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+ingredientId & Long & Có & ID của nguyên liệu trong công thức \\
+\hline
+\caption{Path Parameters - API Cập Nhật Nguyên Liệu}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+quantity & BigDecimal & Không & Số lượng mới (phải > 0) \\
+\hline
+unitId & Long & Không & ID đơn vị mới \\
+\hline
+isMainIngredient & Boolean & Không & Cập nhật trạng thái nguyên liệu chính \\
+\hline
+note & String & Không & Ghi chú mới \\
+\hline
+\caption{Tham số Request Body - API Cập Nhật Nguyên Liệu}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.7]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "recipeId": 1,
+    "recipeName": "Pho bo Ha Noi",
+    "ingredients": [
+      {
+        "id": 1,
+        "foodId": 1,
+        "foodName": "Thit bo",
+        "foodImageUrl": "https://example.com/images/beef.jpg",
+        "quantity": 300,
+        "unitId": 1,
+        "unitName": "gram",
+        "isMainIngredient": true,
+        "note": "Cat lat mong",
+        "isAvailable": true
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.7.1 & Cập nhật số lượng (quantity=300, unitId=1) & 1000 | OK & Số lượng được cập nhật \\
+\hline
+4.7.2 & Thay đổi đơn vị (quantity=0.5, unitId=3) & 1000 | OK & Đơn vị được thay đổi \\
+\hline
+4.7.3 & Cập nhật note (note="Cắt lát mỏng") & 1000 | OK & Note được cập nhật \\
+\hline
+4.7.4 & Cập nhật với quantity <= 0 (quantity=-5) & 1003 | Parameter value is invalid & Số lượng phải > 0 \\
+\hline
+4.7.5 & Cập nhật với unitId không tồn tại (unitId=99999) & 9994 | No data or end of list data & unitId không hợp lệ \\
+\hline
+4.7.6 & Cập nhật ingredient không tồn tại (ingredientId=99999) & 9994 | No data or end of list data & Ingredient không tồn tại \\
+\hline
+4.7.7 & Cập nhật ingredient của công thức nhóm khác (ingredientId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+\caption{Test Cases - API 4.7 Cập Nhật Nguyên Liệu}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.8: Xóa Nguyên Liệu Khỏi Công Thức}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /recipes/ingredients/\{ingredientId\}}
+
+\textbf{Mô tả:} API xóa một nguyên liệu khỏi công thức nấu ăn. Công thức vẫn tồn tại sau khi xóa nguyên liệu.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+ingredientId & Long & Có & ID của nguyên liệu cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Nguyên Liệu}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.8]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.8.1 & Xóa nguyên liệu hợp lệ (ingredientId=1) & 1000 | OK & Nguyên liệu bị xóa khỏi công thức \\
+\hline
+4.8.2 & Xóa nguyên liệu không tồn tại (ingredientId=99999) & 9994 | No data or end of list data & Ingredient không tồn tại \\
+\hline
+4.8.3 & Xóa nguyên liệu của công thức nhóm khác (ingredientId=50) & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+4.8.4 & Xóa nguyên liệu cuối cùng (ingredientId=10) & 1000 | OK & Công thức vẫn tồn tại, chỉ không có nguyên liệu \\
+\hline
+4.8.5 & Xóa với ingredientId không hợp lệ ("abc") & 1003 | Parameter value is invalid & ingredientId phải là số nguyên dương \\
+\hline
+\caption{Test Cases - API 4.8 Xóa Nguyên Liệu}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 4.9: Tìm Công Thức Theo Nguyên Liệu}~\\
+
+\textbf{Endpoint:} \texttt{GET /recipes/by-ingredient/\{foodId\}}
+
+\textbf{Mô tả:} API tìm tất cả công thức có chứa một nguyên liệu cụ thể. Hữu ích khi muốn biết có thể nấu món gì với một loại thực phẩm có sẵn trong bếp. Rất hữu ích cho tính năng "Nấu gì với thực phẩm này?".
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm/nguyên liệu \\
+\hline
+\caption{Path Parameters - API Tìm Công Thức Theo Nguyên Liệu}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 4.9]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "food": {
+      "id": 5,
+      "name": "Thit bo",
+      "imageUrl": "https://example.com/images/beef.jpg"
+    },
+    "recipes": [
+      {
+        "id": 1,
+        "name": "Pho bo Ha Noi",
+        "description": "Mon pho truyen thong cua Viet Nam",
+        "imageUrl": "https://example.com/images/pho.jpg",
+        "htmlContent": "<h2>Nguyen lieu</h2>...",
+        "groupId": 10,
+        "isSystem": false,
+        "ingredientInRecipe": {
+          "quantity": 500,
+          "unitId": 1,
+          "unitName": "gram",
+          "note": "Thit bo tuoi"
+        },
+        "matchedIngredients": 3,
+        "totalIngredients": 5,
+        "createdBy": 123,
+        "createdAt": "2026-01-03T10:30:00Z"
+      },
+      {
+        "id": 15,
+        "name": "Bo luc lac",
+        "description": "Thit bo xao hanh tay",
+        "imageUrl": "https://example.com/images/bolc.jpg",
+        "htmlContent": "<h2>Nguyen lieu</h2>...",
+        "groupId": 10,
+        "isSystem": false,
+        "ingredientInRecipe": {
+          "quantity": 300,
+          "unitId": 1,
+          "unitName": "gram",
+          "note": "Thit bo than"
+        },
+        "matchedIngredients": 2,
+        "totalIngredients": 4,
+        "createdBy": 456,
+        "createdAt": "2025-12-20T08:15:00Z"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+4.9.1 & Tìm công thức có thực phẩm cụ thể (foodId=5) & 1000 | OK & Trả về tất cả công thức có thịt bò, bao gồm quantity và unit \\
+\hline
+4.9.2 & Tìm với foodId không có trong công thức nào (foodId=99) & 1000 | OK & data.recipes = [] (mảng rỗng) \\
+\hline
+4.9.3 & Tìm với foodId không tồn tại (foodId=99999) & 9994 | No data or end of list data & foodId không tồn tại trong hệ thống \\
+\hline
+4.9.4 & Tìm công thức của nhiều nhóm (foodId=1) & 1000 | OK & Chỉ trả về công thức của nhóm hiện tại + công thức public \\
+\hline
+4.9.5 & foodId không hợp lệ ("abc") & 1003 | Parameter value is invalid & foodId phải là số nguyên dương \\
+\hline
+4.9.6 & Tìm công thức khi chưa có nhóm & 1004 | User is not validated & Cần tham gia nhóm trước \\
+\hline
+\caption{Test Cases - API 4.9 Tìm Công Thức Theo Nguyên Liệu}
+\end{longtable}
+
+\normalsize

@@ -1,0 +1,971 @@
+\paragraph{UC5 - Quản lý thực phẩm}
+
+\textbf{Mô tả chung:} UC5 quản lý toàn bộ hệ thống thực phẩm của ứng dụng, bao gồm: quản lý thực phẩm cấp nhóm (thêm, xem, cập nhật, xóa thực phẩm tùy chỉnh của nhóm), quản lý danh mục và đơn vị đo lường (category \& unit), và quản trị thực phẩm hệ thống (thực phẩm master data cho toàn bộ ứng dụng). Hệ thống phân biệt hai loại thực phẩm: thực phẩm hệ thống (isSystemFood = true, khả dụng cho tất cả nhóm) và thực phẩm nhóm (isSystemFood = false, chỉ khả dụng cho nhóm tạo ra).
+
+\subsubsection{Phần 1: API Quản Lý Thực Phẩm Nhóm}
+
+\subparagraph{API 5.1: Thêm Thực Phẩm (Cấp Nhóm)}~\\
+
+\textbf{Endpoint:} \texttt{POST /food}
+
+\textbf{Mô tả:} API thực hiện việc thêm một loại thực phẩm mới vào danh sách thực phẩm của nhóm. Thực phẩm này chỉ khả dụng cho nhóm hiện tại và được đánh dấu isSystemFood = false.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Có & Tên thực phẩm (1-100 ký tự) \\
+\hline
+categoryId & Long & Có & ID danh mục thực phẩm \\
+\hline
+image & File & Không & Ảnh thực phẩm (jpg, jpeg, png, gif) \\
+\hline
+\caption{Tham số Request Body - API Thêm Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.1]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Rau muong VietGAP",
+    "categoryId": 3,
+    "categoryName": "Rau cu",
+    "imageUrl": "https://example.com/images/rau-muong.jpg",
+    "groupId": 10,
+    "isSystemFood": false,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.1.1 & name="Rau muống VietGAP", categoryId=3, image=[file] & 1000 | OK & Thực phẩm được thêm thành công với đầy đủ thông tin \\
+\hline
+5.1.2 & name="Thịt gà ta", categoryId=5 (không có ảnh) & 1000 | OK & Thực phẩm được tạo mà không có ảnh, imageUrl = null \\
+\hline
+5.1.3 & Không có field name & 1002 | Parameter is not enough & Thiếu tên thực phẩm \\
+\hline
+5.1.4 & name="" (tên rỗng), categoryId=3 & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+5.1.5 & name="Thực phẩm mới", categoryId=99999 & 9994 | No data or end of list data & categoryId không tồn tại \\
+\hline
+5.1.6 & Tên trùng với thực phẩm đã có trong nhóm & 1000 | OK & Cho phép trùng tên (khác nguồn gốc), nên có cảnh báo ở frontend \\
+\hline
+5.1.7 & Upload file .pdf thay vì ảnh & 1003 | Parameter value is invalid & File phải là ảnh hợp lệ \\
+\hline
+5.1.8 & Người dùng chưa tham gia nhóm & 1004 | User is not validated & Cần tham gia nhóm trước \\
+\hline
+\caption{Test Cases - API 5.1 Thêm Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.2: Lấy Danh Sách Thực Phẩm (Cấp Nhóm)}~\\
+
+\textbf{Endpoint:} \texttt{GET /food}
+
+\textbf{Mô tả:} API lấy danh sách tất cả thực phẩm khả dụng cho nhóm, bao gồm thực phẩm do nhóm tạo và thực phẩm hệ thống. Hỗ trợ lọc theo danh mục và tìm kiếm theo tên.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+categoryId & Long & Không & Lọc theo danh mục \\
+\hline
+name & String & Không & Tìm kiếm theo tên (gần đúng, không phân biệt hoa thường) \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.2]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "foods": [
+      {
+        "id": 1,
+        "name": "Rau muong VietGAP",
+        "categoryId": 3,
+        "categoryName": "Rau cu",
+        "imageUrl": "https://example.com/images/rau-muong.jpg",
+        "groupId": 10,
+        "isSystemFood": false,
+        "createdAt": "2026-01-03T10:30:00Z"
+      },
+      {
+        "id": 100,
+        "name": "Ca chua",
+        "categoryId": 3,
+        "categoryName": "Rau cu",
+        "imageUrl": "https://example.com/images/ca-chua.jpg",
+        "groupId": null,
+        "isSystemFood": true,
+        "createdAt": "2025-12-01T08:00:00Z"
+      }
+    ],
+    "total": 2
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.2.1 & Không có query parameters & 1000 | OK & Trả về thực phẩm của nhóm + thực phẩm hệ thống \\
+\hline
+5.2.2 & ?categoryId=3 & 1000 | OK & Chỉ trả về thực phẩm thuộc danh mục 3 \\
+\hline
+5.2.3 & ?name=thịt & 1000 | OK & Trả về thực phẩm có tên chứa "thịt", không phân biệt hoa thường \\
+\hline
+5.2.4 & ?categoryId=5\&name=bò & 1000 | OK & Kết hợp nhiều filter, trả về thịt bò \\
+\hline
+5.2.5 & ?name=abcxyz123 & 1000 | OK & foods = [], total = 0 (không tìm thấy) \\
+\hline
+5.2.6 & ?categoryId=99999 & 1000 | OK & foods = [], total = 0 (categoryId không tồn tại) \\
+\hline
+5.2.7 & Người dùng chưa có nhóm & 1004 | User is not validated & Cần tham gia nhóm \\
+\hline
+\caption{Test Cases - API 5.2 Lấy Danh Sách Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.3: Xem Chi Tiết Thực Phẩm (Cấp Nhóm)}~\\
+
+\textbf{Endpoint:} \texttt{GET /food/\{foodId\}}
+
+\textbf{Mô tả:} API lấy thông tin chi tiết một loại thực phẩm cụ thể. Người dùng có thể xem chi tiết thực phẩm của nhóm mình hoặc thực phẩm hệ thống.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm \\
+\hline
+\caption{Path Parameters - API Xem Chi Tiết Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.3]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Rau muong VietGAP",
+    "categoryId": 3,
+    "categoryName": "Rau cu",
+    "imageUrl": "https://example.com/images/rau-muong.jpg",
+    "groupId": 10,
+    "isSystemFood": false,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.3.1 & foodId=1 (thực phẩm do nhóm tạo) & 1000 | OK & Trả về đầy đủ thông tin \\
+\hline
+5.3.2 & foodId=100 (system food) & 1000 | OK & isSystemFood = true, groupId = null \\
+\hline
+5.3.3 & foodId=99999 (không tồn tại) & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.3.4 & foodId=50 (của nhóm khác, không phải system food) & 1009 | Action has been done previously by this user & Không có quyền truy cập \\
+\hline
+5.3.5 & foodId="abc" (không hợp lệ) & 1003 | Parameter value is invalid & foodId phải là số \\
+\hline
+\caption{Test Cases - API 5.3 Xem Chi Tiết Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.4: Cập Nhật Thực Phẩm (Cấp Nhóm)}~\\
+
+\textbf{Endpoint:} \texttt{PUT /food/\{foodId\}}
+
+\textbf{Mô tả:} API cập nhật thông tin thực phẩm do nhóm tạo. Không thể cập nhật thực phẩm hệ thống. Cho phép cập nhật tên, danh mục và ảnh.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm cần cập nhật \\
+\hline
+\caption{Path Parameters - API Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tên mới (1-100 ký tự) \\
+\hline
+categoryId & Long & Không & Danh mục mới \\
+\hline
+image & File & Không & Ảnh mới (jpg, jpeg, png, gif) \\
+\hline
+\caption{Request Body - API Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.4]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 1,
+    "name": "Rau muong huu co",
+    "categoryId": 4,
+    "categoryName": "Rau huu co",
+    "imageUrl": "https://example.com/images/rau-muong-new.jpg",
+    "groupId": 10,
+    "isSystemFood": false,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.4.1 & foodId=1, name="Rau muống hữu cơ" & 1000 | OK & Tên được cập nhật thành công \\
+\hline
+5.4.2 & foodId=1, categoryId=4 & 1000 | OK & Danh mục được thay đổi \\
+\hline
+5.4.3 & foodId=1, image=[file mới] & 1000 | OK & Ảnh cũ bị thay thế \\
+\hline
+5.4.4 & foodId=1, name="" & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+5.4.5 & foodId=1, categoryId=99999 & 9994 | No data or end of list data & categoryId không tồn tại \\
+\hline
+5.4.6 & foodId=99999 & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.4.7 & foodId=100 (system food) & 1009 | Action has been done previously by this user & Không có quyền cập nhật system food \\
+\hline
+5.4.8 & foodId=50 (của nhóm khác) & 1009 | Action has been done previously by this user & Không có quyền cập nhật thực phẩm nhóm khác \\
+\hline
+\caption{Test Cases - API 5.4 Cập Nhật Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.5: Xóa Thực Phẩm (Cấp Nhóm)}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /food/\{foodId\}}
+
+\textbf{Mô tả:} API xóa thực phẩm do nhóm tạo. Không thể xóa thực phẩm hệ thống hoặc thực phẩm đang được sử dụng trong kitchen, recipe hoặc shopping list.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}}
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm cần xóa \\
+\hline
+\caption{Path Parameters - API Xóa Thực Phẩm}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.5]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.5.1 & foodId=1 (thực phẩm của nhóm, chưa dùng) & 1000 | OK & Thực phẩm bị xóa thành công \\
+\hline
+5.5.2 & foodId=99999 (không tồn tại) & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.5.3 & foodId=100 (system food) & 1009 | Action has been done previously by this user & Không có quyền xóa system food \\
+\hline
+5.5.4 & foodId=50 (của nhóm khác) & 1009 | Action has been done previously by this user & Không có quyền xóa thực phẩm nhóm khác \\
+\hline
+5.5.5 & foodId=5 (có kitchen items sử dụng) & 1009 | Action has been done previously by this user & Không thể xóa vì đang được dùng trong kitchen \\
+\hline
+5.5.6 & foodId=8 (có recipe ingredients sử dụng) & 1009 | Action has been done previously by this user & Không thể xóa vì đang được dùng trong recipe \\
+\hline
+5.5.7 & foodId=10 (có shopping items sử dụng) & 1009 | Action has been done previously by this user & Không thể xóa vì đang được dùng trong shopping list \\
+\hline
+\caption{Test Cases - API 5.5 Xóa Thực Phẩm}
+\end{longtable}
+
+\normalsize
+
+\subsubsection{Phần 2: API Danh Mục và Đơn Vị}
+
+\subparagraph{API 5.6: Lấy Danh Sách Danh Mục}~\\
+
+\textbf{Endpoint:} \texttt{GET /category}
+
+\textbf{Mô tả:} API lấy tất cả danh mục thực phẩm trong hệ thống (rau, củ, quả, thịt, cá, v.v.). API này không yêu cầu xác thực và có thể được cache vì ít thay đổi.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Not required}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.6]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "categories": [
+      {
+        "id": 1,
+        "name": "Rau",
+        "description": "Cac loai rau cu qua",
+        "imageUrl": "https://example.com/images/rau.jpg"
+      },
+      {
+        "id": 2,
+        "name": "Thit",
+        "description": "Thit bo, heo, ga, vit",
+        "imageUrl": "https://example.com/images/thit.jpg"
+      },
+      {
+        "id": 3,
+        "name": "Ca",
+        "description": "Ca tuoi, ca bien",
+        "imageUrl": "https://example.com/images/ca.jpg"
+      }
+    ],
+    "total": 3
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.6.1 & Gọi API bình thường & 1000 | OK & Trả về tất cả danh mục với total \\
+\hline
+5.6.2 & Danh sách rỗng (không nên xảy ra) & 1000 | OK & categories = [], total = 0 \\
+\hline
+5.6.3 & Gọi API không cần token & 1000 | OK & Vẫn trả về dữ liệu (API public) \\
+\hline
+\caption{Test Cases - API 5.6 Lấy Danh Sách Danh Mục}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.7: Lấy Danh Sách Đơn Vị}~\\
+
+\textbf{Endpoint:} \texttt{GET /unit}
+
+\textbf{Mô tả:} API lấy tất cả đơn vị đo lường trong hệ thống (kg, gram, lít, ml, v.v.). API này không yêu cầu xác thực và có thể được cache.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Not required}
+\end{itemize}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.7]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "units": [
+      {
+        "id": 1,
+        "name": "Kilogram",
+        "abbreviation": "kg"
+      },
+      {
+        "id": 2,
+        "name": "Gram",
+        "abbreviation": "g"
+      },
+      {
+        "id": 3,
+        "name": "Lit",
+        "abbreviation": "l"
+      },
+      {
+        "id": 4,
+        "name": "Mililit",
+        "abbreviation": "ml"
+      }
+    ],
+    "total": 4
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.7.1 & Gọi API bình thường & 1000 | OK & Trả về tất cả đơn vị với total \\
+\hline
+5.7.2 & Danh sách rỗng (không nên xảy ra) & 1000 | OK & units = [], total = 0 \\
+\hline
+5.7.3 & Gọi API không cần token & 1000 | OK & Vẫn trả về dữ liệu (API public) \\
+\hline
+\caption{Test Cases - API 5.7 Lấy Danh Sách Đơn Vị}
+\end{longtable}
+
+\normalsize
+
+\subsubsection{Phần 3: API Quản Trị Thực Phẩm Hệ Thống (Admin)}
+
+\subparagraph{API 5.8: Tạo Thực Phẩm Hệ Thống (Admin)}~\\
+
+\textbf{Endpoint:} \texttt{POST /admin/food}
+
+\textbf{Mô tả:} API cho phép quản trị viên tạo thực phẩm master data cho toàn hệ thống. Thực phẩm này sẽ khả dụng cho tất cả các nhóm với isSystemFood = true và groupId = null. Chỉ user có role ADMIN mới được gọi API này.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}} (ADMIN role required)
+\end{itemize}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Có & Tên thực phẩm (1-100 ký tự) \\
+\hline
+categoryId & Long & Có & ID danh mục \\
+\hline
+image & File & Không & Ảnh thực phẩm (jpg, jpeg, png, gif) \\
+\hline
+\caption{Request Body - API Tạo Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.8]
+{
+  "code": "1000",
+  "message": "Tao thuc pham he thong thanh cong",
+  "data": {
+    "id": 100,
+    "name": "Ca chua",
+    "categoryId": 3,
+    "categoryName": "Rau cu",
+    "imageUrl": "https://example.com/images/ca-chua.jpg",
+    "groupId": null,
+    "isSystemFood": true,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.8.1 & Admin: name="Cà chua", categoryId=3, image=[file] & 1000 | OK & isSystemFood = true, groupId = null \\
+\hline
+5.8.2 & Admin: name="Muối", categoryId=8 (không có ảnh) & 1000 | OK & imageUrl = null \\
+\hline
+5.8.3 & User thường cố gọi API & 1009 | Action has been done previously by this user & Không có quyền (không phải ADMIN) \\
+\hline
+5.8.4 & Admin: name="" & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+5.8.5 & Admin: categoryId=99999 & 9994 | No data or end of list data & categoryId không tồn tại \\
+\hline
+5.8.6 & Admin: tên trùng với thực phẩm hệ thống khác & 1000 | OK & Cho phép, nên có cảnh báo \\
+\hline
+\caption{Test Cases - API 5.8 Tạo Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.9: Lấy Danh Sách Thực Phẩm Hệ Thống (Admin)}~\\
+
+\textbf{Endpoint:} \texttt{GET /admin/food}
+
+\textbf{Mô tả:} API cho phép admin xem tất cả thực phẩm hệ thống để quản lý. Chỉ trả về thực phẩm có isSystemFood = true và groupId = null.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}} (ADMIN role required)
+\end{itemize}
+
+\textbf{Query Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+categoryId & Long & Không & Lọc theo danh mục \\
+\hline
+name & String & Không & Tìm kiếm theo tên (gần đúng) \\
+\hline
+\caption{Query Parameters - API Lấy Danh Sách Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.9]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "foods": [
+      {
+        "id": 100,
+        "name": "Ca chua",
+        "categoryId": 3,
+        "categoryName": "Rau cu",
+        "imageUrl": "https://example.com/images/ca-chua.jpg",
+        "groupId": null,
+        "isSystemFood": true,
+        "createdAt": "2026-01-03T10:30:00Z"
+      }
+    ],
+    "total": 1
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.9.1 & Admin: không có query parameters & 1000 | OK & Trả về tất cả system foods \\
+\hline
+5.9.2 & Admin: ?categoryId=3 & 1000 | OK & Chỉ trả về system foods thuộc danh mục 3 \\
+\hline
+5.9.3 & Admin: ?name=cà & 1000 | OK & Trả về system foods có tên chứa "cà" \\
+\hline
+5.9.4 & User thường cố gọi API & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+5.9.5 & Admin: ?name=xyz123 & 1000 | OK & foods = [], total = 0 \\
+\hline
+\caption{Test Cases - API 5.9 Lấy Danh Sách Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.10: Xem Chi Tiết Thực Phẩm Hệ Thống (Admin)}~\\
+
+\textbf{Endpoint:} \texttt{GET /admin/food/\{foodId\}}
+
+\textbf{Mô tả:} API cho phép admin xem chi tiết thực phẩm hệ thống. Chỉ có thể xem thực phẩm có isSystemFood = true.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}} (ADMIN role required)
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm hệ thống \\
+\hline
+\caption{Path Parameters - API Xem Chi Tiết Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.10]
+{
+  "code": "1000",
+  "message": "OK",
+  "data": {
+    "id": 100,
+    "name": "Ca chua",
+    "categoryId": 3,
+    "categoryName": "Rau cu",
+    "imageUrl": "https://example.com/images/ca-chua.jpg",
+    "groupId": null,
+    "isSystemFood": true,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.10.1 & Admin: foodId=100 (system food) & 1000 | OK & isSystemFood = true, groupId = null \\
+\hline
+5.10.2 & Admin: foodId=99999 & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.10.3 & User thường cố gọi API & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+5.10.4 & Admin: foodId=5 (group food, not system) & 1009 | Action has been done previously by this user & Không phải system food \\
+\hline
+5.10.5 & Admin: foodId="abc" & 1003 | Parameter value is invalid & foodId phải là số \\
+\hline
+\caption{Test Cases - API 5.10 Xem Chi Tiết Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.11: Cập Nhật Thực Phẩm Hệ Thống (Admin)}~\\
+
+\textbf{Endpoint:} \texttt{PUT /admin/food/\{foodId\}}
+
+\textbf{Mô tả:} API cho phép admin cập nhật thông tin thực phẩm hệ thống. Cập nhật system food sẽ ảnh hưởng đến tất cả nhóm đang sử dụng.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Content-Type: multipart/form-data}
+    \item \texttt{Authorization: Bearer \{access\_token\}} (ADMIN role required)
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm hệ thống \\
+\hline
+\caption{Path Parameters - API Cập Nhật Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Request Body:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+name & String & Không & Tên mới (1-100 ký tự) \\
+\hline
+categoryId & Long & Không & Danh mục mới \\
+\hline
+image & File & Không & Ảnh mới (jpg, jpeg, png, gif) \\
+\hline
+\caption{Request Body - API Cập Nhật Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.11]
+{
+  "code": "1000",
+  "message": "Cap nhat thuc pham he thong thanh cong",
+  "data": {
+    "id": 100,
+    "name": "Ca chua bi",
+    "categoryId": 5,
+    "categoryName": "Qua",
+    "imageUrl": "https://example.com/images/ca-chua-bi.jpg",
+    "groupId": null,
+    "isSystemFood": true,
+    "createdAt": "2026-01-03T10:30:00Z"
+  }
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.11.1 & Admin: name="Cà chua bi" & 1000 | OK & Tên được cập nhật \\
+\hline
+5.11.2 & Admin: categoryId=5 & 1000 | OK & Danh mục được cập nhật \\
+\hline
+5.11.3 & Admin: image=[file mới] & 1000 | OK & Ảnh được thay thế \\
+\hline
+5.11.4 & User thường cố cập nhật & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+5.11.5 & Admin: name="" & 1003 | Parameter value is invalid & Tên không được rỗng \\
+\hline
+5.11.6 & Admin: foodId=99999 & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.11.7 & Admin: foodId=5 (group food) & 1009 | Action has been done previously by this user & Không phải system food \\
+\hline
+\caption{Test Cases - API 5.11 Cập Nhật Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\normalsize
+
+\subparagraph{API 5.12: Xóa Thực Phẩm Hệ Thống (Admin)}~\\
+
+\textbf{Endpoint:} \texttt{DELETE /admin/food/\{foodId\}}
+
+\textbf{Mô tả:} API cho phép admin xóa thực phẩm hệ thống. Chỉ xóa được nếu không có dữ liệu nào đang sử dụng trong toàn hệ thống. Xóa system food rất nguy hiểm và ảnh hưởng đến tất cả nhóm.
+
+\textbf{Request Headers:}
+\begin{itemize}
+    \item \texttt{Authorization: Bearer \{access\_token\}} (ADMIN role required)
+\end{itemize}
+
+\textbf{Path Parameters:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\
+\hline
+\endhead
+foodId & Long & Có & ID của thực phẩm hệ thống \\
+\hline
+\caption{Path Parameters - API Xóa Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\textbf{Response Body (Success - 1000):}
+
+\begin{lstlisting}[language=json, caption=Response thanh cong API 5.12]
+{
+  "code": "1000",
+  "message": "Xoa thuc pham he thong thanh cong",
+  "data": null
+}
+\end{lstlisting}
+
+\textbf{Các Test Case:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{TC} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} & \textbf{Ghi chú} \\
+\hline
+\endhead
+5.12.1 & Admin: foodId=100 (system food, chưa dùng) & 1000 | OK & Thực phẩm bị xóa \\
+\hline
+5.12.2 & Admin: foodId=99999 & 9994 | No data or end of list data & Thực phẩm không tồn tại \\
+\hline
+5.12.3 & User thường cố xóa & 1009 | Action has been done previously by this user & Không có quyền \\
+\hline
+5.12.4 & Admin: foodId=10 (có dữ liệu sử dụng) & 1009 | Action has been done previously by this user & Không thể xóa vì đang được dùng \\
+\hline
+5.12.5 & Admin: foodId=5 (group food, not system) & 1009 | Action has been done previously by this user & Không phải system food \\
+\hline
+5.12.6 & Admin: foodId="abc" & 1003 | Parameter value is invalid & foodId phải là số \\
+\hline
+\caption{Test Cases - API 5.12 Xóa Thực Phẩm Hệ Thống}
+\end{longtable}
+
+\normalsize
