@@ -14,6 +14,7 @@
 \paragraph{Bảng USER - Người dùng}
 \textbf{Mục đích:} Lưu trữ thông tin tài khoản và hồ sơ người dùng hệ thống.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -60,6 +61,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng GROUP - Nhóm gia đình}
 \textbf{Mục đích:} Quản lý các nhóm người dùng (gia đình, bạn bè) cùng sử dụng tủ lạnh chung.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -97,6 +99,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng GROUP\_MEMBER - Thành viên nhóm}
 \textbf{Mục đích:} Bảng trung gian quản lý quan hệ nhiều-nhiều giữa User và Group.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -134,6 +137,7 @@ joined\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian tham
 \paragraph{Bảng CATEGORY - Danh mục thực phẩm}
 \textbf{Mục đích:} Phân loại thực phẩm theo các nhóm (rau củ, thịt cá, gia vị...).
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -176,6 +180,7 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian t�
 \paragraph{Bảng FOOD - Thực phẩm}
 \textbf{Mục đích:} Lưu trữ thông tin các loại thực phẩm (hệ thống và do người dùng tạo).
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -223,6 +228,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng UNIT - Đơn vị đo lường}
 \textbf{Mục đích:} Định nghĩa các đơn vị đo lường sử dụng trong hệ thống.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -263,6 +269,7 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian t�
 \paragraph{Bảng KITCHEN\_ITEM - Nguyên liệu trong tủ lạnh}
 \textbf{Mục đích:} Quản lý thực phẩm có sẵn trong tủ lạnh của từng nhóm.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -318,6 +325,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng RECIPE - Công thức nấu ăn}
 \textbf{Mục đích:} Lưu trữ các công thức nấu ăn (hệ thống và do người dùng tạo).
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -368,6 +376,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng RECIPE\_INGREDIENT - Nguyên liệu của công thức}
 \textbf{Mục đích:} Bảng trung gian liên kết Recipe và Food, xác định nguyên liệu cần thiết.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -414,6 +423,7 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian t�
 \paragraph{Bảng MEAL\_PLAN - Kế hoạch bữa ăn}
 \textbf{Mục đích:} Lập lịch các món ăn cho nhóm theo ngày và bữa.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -468,6 +478,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng SHOPPING\_LIST - Danh sách mua sắm}
 \textbf{Mục đích:} Quản lý danh sách đi chợ/mua sắm của nhóm.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -519,6 +530,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng SHOPPING\_LIST\_ITEM - Mục trong danh sách mua sắm}
 \textbf{Mục đích:} Chi tiết các món cần mua trong danh sách mua sắm.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -568,6 +580,7 @@ updated\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP ON UPDATE & Thờ
 \paragraph{Bảng NOTIFICATION - Thông báo}
 \textbf{Mục đích:} Lưu trữ thông báo gửi đến người dùng.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -625,6 +638,7 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian t�
 \paragraph{Bảng EMAIL\_VERIFICATION - Xác thực email}
 \textbf{Mục đích:} Lưu mã OTP để xác thực email khi đăng ký hoặc đổi mật khẩu.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -665,6 +679,7 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian t�
 \paragraph{Bảng SYSTEM\_LOG - Nhật ký hệ thống}
 \textbf{Mục đích:} Ghi lại các hành động quan trọng trong hệ thống để audit và debug.
 
+\small
 \begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
 \hline
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
@@ -725,5 +740,456 @@ created\_at & TIMESTAMP & NOT NULL, DEFAULT CURRENT\_TIMESTAMP & Thời gian x�
 
 \subsection{Thiết kế API Backend}
 \subsubsection{Danh sách API}
+\paragraph{Thông tin kết nối}
+\paragraph{Danh sách mã phản hồi (response code)}
+
+\textbf{Quy ước mã:}
+\begin{itemize}
+    \item \textbf{00000}: Mã thành công
+    \item \textbf{001xx}: Lỗi xác thực và phân quyền (Authentication)
+    \item \textbf{002xx}: Lỗi người dùng (User)
+    \item \textbf{003xx}: Lỗi xác thực email (Email Verification)
+    \item \textbf{004xx}: Lỗi nhóm (Group)
+    \item \textbf{005xx}: Lỗi thực phẩm (Food)
+    \item \textbf{006xx}: Lỗi bếp (Kitchen)
+    \item \textbf{007xx}: Lỗi mua sắm (Shopping)
+    \item \textbf{008xx}: Lỗi kế hoạch bữa ăn (Meal)
+    \item \textbf{009xx}: Lỗi công thức nấu ăn (Recipe)
+    \item \textbf{010xx}: Lỗi danh mục và đơn vị (Category \& Unit)
+    \item \textbf{011xx}: Lỗi thông báo (Notification)
+    \item \textbf{012xx}: Lỗi validation (Validation)
+    \item \textbf{099xx}: Lỗi hệ thống (System)
+\end{itemize}
+
+\textbf{Danh sách mã chi tiết:}
+
+\textit{Mã thành công:}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00000 & Thành công & 200 OK & Yêu cầu được xử lý thành công \\
+\hline
+\caption{Mã thành công}
+\end{longtable}
+
+\textit{Lỗi xác thực và phân quyền (001xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00100 & Email hoặc mật khẩu không đúng & 401 UNAUTHORIZED & Thông tin đăng nhập không chính xác \\
+\hline
+00101 & Token đã hết hạn & 401 UNAUTHORIZED & JWT token đã hết thời gian hiệu lực \\
+\hline
+00102 & Token không hợp lệ & 401 UNAUTHORIZED & JWT token bị sai định dạng hoặc không xác thực được \\
+\hline
+00103 & Bạn chưa đăng nhập & 401 UNAUTHORIZED & Yêu cầu chưa được xác thực \\
+\hline
+00104 & Bạn không có quyền truy cập & 403 FORBIDDEN & Người dùng không có quyền thực hiện hành động \\
+\hline
+00105 & Email chưa được xác thực & 403 FORBIDDEN & Tài khoản chưa xác thực email \\
+\hline
+00106 & Tài khoản đã bị khóa & 403 FORBIDDEN & Tài khoản bị khóa bởi admin \\
+\hline
+\caption{Lỗi xác thực và phân quyền}
+\end{longtable}
+
+\textit{Lỗi người dùng (002xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00200 & Không tìm thấy người dùng & 404 NOT\_FOUND & User ID không tồn tại trong hệ thống \\
+\hline
+00201 & Email đã được sử dụng & 409 CONFLICT & Email đã được đăng ký bởi người dùng khác \\
+\hline
+00202 & Số điện thoại đã được sử dụng & 409 CONFLICT & Số điện thoại đã tồn tại trong hệ thống \\
+\hline
+00203 & Mật khẩu cũ không đúng & 400 BAD\_REQUEST & Mật khẩu hiện tại nhập sai khi đổi mật khẩu \\
+\hline
+00204 & Mật khẩu xác nhận không khớp & 400 BAD\_REQUEST & Mật khẩu và xác nhận mật khẩu không giống nhau \\
+\hline
+00205 & Mật khẩu phải có ít nhất 6 ký tự & 400 BAD\_REQUEST & Định dạng mật khẩu không hợp lệ \\
+\hline
+\caption{Lỗi người dùng}
+\end{longtable}
+
+\textit{Lỗi xác thực email (003xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00300 & Mã xác thực đã hết hạn & 400 BAD\_REQUEST & OTP/Verification code đã quá thời gian sử dụng \\
+\hline
+00301 & Mã xác thực không đúng & 400 BAD\_REQUEST & OTP/Verification code nhập sai \\
+\hline
+00302 & Email đã được xác thực & 400 BAD\_REQUEST & Tài khoản đã được xác thực trước đó \\
+\hline
+00303 & Gửi email xác thực thất bại & 500 INTERNAL\_SERVER\_ERROR & Lỗi hệ thống khi gửi email \\
+\hline
+\caption{Lỗi xác thực email}
+\end{longtable}
+
+\textit{Lỗi nhóm (004xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00400 & Không tìm thấy nhóm & 404 NOT\_FOUND & Group ID không tồn tại \\
+\hline
+00401 & Bạn đã ở trong một nhóm & 409 CONFLICT & Người dùng đã tham gia nhóm khác \\
+\hline
+00402 & Bạn chưa tham gia nhóm nào & 400 BAD\_REQUEST & Người dùng chưa thuộc nhóm nào \\
+\hline
+00403 & Chỉ chủ nhóm mới có quyền này & 403 FORBIDDEN & Hành động chỉ dành cho chủ nhóm \\
+\hline
+00404 & Không thể xóa chủ nhóm & 400 BAD\_REQUEST & Không thể xóa người dùng là chủ nhóm \\
+\hline
+00405 & Người dùng không thuộc nhóm này & 400 BAD\_REQUEST & User không phải thành viên của nhóm \\
+\hline
+00406 & Không tìm thấy lời mời & 404 NOT\_FOUND & Invitation ID không tồn tại \\
+\hline
+00407 & Lời mời đã hết hạn & 400 BAD\_REQUEST & Invitation đã quá thời gian hiệu lực \\
+\hline
+00408 & Đã gửi lời mời cho người này & 409 CONFLICT & Đã có invitation chưa xử lý cho user \\
+\hline
+\caption{Lỗi nhóm}
+\end{longtable}
+
+\textit{Lỗi thực phẩm (005xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00500 & Không tìm thấy thực phẩm & 404 NOT\_FOUND & Food ID không tồn tại trong database \\
+\hline
+00501 & Thực phẩm đã tồn tại trong nhóm & 409 CONFLICT & Thực phẩm này đã có trong nhóm \\
+\hline
+\caption{Lỗi thực phẩm}
+\end{longtable}
+
+\textit{Lỗi bếp (006xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00600 & Không tìm thấy món trong bếp & 404 NOT\_FOUND & Kitchen item ID không tồn tại \\
+\hline
+00601 & Thực phẩm này đã có trong bếp & 409 CONFLICT & Thực phẩm đã được thêm vào bếp \\
+\hline
+00602 & Số lượng không đủ & 400 BAD\_REQUEST & Số lượng thực phẩm không đủ để sử dụng \\
+\hline
+00603 & Ngày hết hạn không hợp lệ & 400 BAD\_REQUEST & Expiry date sai định dạng hoặc đã quá khứ \\
+\hline
+\caption{Lỗi bếp}
+\end{longtable}
+
+\textit{Lỗi mua sắm (007xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00700 & Không tìm thấy danh sách mua sắm & 404 NOT\_FOUND & Shopping list ID không tồn tại \\
+\hline
+00701 & Không tìm thấy mục trong danh sách & 404 NOT\_FOUND & Shopping item ID không tồn tại \\
+\hline
+00702 & Thực phẩm đã có trong danh sách & 409 CONFLICT & Item đã được thêm vào shopping list \\
+\hline
+00703 & Mục này đã được mua & 400 BAD\_REQUEST & Item đã có trạng thái "đã mua" \\
+\hline
+00704 & Trạng thái danh sách không hợp lệ & 400 BAD\_REQUEST & Shopping list status không đúng \\
+\hline
+\caption{Lỗi mua sắm}
+\end{longtable}
+
+\textit{Lỗi kế hoạch bữa ăn (008xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00800 & Không tìm thấy kế hoạch bữa ăn & 404 NOT\_FOUND & Meal plan ID không tồn tại \\
+\hline
+00801 & Ngày kế hoạch không hợp lệ & 400 BAD\_REQUEST & Meal date sai định dạng \\
+\hline
+\caption{Lỗi kế hoạch bữa ăn}
+\end{longtable}
+
+\textit{Lỗi công thức nấu ăn (009xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+00900 & Không tìm thấy công thức & 404 NOT\_FOUND & Recipe ID không tồn tại \\
+\hline
+00901 & Bạn không có quyền xem công thức này & 403 FORBIDDEN & Recipe là riêng tư hoặc không thuộc nhóm \\
+\hline
+\caption{Lỗi công thức nấu ăn}
+\end{longtable}
+
+\textit{Lỗi danh mục và đơn vị (010xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+01000 & Không tìm thấy danh mục & 404 NOT\_FOUND & Category ID không tồn tại \\
+\hline
+01001 & Không tìm thấy đơn vị & 404 NOT\_FOUND & Unit ID không tồn tại \\
+\hline
+\caption{Lỗi danh mục và đơn vị}
+\end{longtable}
+
+\textit{Lỗi thông báo (011xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+01100 & Không tìm thấy thông báo & 404 NOT\_FOUND & Notification ID không tồn tại \\
+\hline
+\caption{Lỗi thông báo}
+\end{longtable}
+
+\textit{Lỗi validation (012xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+01200 & Dữ liệu không hợp lệ & 400 BAD\_REQUEST & Request body không đúng format \\
+\hline
+01201 & Thiếu trường bắt buộc & 400 BAD\_REQUEST & Thiếu required fields trong request \\
+\hline
+01202 & Định dạng không hợp lệ & 400 BAD\_REQUEST & Dữ liệu không đúng kiểu hoặc format \\
+\hline
+\caption{Lỗi validation}
+\end{longtable}
+
+\textit{Lỗi hệ thống (099xx):}
+
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{4.5cm}|}
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Thông điệp} & \textbf{HTTP Status} & \textbf{Ghi chú} \\
+\hline
+\endhead
+09900 & Lỗi hệ thống & 500 INTERNAL\_SERVER\_ERROR & Lỗi không xác định từ server \\
+\hline
+09901 & Dịch vụ tạm thời không khả dụng & 503 SERVICE\_UNAVAILABLE & Server hoặc service tạm thời không hoạt động \\
+\hline
+09902 & Tải file thất bại & 500 INTERNAL\_SERVER\_ERROR & Lỗi khi upload file lên Cloudinary \\
+\hline
+\caption{Lỗi hệ thống}
+\end{longtable}
+\paragraph{Danh sách API}
+
+\small
+\begin{longtable}{|>{\centering\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{7cm}|>{\raggedright\arraybackslash}p{3cm}|}
+\hline
+\textbf{Mã UC} & \textbf{Use Case} & \textbf{Danh Sách API} & \textbf{Mô Tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã UC} & \textbf{Use Case} & \textbf{Danh Sách API} & \textbf{Mô Tả} \\
+\hline
+\endhead
+UC001 & Quản lý danh sách mua sắm & 
+\texttt{/shopping/lists} (POST) \newline
+\texttt{/shopping/lists} (GET) \newline
+\texttt{/shopping/lists/\{listId\}} (GET) \newline
+\texttt{/shopping/lists/my-assigned} \newline
+\texttt{/shopping/lists/\{listId\}} (PUT) \newline
+\texttt{/shopping/lists/\{listId\}} (DELETE) \newline
+\texttt{/shopping/lists/\{listId\}/complete} \newline
+\texttt{/shopping/lists/\{listId\}/items} (POST) \newline
+\texttt{/shopping/items/\{itemId\}} (PUT) \newline
+\texttt{/shopping/items/\{itemId\}} (DELETE) \newline
+\texttt{/shopping/items/\{itemId\}/purchased} & 
+Người dùng tạo, chỉnh sửa, xóa, theo dõi danh sách mua sắm. Giao cho người dùng đi chợ \\
+\hline
+UC002 & Quản lý dự định bữa ăn & 
+\texttt{/meal-plans} (POST) \newline
+\texttt{/meal-plans} (GET) \newline
+\texttt{/meal-plans/\{id\}} (GET) \newline
+\texttt{/meal-plans/\{id\}} (PUT) \newline
+\texttt{/meal-plans/\{id\}} (DELETE) \newline
+\texttt{/meal-plans/daily} \newline
+\texttt{/meal-plans/range} \newline
+\texttt{/meal-plans/upcoming} & 
+Người dùng lên kế hoạch bữa ăn theo ngày hoặc tuần \\
+\hline
+UC003 & Quản lý thực phẩm trong bếp & 
+\texttt{/kitchen} (POST) \newline
+\texttt{/kitchen} (GET) \newline
+\texttt{/kitchen/\{itemId\}} (GET) \newline
+\texttt{/kitchen/expiring} \newline
+\texttt{/kitchen/\{itemId\}} (PUT) \newline
+\texttt{/kitchen/\{itemId\}} (DELETE) & 
+Người dùng nhập, chỉnh sửa, theo dõi thông tin các thực phẩm trong bếp \\
+\hline
+UC004 & Quản lý công thức nấu ăn & 
+\texttt{/recipes} (POST) \newline
+\texttt{/recipes} (GET) \newline
+\texttt{/recipes/\{recipeId\}} (GET) \newline
+\texttt{/recipes/\{recipeId\}} (PUT) \newline
+\texttt{/recipes/\{recipeId\}} (DELETE) \newline
+\texttt{/recipes/\{recipeId\}/ingredients} (POST) \newline
+\texttt{/recipes/ingredients/\{ingredientId\}} (PUT) \newline
+\texttt{/recipes/ingredients/\{ingredientId\}} (DELETE) \newline
+\texttt{/recipes/by-ingredient/\{foodId\}} & 
+Người dùng lưu trữ và quản lý các công thức nấu ăn \\
+\hline
+UC005 & Quản lý danh sách các loại thực phẩm & 
+\texttt{/food} (POST) \newline
+\texttt{/food} (GET) \newline
+\texttt{/food/\{foodId\}} (GET) \newline
+\texttt{/food/\{foodId\}} (PUT) \newline
+\texttt{/food/\{foodId\}} (DELETE) \newline
+\texttt{/category} (GET) \newline
+\texttt{/unit} (GET) \newline
+\texttt{/admin/food} (POST) \newline
+\texttt{/admin/food} (GET) \newline
+\texttt{/admin/food/\{foodId\}} (GET) \newline
+\texttt{/admin/food/\{foodId\}} (PUT) \newline
+\texttt{/admin/food/\{foodId\}} (DELETE) & 
+Người dùng, Quản trị viên quản lý danh sách thực phẩm, danh mục và đơn vị \\
+\hline
+UC006 & Quản lý nhóm & 
+\texttt{/group} (POST) \newline
+\texttt{/group} (GET) \newline
+\texttt{/group/add-member} \newline
+\texttt{/group/remove-member} \newline
+\texttt{/group/leave} & 
+Người dùng tạo/xóa nhóm, thêm/xóa thành viên trong nhóm \\
+\hline
+UC007 & Thống kê và báo cáo & 
+\textit{Chưa triển khai} & 
+Hệ thống tạo báo cáo về mua sắm và tiêu thụ thực phẩm \\
+\hline
+UC008 & Quản trị người dùng & 
+\textit{Chưa triển khai đầy đủ} & 
+Quản trị viên quản lý tài khoản người dùng \\
+\hline
+UC009 & Xác thực và phân quyền & 
+\texttt{/auth/register} \newline
+\texttt{/auth/login} \newline
+\texttt{/auth/verify-email} \newline
+\texttt{/auth/resend-verification} \newline
+\texttt{/auth/change-password} \newline
+\texttt{/user/profile} (GET) \newline
+\texttt{/user/profile} (PUT) \newline
+\texttt{/user/fcm-token} (PUT) & 
+Người dùng đăng ký, đăng nhập, quên mật khẩu, cập nhật thông tin cá nhân và đổi mật khẩu \\
+\hline
+\multicolumn{4}{|c|}{\textbf{API Bổ Sung}} \\
+\hline
+- & Hệ thống gợi ý công thức & 
+\texttt{/suggestions/recipes} \newline
+\texttt{/suggestions/recipes/by-food} & 
+Gợi ý công thức dựa trên thực phẩm có sẵn trong bếp \\
+\hline
+- & Quản lý thông báo & 
+\texttt{/notification} (GET) \newline
+\texttt{/notification/\{notificationId\}/read} \newline
+\texttt{/notification/read-all} \newline
+\texttt{/notification/\{notificationId\}} (DELETE) & 
+Xem thông báo, đánh dấu đã đọc, xóa thông báo \\
+\hline
+\caption{Danh sách API của hệ thống}
+\end{longtable}
+
 \subsubsection{Đặc tả chi tiết API}
 
