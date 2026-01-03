@@ -12,15 +12,30 @@
     \item \textbf{Database:} PostgreSQL để lưu trữ dữ liệu.
 \end{itemize}
 
-\paragraph{Kiến trúc Backend: Clean Architecture}
-Phía Backend được thiết kế theo \textbf{Clean Architecture} với nguyên tắc \textbf{Dependency Inversion} - các lớp bên trong không phụ thuộc vào các lớp bên ngoài. Các đặc điểm chính:
-\begin{itemize}
-    \item \textbf{Độc lập với Framework:} Logic nghiệp vụ không phụ thuộc vào framework cụ thể.
-    \item \textbf{Có thể kiểm thử (Testable):} Business logic có thể test độc lập.
-    \item \textbf{Độc lập với Database:} Có thể thay đổi database mà không ảnh hưởng nghiệp vụ.
-\end{itemize}
+\paragraph{Kiến trúc Backend: Clean Architecture} ~\\
+Phía Backend được thiết kế theo \textbf{Clean Architecture} với nguyên tắc \textbf{Dependency Inversion} - các lớp bên trong không phụ thuộc vào các lớp bên ngoài. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{bieu_do/PackageDiagram.png}
+    \caption{Sơ đồ phân lớp các gói (Package Diagram) theo Clean Architecture}
+\end{figure}
 
-\paragraph{Kiến trúc Frontend: Component-Based Architecture}
+\paragraph{Vai trò của gói domain (Tầng lõi)} ~\\
+Đây là thành phần quan trọng nhất, chứa các thực thể nghiệp vụ (Entities) và các giao diện kho lưu trữ (Repository Interfaces). Gói này tập trung các quy tắc nghiệp vụ cốt lõi, được thiết kế độc lập hoàn toàn với framework hay công cụ bên thứ ba, giúp lõi ứng dụng ổn định trước các thay đổi công nghệ.
+
+\paragraph{Vai trò của gói application (Tầng nghiệp vụ)} ~\\
+Gói này chứa các kịch bản sử dụng (Use Cases) điều phối logic ứng dụng. Nó đóng vai trò cầu nối, tiếp nhận yêu cầu từ tầng Presentation để thực thi các chức năng nghiệp vụ cụ thể thông qua việc tương tác với các Entity và Interface tại tầng Domain.
+
+\paragraph{Vai trò của gói presentation (Tầng giao tiếp)} ~\\
+Đảm nhận nhiệm vụ xử lý tương tác với người dùng qua các API Controller. Các thành phần tại đây tiếp nhận Request HTTP, giải mã dữ liệu, chuyển giao cho tầng Application xử lý và trả về Response phù hợp cho ứng dụng Client.
+
+\paragraph{Vai trò của gói infrastructure (Tầng hạ tầng)} ~\\
+Chứa các cài đặt kỹ thuật chi tiết hỗ trợ hệ thống, bao gồm triển khai thực tế các Repository (JPA), cấu hình cơ sở dữ liệu PostgreSQL, thiết lập bảo mật (Security) và các bộ chuyển đổi dữ liệu (Mappers).
+
+\paragraph{Quy tắc thiết kế và sự phụ thuộc} ~\\
+Hệ thống tuân thủ nghiêm ngặt nguyên tắc phụ thuộc một chiều hướng vào tầng \textit{domain}. Các gói được phân tầng rõ ràng: tầng \textit{presentation} không được phép truy cập trực tiếp \textit{domain} mà phải thông qua \textit{application}. Đồng thời, việc áp dụng Dependency Inversion giúp tầng lõi không biết về sự tồn tại của các Framework bên ngoài, đảm bảo tính độc lập và khả năng kiểm thử (Testable) tối đa.
+
+\paragraph{Kiến trúc Frontend: Component-Based Architecture} ~\\
 Phía Frontend sử dụng \textbf{Component-Based Architecture} kết hợp với \textbf{React Query} cho server state và \textbf{Zustand} cho client state:
 \begin{itemize}
     \item \textbf{Component-Based:} Giao diện được chia thành các component độc lập, tái sử dụng.
@@ -37,6 +52,1238 @@ Phía Frontend sử dụng \textbf{Component-Based Architecture} kết hợp v�
 \end{enumerate}
 
 \subsection{Tổ chức thư mục của dự án}
+Cấu trúc tệp và thư mục của một dự án đóng vai trò quyết định đến mức độ dễ dàng trong việc điều hướng, bảo trì và mở rộng hệ thống. Một tổ chức thư mục hợp lý giúp các nhà phát triển nhanh chóng tìm thấy các thành phần nghiệp vụ hoặc kỹ thuật tương ứng mà không làm xáo trộn các lớp kiến trúc.
+
+\subsubsection{Cấu trúc mã nguồn Backend (Spring Boot)}
+
+Dựa trên mô hình Clean Architecture, mã nguồn Backend được tổ chức phân lớp nghiêm ngặt để tách biệt logic nghiệp vụ khỏi các chi tiết hạ tầng.
+
+\begin{verbatim}
+src/main/java/hust/project/freshfridge/
+|-- FreshfridgeApplication.java   # Diem khoi chay ung dung
+|-- domain/                       # LAYER 1: Nghiep vu cot loi
+|   |-- constant/                 # Hang so nghiep vu
+|   |-- entity/                   # Domain Entities (Pure Java Objects)
+|   |-- exception/                # Ngoai le cap nghiep vu
+|   |-- repository/               # Repository Interfaces (Ports)
+|   |-- service/                  # Domain Services
+|-- application/                  # LAYER 2: Logic ung dung
+|   |-- dto/                      # Data Transfer Objects (Request/Response)
+|   |-- scheduler/                # Cac tac vu lap lich tu dong
+|   |-- usecase/                  # Use Cases / Application Services
+|-- infrastructure/               # LAYER 3: Cac thanh phan ben ngoai
+|   |-- config/                   # Cau hinh Spring Boot
+|   |-- persistence/              # Cai dat luu tru (JPA, Models, Mappers)
+|   |-- security/                 # Cau hinh bao mat (JWT, Auth)
+|   |-- service/                  # Dich vu ha tang ky thuat
+|-- presentation/                 # LAYER 4: Tang giao tiep (API)
+|   |-- controller/               # REST Controllers
+|   |-- exception/                # Global Exception Handlers
+
+src/main/resources/
+|-- application.yaml              # Cau hinh tham so moi truong
+|-- db/migration/                 # Quan ly phien ban DB (Flyway)
+\end{verbatim}
+
+\paragraph{Phân tích ưu và nhược điểm (Backend)}
+\begin{itemize}
+    \item \textbf{Ưu điểm:} Tách biệt trách nhiệm rõ ràng (Separation of Concerns), giúp bảo trì dễ dàng khi cần thay đổi cơ sở dữ liệu hoặc framework mà không ảnh hưởng đến lõi nghiệp vụ. Cấu trúc này cũng tối ưu cho việc viết Unit Test cho tầng \textit{domain}.
+    \item \textbf{Nhược điểm:} Độ phức tạp ban đầu cao và phát sinh nhiều mã nguồn bổ trợ (Boilerplate code) như các Mapper và DTO để chuyển đổi dữ liệu giữa các lớp.
+\end{itemize}
+
+\subsubsection{Cấu trúc mã nguồn Frontend (React Native)}
+
+Mã nguồn Frontend được tổ chức theo hướng mô-đun hóa và quản lý theo tính năng (feature-based), giúp tối ưu hóa việc tái sử dụng thành phần giao diện.
+
+\begin{verbatim}
+frontend/
+|-- App.tsx                 # Diem khoi dau (Root Component)
+|-- app.json                # Cau hinh Expo/React Native
+|-- src/                    # Ma nguon chinh
+|   |-- api/                # Tang giao tiep mang (Axios client, Endpoints)
+|   |-- components/         # UI Components tai su dung (Common, Form)
+|   |-- constants/          # Hang so toan cuc
+|   |-- hooks/              # Custom React Hooks
+|   |-- screens/            # Cac man hinh theo tinh nang (Auth, Food, Home...)
+|   |-- services/           # Business logic services (Auth, Storage)
+|   |-- store/              # Quan ly trang thai (Zustand/Redux)
+|   |-- theme/              # Design system (Colors, Typography)
+|   |-- types/              # TypeScript definitions
+|   |-- utils/              # Ham tien ich dung chung
+|   |-- validation/         # Quy tac kiem tra du lieu (Zod/Yup)
+\end{verbatim}
+
+\paragraph{Phân tích ưu và nhược điểm (Frontend)}
+\begin{itemize}
+    \item \textbf{Ưu điểm:} Cách tổ chức theo \textit{screens} và \textit{components} giúp nhà phát triển dễ dàng định vị mã nguồn theo chức năng hiển thị. Việc tách riêng tầng \textit{api} và \textit{store} giúp quản lý luồng dữ liệu tập trung, tránh tình trạng logic nghiệp vụ bị trộn lẫn vào giao diện.
+    \item \textbf{Nhược điểm:} Cấu trúc thư mục có phân cấp sâu, đòi hỏi việc thiết lập Path Aliases (đường dẫn tắt) trong cấu hình TypeScript để tránh các đường dẫn import quá dài gây khó đọc.
+\end{itemize}
 \subsection{Thiết kế chi tiết các gói}
+\subsubsection{Thiết kế chi tiết cho UC1: Quản lý danh sách mua sắm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC1.png}
+    \caption{Biểu đồ gói chi tiết cho UC1: Quản lý danh sách mua sắm}
+\end{figure}
+\paragraph{Mô tả các mối quan hệ nghiệp vụ}
+\begin{itemize}
+    \item \textbf{Điều phối nghiệp vụ:} \texttt{ShoppingController} liên kết với \texttt{ShoppingUseCase} thông qua quan hệ \textit{Association} để xử lý các yêu cầu tạo, cập nhật và xóa danh sách mua sắm từ người dùng.
+    \item \textbf{Nghịch đảo phụ thuộc (DIP):} Tầng nghiệp vụ (\texttt{ShoppingUseCase}) tương tác với dữ liệu thông qua giao diện \texttt{IShoppingListRepository}. Việc thực thi chi tiết tại lớp \texttt{ShoppingListRepositoryImpl} thuộc tầng Infrastructure giúp hệ thống dễ dàng bảo trì và thay đổi công nghệ lưu trữ mà không làm ảnh hưởng đến logic lõi.
+    \item \textbf{Quản lý mặt hàng:} Mối quan hệ \textit{Composition} giữa \texttt{ShoppingList} và \texttt{ShoppingListItem} khẳng định tính toàn vẹn của dữ liệu; các mặt hàng mua sắm là thành phần không thể tách rời của một danh sách cụ thể.
+    \item \textbf{Phân quyền và giao việc:} Quan hệ \textit{Association} từ \texttt{ShoppingList} tới thực thể \texttt{User} mô tả chức năng gán trách nhiệm đi chợ cho một thành viên cụ thể trong nhóm, đáp ứng yêu cầu theo dõi tiến độ mua sắm của ca sử dụng.
+\end{itemize}
+\subsubsection{Thiết kế chi tiết cho UC2: Quản lý dự định bữa ăn}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC2.png}
+    \caption{Biểu đồ gói chi tiết cho UC2: Quản lý dự định bữa ăn}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và các mối quan hệ}
+\begin{itemize}
+    \item \textbf{Tầng Presentation:} \texttt{MealPlanController} tiếp nhận các yêu cầu HTTP để tạo, cập nhật hoặc lấy kế hoạch bữa ăn theo ngày/khoảng thời gian. Lớp này có quan hệ \textit{Association} tới \texttt{MealPlanUseCase}.
+    \item \textbf{Điều phối nghiệp vụ:} \texttt{MealPlanUseCase} đóng vai trò trung tâm, điều phối logic kiểm tra quyền truy cập công thức và tính hợp lệ của thời gian bữa ăn. Nó phụ thuộc (\textit{Dependency}) vào các interface repository để tương tác với dữ liệu.
+    \item \textbf{Cấu trúc thực thể:} Thực thể \texttt{MealPlan} lưu trữ thông tin về ngày ăn, loại bữa ăn (thông qua \texttt{MealType}) và liên kết tới một \texttt{Recipe} cụ thể. Mối quan hệ giữa \texttt{MealPlan} và \texttt{Recipe} đảm bảo mỗi kế hoạch bữa ăn luôn gắn liền với một hướng dẫn nấu ăn cụ thể.
+    \item \textbf{Tính linh hoạt của hạ tầng:} Bằng việc sử dụng quan hệ \textit{Realization} giữa \\ \texttt{MealPlanRepositoryImpl} và \texttt{IMealPlanRepository}, hệ thống tách biệt hoàn toàn logic lưu trữ khỏi logic nghiệp vụ, cho phép thay đổi phương thức lưu trữ mà không ảnh hưởng đến các ca sử dụng của người dùng.
+\end{itemize}
+
+\subsubsection{Thiết kế chi tiết cho UC3: Quản lý thực phẩm trong bếp}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC3.png}
+    \caption{Biểu đồ gói chi tiết cho UC3: Quản lý thực phẩm trong bếp}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và quan hệ giữa các lớp}
+\begin{itemize}
+    \item \textbf{Tầng Presentation và Application:} \texttt{KitchenController} nắm giữ một thực thể của \texttt{KitchenUseCase} qua quan hệ \textit{Association}. Mọi yêu cầu như thêm thực phẩm vào tủ lạnh hoặc cập nhật lượng tồn kho đều được chuyển giao cho Use Case xử lý.
+    \item \textbf{Tương tác dữ liệu nghiệp vụ:} \texttt{KitchenUseCase} phụ thuộc (\textit{Dependency}) vào giao diện \texttt{IKitchenItemRepository}. Việc định nghĩa interface tại tầng Domain và triển khai tại tầng Infrastructure (\texttt{KitchenItemRepositoryImpl}) giúp hệ thống tuân thủ nguyên tắc Nghịch đảo phụ thuộc (DIP).
+    \item \textbf{Cấu trúc thông tin thực phẩm:} Thực thể \texttt{KitchenItem} là đối tượng trung tâm quản lý các thông tin như ngày hết hạn và số lượng tồn thực tế. Nó có quan hệ \textit{Association} tới \texttt{Food} để lấy thông tin định danh thực phẩm và tới \texttt{Unit} để xác định đơn vị đo lường.
+    \item \textbf{Tính mở rộng:} Thiết kế này cho phép hệ thống dễ dàng tích hợp thêm các tính năng tự động như \textit{ExpiryCheckScheduler} để quét các \texttt{KitchenItem} sắp hết hạn và gửi thông báo cho người dùng mà không cần thay đổi cấu trúc cốt lõi.
+\end{itemize}
+
+\subsubsection{Thiết kế chi tiết cho UC4: Quản lý công thức nấu ăn}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC4.png}
+    \caption{Biểu đồ gói chi tiết cho UC4: Quản lý công thức nấu ăn}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và các mối quan hệ}
+\begin{itemize}
+    \item \textbf{Tầng Presentation và Application:} \texttt{RecipeController} đóng vai trò điều phối các yêu cầu HTTP, liên kết với \texttt{RecipeUseCase} qua quan hệ \textit{Association}. Tầng nghiệp vụ chịu trách nhiệm kiểm tra quyền sở hữu công thức (theo nhóm hoặc hệ thống) trước khi thực hiện các thao tác chỉnh sửa.
+    \item \textbf{Cấu trúc dữ liệu thành phần:} Mối quan hệ \textit{Composition} giữa \texttt{Recipe} và \texttt{RecipeIngredient} thể hiện tính ràng buộc chặt chẽ; các nguyên liệu là bộ phận không thể tách rời của một công thức. Mỗi nguyên liệu (\texttt{RecipeIngredient}) lại kết hợp với \texttt{Food} và \texttt{Unit} để xác định rõ loại thực phẩm và định lượng cần thiết.
+    \item \textbf{Tính linh hoạt và Đóng gói:} Hệ thống sử dụng các giao diện repository (\texttt{IRecipeRepository}) tại tầng Domain để che giấu chi tiết cài đặt hạ tầng. Quan hệ \textit{Realization} từ các lớp \texttt{Impl} tại tầng Infrastructure giúp đảm bảo tầng nghiệp vụ không bị ảnh hưởng khi thay đổi công nghệ lưu trữ.
+    \item \textbf{Dịch vụ hỗ trợ:} \texttt{RecipeUseCase} sử dụng \texttt{IImageStorageService} qua quan hệ \textit{Dependency} để quản lý các tệp tin hình ảnh một cách độc lập, giúp giao diện người dùng trở nên trực quan hơn.
+\end{itemize}
+
+\subsubsection{Thiết kế chi tiết cho UC5: Quản lý danh sách thực phẩm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC5.png}
+    \caption{Biểu đồ gói chi tiết cho UC5: Quản lý danh sách thực phẩm}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và quan hệ giữa các lớp}
+\begin{itemize}
+    \item \textbf{Điều phối giao tiếp:} \texttt{FoodController} tại tầng Presentation tiếp nhận các yêu cầu quản lý thực phẩm và liên kết với \texttt{FoodUseCase} qua quan hệ \textit{Association}. Tầng này đảm bảo dữ liệu đầu vào được kiểm tra hợp lệ trước khi đi sâu vào logic nghiệp vụ.
+    \item \textbf{Logic nghiệp vụ và Trừu tượng hóa:} \texttt{FoodUseCase} đóng vai trò điều phối chính, tương tác với các giao diện repository thông qua quan hệ \textit{Dependency}. Việc phụ thuộc vào \texttt{IFoodRepository} và \texttt{ICategoryRepository} giúp tầng nghiệp vụ không bị ràng buộc vào các chi tiết lưu trữ dữ liệu cụ thể.
+    \item \textbf{Cấu trúc thực thể và Phân loại:} Thực thể \texttt{Food} giữ vai trò trung tâm lưu trữ thông tin về tên, mô tả và hình ảnh. Quan hệ \textit{Association} từ \texttt{Food} tới \texttt{Category} cho phép hệ thống quản lý thực phẩm theo từng nhóm danh mục khoa học, hỗ trợ việc tìm kiếm và lọc dữ liệu hiệu quả.
+    \item \textbf{Cài đặt hạ tầng và Dịch vụ ngoại vi:} Lớp \texttt{FoodRepositoryImpl} thực hiện giao diện \texttt{IFoodRepository} (quan hệ \textit{Realization}), kết nối trực tiếp với cơ sở dữ liệu. Ngoài ra, \texttt{FoodUseCase} còn sử dụng \texttt{IImageStorageService} để quản lý các tệp tin hình ảnh một cách chuyên biệt, tách biệt khỏi luồng dữ liệu nghiệp vụ thông thường.
+\end{itemize}
+\subsubsection{Thiết kế chi tiết cho UC6: Quản lý nhóm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC6.png}
+    \caption{Biểu đồ gói chi tiết cho UC6: Quản lý nhóm}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và quan hệ giữa các lớp}
+\begin{itemize}
+    \item \textbf{Tầng Presentation và Application:} \texttt{GroupController} đóng vai trò là điểm tiếp nhận các yêu cầu như tạo nhóm (\textit{createGroup}), thêm thành viên (\textit{addMember}) hoặc rời nhóm (\textit{leaveGroup}), sau đó ủy thác cho \texttt{GroupUseCase} thông qua quan hệ \textit{Association}.
+    \item \textbf{Logic nghiệp vụ tập trung:} \texttt{GroupUseCase} điều phối toàn bộ luồng nghiệp vụ của nhóm. Lớp này sử dụng quan hệ \textit{Dependency} tới các giao diện repository như \texttt{IGroupRepository} và \texttt{IGroupMemberRepository} để đảm bảo tính độc lập của tầng Domain theo kiến trúc Clean Architecture.
+    \item \textbf{Cấu trúc ràng buộc thành viên:} Mối quan hệ \textit{Composition} từ \texttt{Group} tới \texttt{GroupMember} thể hiện rằng danh sách thành viên là một phần hữu cơ của nhóm; khi nhóm bị giải tán bởi quản trị viên, các bản ghi thành viên liên quan sẽ tự động bị xóa bỏ để bảo đảm tính toàn vẹn dữ liệu.
+    \item \textbf{Tương tác hệ thống:} \texttt{GroupUseCase} kết hợp với \texttt{NotificationUseCase} (quan hệ \textit{Association}) để tự động gửi thông báo thời gian thực khi có biến động về nhân sự trong nhóm, ví dụ như gửi lời mời (\textit{GROUP\_INVITE}) hoặc thông báo thành viên mới gia nhập.
+    \item \textbf{Thực thi hạ tầng:} Các lớp \texttt{Impl} tại tầng Infrastructure chịu trách nhiệm hiện thực hóa các giao diện trừu tượng (\textit{Realization}), kết nối logic ứng dụng với hệ quản trị cơ sở dữ liệu mà không làm lộ các chi tiết cài đặt kỹ thuật lên tầng nghiệp vụ.
+\end{itemize}
+
+\subsubsection{Thiết kế chi tiết cho UC7: Thống kê và báo cáo}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC7.png}
+    \caption{Biểu đồ gói chi tiết cho UC7: Thống kê và báo cáo}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và quan hệ giữa các lớp}
+\begin{itemize}
+    \item \textbf{Trung tâm điều phối dữ liệu:} \texttt{ReportController} liên kết với \texttt{ReportUseCase} qua quan hệ \textit{Association}. Tầng này chịu trách nhiệm cung cấp các điểm cuối (endpoints) để người dùng truy xuất các loại báo cáo khác nhau như báo cáo tổng quan (\textit{Overview}), báo cáo kho bếp (\textit{Kitchen}) và báo cáo mua sắm (\textit{Shopping}).
+    \item \textbf{Phụ thuộc đa nguồn:} \texttt{ReportUseCase} thể hiện quan hệ \textit{Dependency} tới hàng loạt các giao diện kho lưu trữ (\texttt{IKitchenItemRepository}, \texttt{IShoppingListRepository}, v.v.). Điều này cho thấy tính chất của module báo cáo là tầng xử lý dữ liệu cấp cao, tổng hợp thông tin từ tất cả các mảng nghiệp vụ trong hệ thống.
+    \item \textbf{Xử lý nghiệp vụ thống kê:} Tầng nghiệp vụ sử dụng các đối tượng dữ liệu như \texttt{KitchenItem} và \texttt{ShoppingList} để phân tích các chỉ số về hiệu quả đi chợ và mức độ lãng phí thực phẩm.
+    \item \textbf{Tính đóng gói và bảo trì:} Việc tương tác hoàn toàn qua các interface giúp \texttt{ReportUseCase} không bị ảnh hưởng bởi cấu trúc bảng trong cơ sở dữ liệu. Quan hệ \textit{Realization} từ tầng Infrastructure đảm bảo rằng logic thống kê luôn được tách biệt khỏi các truy vấn SQL phức tạp phía dưới.
+\end{itemize}
+
+\subsubsection{Thiết kế chi tiết cho UC8: Quản trị người dùng}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bieu_do/Package-UC8.png}
+    \caption{Biểu đồ gói chi tiết cho UC8: Quản trị người dùng}
+\end{figure}
+
+\paragraph{Giải thích thiết kế và quan hệ giữa các lớp}
+\begin{itemize}
+    \item \textbf{Điều phối quản trị:} \texttt{AdminUserController} tại tầng Presentation tiếp nhận các yêu cầu đặc quyền từ Quản trị viên, liên kết với \texttt{AdminUserUseCase} qua quan hệ \textit{Association}. Tầng này được bảo vệ nghiêm ngặt bởi cơ chế phân quyền (\textit{Role-based Access Control}).
+    \item \textbf{Logic nghiệp vụ và Xử lý ràng buộc:} \texttt{AdminUserUseCase} chịu trách nhiệm thực hiện các quy tắc như ngăn cấm Admin tự vô hiệu hóa tài khoản chính mình. Lớp này sử dụng quan hệ \textit{Dependency} tới \texttt{IUserRepository} để truy vấn và \texttt{IGroupRepository} để xử lý dọn dẹp dữ liệu nhóm (xóa nhóm nếu người dùng bị xóa là chủ nhóm).
+    \item \textbf{Thực thể và Phân quyền:} Thực thể \texttt{User} đóng vai trò trung tâm lưu trữ trạng thái tài khoản. Quan hệ phụ thuộc tới Enum \texttt{Role} cho phép quản trị viên thay đổi vai trò giữa người dùng thông thường và quản trị viên một cách an toàn.
+    \item \textbf{Thống kê và Báo cáo:} Bên trong \texttt{AdminUserUseCase} định nghĩa cấu trúc nội \texttt{UserStatistics} để tổng hợp các chỉ số về số lượng tài khoản đang hoạt động, đã xác thực hoặc đang bị khóa, hỗ trợ Admin trong việc nắm bắt sức khỏe hệ thống.
+    \item \textbf{Tách biệt hạ tầng:} Việc hiện thực hóa giao diện qua \texttt{UserRepositoryImpl} (quan hệ \textit{Realization}) giúp logic quản trị người dùng không bị phụ thuộc vào các chi tiết kỹ thuật của PostgreSQL hay Spring Data JPA.
+\end{itemize}
 \subsection{Thiết kế chi tiết lớp}
+
+Phần này trình bày chi tiết về các lớp chính trong hệ thống theo mô hình CRC (Class-Responsibility-Collaboration), giúp làm rõ vai trò, trách nhiệm và mối quan hệ giữa các thành phần.
+
+\subsubsection{Các Lớp Entity (Domain Layer)}
+
+\paragraph{User (Người dùng)} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & User \\
+\hline
+\textbf{Responsibility} & - Lưu trữ thông tin người dùng hệ thống \newline - Quản lý xác thực và phân quyền \newline - Theo dõi trạng thái tài khoản \\
+\hline
+\textbf{Collaborators} & - Group (là admin hoặc thành viên) \newline - GroupMember (quan hệ membership) \newline - Notification (nhận thông báo) \newline - KitchenItem, Recipe, ShoppingList (người tạo) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - User}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Thuộc tính} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả} \\
+\hline
+id & Long & ID định danh duy nhất của người dùng \\
+\hline
+email & String & Địa chỉ email (dùng để đăng nhập) \\
+\hline
+password & String & Mật khẩu đã được mã hóa \\
+\hline
+name & String & Họ tên người dùng \\
+\hline
+phone & String & Số điện thoại \\
+\hline
+avatarUrl & String & URL ảnh đại diện \\
+\hline
+role & String & Vai trò: "USER" hoặc "ADMIN" \\
+\hline
+isVerified & Boolean & Trạng thái xác minh email \\
+\hline
+isActive & Boolean & Trạng thái kích hoạt tài khoản \\
+\hline
+fcmToken & String & Token Firebase Cloud Messaging \\
+\hline
+createdAt & LocalDateTime & Thời điểm tạo tài khoản \\
+\hline
+updatedAt & LocalDateTime & Thời điểm cập nhật cuối \\
+\hline
+\end{tabularx}
+\caption{Thuộc tính - User}
+\end{table}
+
+\paragraph{Group (Nhóm gia đình)} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & Group \\
+\hline
+\textbf{Responsibility} & - Đại diện cho một nhóm gia đình \newline - Quản lý admin của nhóm \newline - Làm đơn vị chia sẻ dữ liệu (thực phẩm, công thức, danh sách mua sắm) \\
+\hline
+\textbf{Collaborators} & - User (admin của nhóm) \newline - GroupMember (danh sách thành viên) \newline - KitchenItem, Food, Recipe, ShoppingList, MealPlan \\
+\hline
+\end{tabularx}
+\caption{CRC Card - Group}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Thuộc tính} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả} \\
+\hline
+id & Long & ID định danh duy nhất của nhóm \\
+\hline
+name & String & Tên nhóm \\
+\hline
+adminId & Long & ID của người quản trị nhóm \\
+\hline
+createdAt & LocalDateTime & Thời điểm tạo nhóm \\
+\hline
+updatedAt & LocalDateTime & Thời điểm cập nhật cuối \\
+\hline
+\end{tabularx}
+\end{table}
+
+\paragraph{KitchenItem (Thực phẩm trong bếp)} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & KitchenItem \\
+\hline
+\textbf{Responsibility} & - Quản lý thực phẩm trong bếp của nhóm \newline - Theo dõi số lượng, hạn sử dụng \newline - Cảnh báo thực phẩm sắp hết hạn \\
+\hline
+\textbf{Collaborators} & - Food (thực phẩm) \newline - Group (nhóm sở hữu) \newline - Unit (đơn vị đo) \newline - User (người tạo) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - KitchenItem}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Thuộc tính} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả} \\
+\hline
+id & Long & ID định danh \\
+\hline
+foodId & Long & ID thực phẩm \\
+\hline
+groupId & Long & ID nhóm \\
+\hline
+unitId & Long & ID đơn vị đo \\
+\hline
+quantity & BigDecimal & Số lượng \\
+\hline
+useWithin & Integer & Số ngày sử dụng \\
+\hline
+expiryDate & LocalDate & Ngày hết hạn \\
+\hline
+note & String & Ghi chú \\
+\hline
+createdBy & Long & ID người thêm \\
+\hline
+createdAt & LocalDateTime & Thời điểm tạo \\
+\hline
+updatedAt & LocalDateTime & Thời điểm cập nhật cuối \\
+\hline
+\end{tabularx}
+\caption{Thuộc tính - KitchenItem}
+\end{table}
+
+\paragraph{Recipe (Công thức nấu ăn)} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & Recipe \\
+\hline
+\textbf{Responsibility} & - Lưu trữ công thức nấu ăn \newline - Quản lý thông tin chi tiết (thời gian, độ khó, khẩu phần) \newline - Hỗ trợ công thức hệ thống và công thức riêng của nhóm \\
+\hline
+\textbf{Collaborators} & - RecipeIngredient (nguyên liệu) \newline - Group (nhóm sở hữu) \newline - MealPlan (kế hoạch bữa ăn) \newline - User (người tạo) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - Recipe}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Thuộc tính} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả} \\
+\hline
+id & Long & ID định danh \\
+\hline
+name & String & Tên công thức \\
+\hline
+description & String & Mô tả ngắn \\
+\hline
+htmlContent & String & Nội dung HTML chi tiết \\
+\hline
+imageUrl & String & URL hình ảnh \\
+\hline
+groupId & Long & ID nhóm (null nếu là công thức hệ thống) \\
+\hline
+isSystem & Boolean & Đánh dấu công thức hệ thống \\
+\hline
+createdBy & Long & ID người tạo \\
+\hline
+difficulty & String & Độ khó: "EASY", "MEDIUM", "HARD" \\
+\hline
+prepTime & Integer & Thời gian chuẩn bị (phút) \\
+\hline
+cookTime & Integer & Thời gian nấu (phút) \\
+\hline
+servings & Integer & Số khẩu phần \\
+\hline
+tags & List<String> & Danh sách tags \\
+\hline
+createdAt & LocalDateTime & Thời điểm tạo \\
+\hline
+updatedAt & LocalDateTime & Thời điểm cập nhật cuối \\
+\hline
+\end{tabularx}
+\caption{Thuộc tính - Recipe}
+\end{table}
+
+\paragraph{ShoppingList (Danh sách mua sắm)} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & ShoppingList \\
+\hline
+\textbf{Responsibility} & - Quản lý danh sách mua sắm của nhóm \newline - Giao việc cho thành viên \newline - Theo dõi trạng thái hoàn thành \\
+\hline
+\textbf{Collaborators} & - Group (nhóm) \newline - User (người được giao, người tạo) \newline - ShoppingListItem (các mục cần mua) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - ShoppingList}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Thuộc tính} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả} \\
+\hline
+id & Long & ID định danh \\
+\hline
+name & String & Tên danh sách \\
+\hline
+groupId & Long & ID nhóm \\
+\hline
+assignedToUserId & Long & ID người được giao \\
+\hline
+note & String & Ghi chú \\
+\hline
+shoppingDate & LocalDate & Ngày mua sắm dự kiến \\
+\hline
+status & String & Trạng thái: "PENDING", "IN\_PROGRESS", "COMPLETED" \\
+\hline
+createdBy & Long & ID người tạo \\
+\hline
+createdAt & LocalDateTime & Thời điểm tạo \\
+\hline
+updatedAt & LocalDateTime & Thời điểm cập nhật cuối \\
+\hline
+\end{tabularx}
+\caption{Thuộc tính - ShoppingList}
+\end{table}
+
+\subsubsection{Các Lớp Repository (Domain Layer)}
+
+\paragraph{IUserRepository} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & IUserRepository \\
+\hline
+\textbf{Responsibility} & - Định nghĩa interface truy cập dữ liệu User \newline - CRUD operations cho User \newline - Tìm kiếm và lọc người dùng \\
+\hline
+\textbf{Collaborators} & - User (entity) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - IUserRepository}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+save(User user) & User & Lưu/cập nhật người dùng \\
+\hline
+findById(Long id) & Optional<User> & Tìm theo ID \\
+\hline
+findByEmail(String email) & Optional<User> & Tìm theo email \\
+\hline
+existsByEmail(String) & boolean & Kiểm tra email tồn tại \\
+\hline
+count() & long & Đếm tổng số người dùng \\
+\hline
+deleteById(Long id) & void & Xóa người dùng \\
+\hline
+\end{tabularx}
+\caption{Phương thức - IUserRepository}
+\end{table}
+
+\paragraph{IKitchenItemRepository} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & IKitchenItemRepository \\
+\hline
+\textbf{Responsibility} & - Định nghĩa interface truy cập dữ liệu KitchenItem \newline - Tìm kiếm thực phẩm sắp hết hạn \\
+\hline
+\textbf{Collaborators} & - KitchenItem (entity) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - IKitchenItemRepository}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+save(KitchenItem) & KitchenItem & Lưu/cập nhật \\
+\hline
+findById(Long id) & Optional<KitchenItem> & Tìm theo ID \\
+\hline
+findByGroupId(Long) & List<KitchenItem> & Lấy theo nhóm \\
+\hline
+findExpiringItems(...) & List<KitchenItem> & Tìm thực phẩm sắp hết hạn \\
+\hline
+deleteById(Long id) & void & Xóa \\
+\hline
+\end{tabularx}
+\caption{Phương thức - IKitchenItemRepository}
+\end{table}
+
+\paragraph{IRecipeRepository} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & IRecipeRepository \\
+\hline
+\textbf{Responsibility} & - Định nghĩa interface truy cập dữ liệu Recipe \newline - Tìm kiếm công thức hệ thống và của nhóm \\
+\hline
+\textbf{Collaborators} & - Recipe (entity) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - IRecipeRepository}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+save(Recipe recipe) & Recipe & Lưu/cập nhật \\
+\hline
+findById(Long id) & Optional<Recipe> & Tìm theo ID \\
+\hline
+findByGroupId(Long) & List<Recipe> & Lấy theo nhóm \\
+\hline
+findSystemRecipes() & List<Recipe> & Lấy công thức hệ thống \\
+\hline
+searchByName(...) & List<Recipe> & Tìm theo tên \\
+\hline
+deleteById(Long id) & void & Xóa \\
+\hline
+\end{tabularx}
+\caption{Phương thức - IRecipeRepository}
+\end{table}
+
+\subsubsection{Các Lớp UseCase (Application Layer)}
+
+\paragraph{UserUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & UserUseCase \\
+\hline
+\textbf{Responsibility} & - Xử lý nghiệp vụ đăng ký, đăng nhập \newline - Quản lý profile người dùng \newline - Xác thực email, đổi mật khẩu \\
+\hline
+\textbf{Collaborators} & - IUserRepository \newline - PasswordEncoder \newline - JwtTokenProvider \newline - EmailService \newline - IImageStorageService \\
+\hline
+\end{tabularx}
+\caption{CRC Card - UserUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+register(RegisterRequest) & AuthResponse & Đăng ký tài khoản mới \\
+\hline
+login(LoginRequest) & AuthResponse & Đăng nhập \\
+\hline
+verifyEmail(...) & void & Xác thực email \\
+\hline
+changePassword(...) & void & Đổi mật khẩu \\
+\hline
+getProfile(Long userId) & UserResponse & Lấy thông tin profile \\
+\hline
+updateProfile(...) & UserResponse & Cập nhật profile \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - UserUseCase}
+\end{table}
+
+\paragraph{GroupUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & GroupUseCase \\
+\hline
+\textbf{Responsibility} & - Xử lý nghiệp vụ tạo và quản lý nhóm \newline - Quản lý thành viên nhóm \newline - Gửi thông báo khi có thay đổi \\
+\hline
+\textbf{Collaborators} & - IGroupRepository \newline - IGroupMemberRepository \newline - IUserRepository \newline - NotificationUseCase \\
+\hline
+\end{tabularx}
+\caption{CRC Card - GroupUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+createGroup(...) & GroupResponse & Tạo nhóm mới \\
+\hline
+getGroup(Long userId) & GroupResponse & Lấy thông tin nhóm \\
+\hline
+getGroupMembers(...) & List<MemberResponse> & Lấy danh sách thành viên \\
+\hline
+addMember(...) & GroupResponse & Thêm thành viên \\
+\hline
+removeMember(...) & void & Xóa thành viên \\
+\hline
+leaveGroup(Long userId) & void & Rời khỏi nhóm \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - GroupUseCase}
+\end{table}
+
+\paragraph{KitchenUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & KitchenUseCase \\
+\hline
+\textbf{Responsibility} & - Quản lý thực phẩm trong bếp \newline - Theo dõi hạn sử dụng \newline - Lọc và tìm kiếm thực phẩm \\
+\hline
+\textbf{Collaborators} & - IKitchenItemRepository \newline - IFoodRepository \newline - ICategoryRepository \newline - IUnitRepository \newline - IGroupMemberRepository \\
+\hline
+\end{tabularx}
+\caption{CRC Card - KitchenUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+createKitchenItem(...) & KitchenItemResponse & Thêm thực phẩm vào bếp \\
+\hline
+updateKitchenItem(...) & KitchenItemResponse & Cập nhật thực phẩm \\
+\hline
+deleteKitchenItem(...) & void & Xóa thực phẩm \\
+\hline
+getKitchenItems(...) & List<KitchenItemResponse> & Lấy danh sách với bộ lọc \\
+\hline
+getExpiringItems(...) & List<KitchenItemResponse> & Lấy thực phẩm sắp hết hạn \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - KitchenUseCase}
+\end{table}
+
+\paragraph{RecipeUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & RecipeUseCase \\
+\hline
+\textbf{Responsibility} & - Quản lý công thức nấu ăn \newline - Quản lý nguyên liệu công thức \newline - Phân quyền truy cập công thức \\
+\hline
+\textbf{Collaborators} & - IRecipeRepository \newline - IRecipeIngredientRepository \newline - IFoodRepository \newline - IGroupMemberRepository \newline - IImageStorageService \\
+\hline
+\end{tabularx}
+\caption{CRC Card - RecipeUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+createRecipe(...) & RecipeResponse & Tạo công thức mới \\
+\hline
+updateRecipe(...) & RecipeResponse & Cập nhật công thức \\
+\hline
+deleteRecipe(...) & void & Xóa công thức \\
+\hline
+getRecipes(...) & List<RecipeResponse> & Lấy danh sách công thức \\
+\hline
+findRecipesByIngredient(...) & List<RecipeResponse> & Tìm công thức theo nguyên liệu \\
+\hline
+addIngredient(...) & RecipeResponse & Thêm nguyên liệu \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - RecipeUseCase}
+\end{table}
+
+\paragraph{ShoppingUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & ShoppingUseCase \\
+\hline
+\textbf{Responsibility} & - Quản lý danh sách mua sắm \newline - Quản lý các mục trong danh sách \newline - Đánh dấu đã mua và thêm vào bếp \\
+\hline
+\textbf{Collaborators} & - IShoppingListRepository \newline - IShoppingListItemRepository \newline - IFoodRepository \newline - IUserRepository \newline - NotificationUseCase \\
+\hline
+\end{tabularx}
+\caption{CRC Card - ShoppingUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+createShoppingList(...) & ShoppingListResponse & Tạo danh sách mới \\
+\hline
+updateShoppingList(...) & ShoppingListResponse & Cập nhật danh sách \\
+\hline
+deleteShoppingList(...) & void & Xóa danh sách \\
+\hline
+addItems(...) & ShoppingListResponse & Thêm mục vào danh sách \\
+\hline
+markItemPurchased(...) & ShoppingItemResponse & Đánh dấu đã mua \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - ShoppingUseCase}
+\end{table}
+
+\paragraph{MealPlanUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & MealPlanUseCase \\
+\hline
+\textbf{Responsibility} & - Lập kế hoạch bữa ăn \newline - Quản lý lịch ăn theo ngày/tuần \newline - Lấy kế hoạch theo khoảng thời gian \\
+\hline
+\textbf{Collaborators} & - IMealPlanRepository \newline - IRecipeRepository \newline - IGroupMemberRepository \newline - IGroupRepository \\
+\hline
+\end{tabularx}
+\caption{CRC Card - MealPlanUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+createMealPlan(...) & MealPlanResponse & Tạo kế hoạch bữa ăn \\
+\hline
+updateMealPlan(...) & MealPlanResponse & Cập nhật kế hoạch \\
+\hline
+getMealPlans(...) & List<MealPlanResponse> & Lấy tất cả kế hoạch của nhóm \\
+\hline
+getMealPlansByDateRange(...) & List<MealPlanResponse> & Lấy theo khoảng ngày \\
+\hline
+getDailyMealPlan(...) & DailyMealPlanResponse & Lấy kế hoạch trong ngày \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - MealPlanUseCase}
+\end{table}
+
+\paragraph{ReportUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & ReportUseCase \\
+\hline
+\textbf{Responsibility} & - Tổng hợp dữ liệu thống kê \newline - Tạo báo cáo tổng quan, kho bếp, mua sắm \newline - Phân tích xu hướng sử dụng \\
+\hline
+\textbf{Collaborators} & - IKitchenItemRepository \newline - IShoppingListRepository \newline - IMealPlanRepository \newline - IRecipeRepository \\
+\hline
+\end{tabularx}
+\caption{CRC Card - ReportUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+getOverviewReport(...) & OverviewReportResponse & Lấy báo cáo tổng quan \\
+\hline
+getKitchenReport(...) & KitchenReportResponse & Báo cáo kho bếp \\
+\hline
+getShoppingReport(...) & ShoppingReportResponse & Báo cáo mua sắm \\
+\hline
+getWasteAnalysis(...) & WasteAnalysisResponse & Phân tích lãng phí \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - ReportUseCase}
+\end{table}
+
+\paragraph{AdminUserUseCase} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & AdminUserUseCase \\
+\hline
+\textbf{Responsibility} & - Quản trị người dùng hệ thống \newline - Vô hiệu hóa/kích hoạt tài khoản \newline - Thống kê người dùng \\
+\hline
+\textbf{Collaborators} & - IUserRepository \newline - IGroupRepository \\
+\hline
+\end{tabularx}
+\caption{CRC Card - AdminUserUseCase}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{3cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Phương thức} & \textbf{Kiểu trả về} & \textbf{Mô tả} \\
+\hline
+getAllUsers(...) & List<UserResponse> & Lấy danh sách người dùng \\
+\hline
+getUserStatistics() & UserStatistics & Lấy thống kê người dùng \\
+\hline
+toggleUserStatus(...) & void & Bật/tắt trạng thái tài khoản \\
+\hline
+changeUserRole(...) & void & Thay đổi vai trò người dùng \\
+\hline
+deleteUser(...) & void & Xóa người dùng \\
+\hline
+\end{tabularx}
+\caption{Phương thức chính - AdminUserUseCase}
+\end{table}
+
+\subsubsection{Các Lớp Controller (Presentation Layer)}
+
+\paragraph{AuthController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & AuthController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho xác thực \newline - Định nghĩa các endpoints đăng ký, đăng nhập \newline - Validate và chuyển đổi request/response \\
+\hline
+\textbf{Collaborators} & - UserUseCase \\
+\hline
+\end{tabularx}
+\caption{CRC Card - AuthController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/auth/register & POST & Đăng ký tài khoản mới \\
+\hline
+/api/auth/login & POST & Đăng nhập hệ thống \\
+\hline
+/api/auth/verify-email & POST & Xác thực email \\
+\hline
+/api/auth/resend-verification & POST & Gửi lại mã xác thực \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - AuthController}
+\end{table}
+
+\paragraph{GroupController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & GroupController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản lý nhóm \newline - Định nghĩa các endpoints quản lý thành viên \newline - Validate và chuyển đổi request/response \\
+\hline
+\textbf{Collaborators} & - GroupUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - GroupController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/groups & POST & Tạo nhóm mới \\
+\hline
+/api/groups/my-group & GET & Lấy thông tin nhóm hiện tại \\
+\hline
+/api/groups/members & GET & Lấy danh sách thành viên \\
+\hline
+/api/groups/members & POST & Thêm thành viên \\
+\hline
+/api/groups/members/\{id\} & DELETE & Xóa thành viên \\
+\hline
+/api/groups/leave & POST & Rời khỏi nhóm \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - GroupController}
+\end{table}
+
+\paragraph{KitchenController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & KitchenController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản lý thực phẩm trong bếp \newline - Validate và chuyển đổi request/response \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - KitchenUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - KitchenController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/kitchen & POST & Thêm thực phẩm vào bếp \\
+\hline
+/api/kitchen & GET & Lấy danh sách thực phẩm \\
+\hline
+/api/kitchen/\{id\} & GET & Lấy chi tiết thực phẩm \\
+\hline
+/api/kitchen/\{id\} & PUT & Cập nhật thực phẩm \\
+\hline
+/api/kitchen/\{id\} & DELETE & Xóa thực phẩm \\
+\hline
+/api/kitchen/expiring & GET & Lấy thực phẩm sắp hết hạn \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - KitchenController}
+\end{table}
+
+\paragraph{RecipeController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & RecipeController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản lý công thức \newline - Validate và chuyển đổi request/response \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - RecipeUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - RecipeController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/recipes & POST & Tạo công thức mới \\
+\hline
+/api/recipes & GET & Lấy danh sách công thức \\
+\hline
+/api/recipes/\{id\} & GET & Lấy chi tiết công thức \\
+\hline
+/api/recipes/\{id\} & PUT & Cập nhật công thức \\
+\hline
+/api/recipes/\{id\} & DELETE & Xóa công thức \\
+\hline
+/api/recipes/\{id\}/ingredients & POST & Thêm nguyên liệu \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - RecipeController}
+\end{table}
+
+\paragraph{ShoppingController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & ShoppingController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản lý danh sách mua sắm \newline - Validate và chuyển đổi request/response \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - ShoppingUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - ShoppingController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/shopping-lists & POST & Tạo danh sách mua sắm \\
+\hline
+/api/shopping-lists & GET & Lấy danh sách mua sắm \\
+\hline
+/api/shopping-lists/\{id\} & GET & Lấy chi tiết \\
+\hline
+/api/shopping-lists/\{id\} & PUT & Cập nhật danh sách \\
+\hline
+/api/shopping-lists/\{id\} & DELETE & Xóa danh sách \\
+\hline
+/api/shopping-lists/\{id\}/items & POST & Thêm mục mua sắm \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - ShoppingController}
+\end{table}
+
+\paragraph{MealPlanController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & MealPlanController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản lý kế hoạch bữa ăn \newline - Validate và chuyển đổi request/response \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - MealPlanUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - MealPlanController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/meal-plans & POST & Tạo kế hoạch bữa ăn \\
+\hline
+/api/meal-plans & GET & Lấy danh sách kế hoạch \\
+\hline
+/api/meal-plans/\{id\} & GET & Lấy chi tiết \\
+\hline
+/api/meal-plans/\{id\} & PUT & Cập nhật kế hoạch \\
+\hline
+/api/meal-plans/\{id\} & DELETE & Xóa kế hoạch \\
+\hline
+/api/meal-plans/daily & GET & Lấy kế hoạch trong ngày \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - MealPlanController}
+\end{table}
+
+\paragraph{ReportController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & ReportController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho báo cáo và thống kê \newline - Validate tham số thời gian \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - ReportUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - ReportController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/reports/overview & GET & Lấy báo cáo tổng quan \\
+\hline
+/api/reports/kitchen & GET & Lấy báo cáo kho bếp \\
+\hline
+/api/reports/shopping & GET & Lấy báo cáo mua sắm \\
+\hline
+/api/reports/waste & GET & Phân tích lãng phí \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - ReportController}
+\end{table}
+
+\paragraph{AdminUserController} ~\\
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Class Name} & AdminUserController \\
+\hline
+\textbf{Responsibility} & - Xử lý HTTP requests cho quản trị người dùng \newline - Validate quyền Admin \newline - Định nghĩa các endpoints RESTful \\
+\hline
+\textbf{Collaborators} & - AdminUserUseCase \newline - UserPrincipal (current user) \\
+\hline
+\end{tabularx}
+\caption{CRC Card - AdminUserController}
+\end{table}
+
+\begin{table}[H]
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{2cm}|X|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Method} & \textbf{Mô tả} \\
+\hline
+/api/admin/users & GET & Lấy danh sách người dùng \\
+\hline
+/api/admin/users/statistics & GET & Lấy thống kê người dùng \\
+\hline
+/api/admin/users/\{id\}/toggle-status & PUT & Bật/tắt trạng thái \\
+\hline
+/api/admin/users/\{id\}/role & PUT & Thay đổi vai trò \\
+\hline
+/api/admin/users/\{id\} & DELETE & Xóa người dùng \\
+\hline
+\end{tabularx}
+\caption{Các endpoint - AdminUserController}
+\end{table}
+
 \subsection{Các giải pháp khác đã xây dựng trong chương trình}
