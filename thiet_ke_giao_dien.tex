@@ -63,4 +63,1263 @@
     \caption{Thiết kế giao diện cho UC8: Quản trị người dùng}
     \label{fig:lowfidelity-8.1}
 \end{figure}
+\subsubsection{UC9: Xác thực}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.4\textwidth]{UC9.1.jpg}
+    \caption{Thiết kế giao diện cho UC9: Đăng ký/đăng nhập}
+    \label{fig:lowfidelity-9.1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.4\textwidth]{UC9.2.jpg}
+    \caption{Thiết kế giao diện cho UC9: Quản lý hồ sơ cá nhân}
+    \label{fig:lowfidelity-9.2}
+\end{figure}
 \subsection{Xây dựng các màn hình giao diện của ứng dụng (high-fidelity)}
+
+Trong giai đoạn này, nhóm đã tiến hành chuyển đổi từ các bản thiết kế low-fidelity sang giao diện hoàn chỉnh (high-fidelity) bằng framework React Native. Toàn bộ giao diện tuân thủ quy chuẩn Material Design 3, tập trung vào trải nghiệm người dùng mượt mà và trực quan.
+
+\subsubsection{Hệ thống Theme và Styles tổng thể}
+Trước khi đi vào chi tiết các màn hình, hệ thống Styles được định nghĩa nhất quán để đảm bảo tính thẩm mỹ của thương hiệu:
+\begin{itemize}
+    \item \textbf{Màu sắc (Color System):} Sử dụng bảng màu Material 3 với màu chủ đạo là Đỏ táo (Primary: \texttt{\#C93C3C}) tượng trưng cho thực phẩm tươi và sự ấm cúng, kết hợp với các màu bổ trợ như Tím nho (Secondary: \texttt{\#5C3D99}) và Xanh lá (Accent: \texttt{\#4CAF50}) cho các thông báo trạng thái tươi mới.
+    \item \textbf{Typography:} Sử dụng bộ font \textbf{Nunito} với các biến thể từ Regular đến ExtraBold, phù hợp với ứng dụng dạng Lifestyle và Food.
+    \item \textbf{Spacing \& Shadow:} Sử dụng đơn vị cơ sở 4px và hệ thống Elevation của Material Design để tạo chiều sâu cho các thành phần Card và Surface.
+\end{itemize}
+
+\subsubsection{Kỹ thuật điều hướng (Navigation)}
+Ứng dụng không sử dụng thư viện điều hướng thông thường mà triển khai giải pháp \textbf{Custom Navigation Hook} kết hợp với \textit{History Stack}:
+\begin{itemize}
+    \item \textbf{Cơ chế:} Quản lý mảng lịch sử (History Array) để thực hiện các thao tác \texttt{navigate}, \texttt{goBack} và \texttt{reset}.
+    \item \textbf{Hiệu ứng:} Sử dụng \textit{Animated API} để tạo hiệu ứng Fade và Scale ($0.95x$) khi chuyển màn hình với thời gian trễ 300ms.
+\end{itemize}
+
+\subsubsection{Sơ đồ điều hướng}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.9\textwidth]{So_Do_Dieu_Huong.png}
+    \caption{Sơ đồ điều hướng của ứng dụng}
+    \label{fig:navigation-diagram}
+\end{figure}
+
+\subsubsection{Chi tiết thiết kế các màn hình theo Use Case}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_trangchu.jpg}
+    \caption{Thiết kế giao diện trang chủ}
+    \label{fig:app-screenshots-home}
+\end{figure}
+% --- UC1: MUA SẮM ---
+\paragraph{1. Nhóm UC-01: Quản lý danh sách mua sắm}
+Màn hình này cho phép người dùng theo dõi và thực hiện các kế hoạch mua sắm của gia đình.
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Custom Header} (Logo + Title)
+            \item \texttt{ScrollView} $\rightarrow$ Danh sách các \texttt{ShoppingCard}
+            \item Trong mỗi \texttt{ShoppingCard}: \texttt{Avatar} (Người đảm nhận) + \texttt{ProgressBar} (Tiến độ mua sắm) + \texttt{Chip} (Trạng thái)
+            \item \texttt{FAB} (Floating Action Button): Nút tạo mới danh sách
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:} 
+        \begin{itemize}
+            \item \textbf{Gestures:} Sử dụng \textit{Pull-to-refresh} để đồng bộ dữ liệu mua sắm từ server backend.
+            \item \textbf{Interactions:} Khi người dùng tick vào vật phẩm, hệ thống kích hoạt hộp thoại nhập số lượng thực tế. Nếu số lượng mua ít hơn dự định, hệ thống tự động tách mục mới cho phần thiếu.
+        \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_muasam_1.jpg}
+    \caption{Thiết kế trang quản lý danh sách mua sắm - 1}
+    \label{fig:app-screenshots-shopping1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_muasam_2.jpg}
+    \caption{Thiết kế giao diện chi tiết danh sách mua sắm - 2}
+    \label{fig:app-screenshots-shopping2}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_muasam_3.jpg}
+    \caption{Thiết kế giao diện chi tiết danh sách mua sắm - 3}
+    \label{fig:app-screenshots-shopping3}
+\end{figure}
+% --- UC2: THỰC ĐƠN ---
+\paragraph{3. Nhóm UC-02: Quản lý dự định bữa ăn}
+Giao diện lịch biểu giúp người dùng lên kế hoạch ăn uống khoa học.
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{Calendar} (Thư viện \textit{react-native-calendars}): Hiển thị lịch tháng với các dấu chấm (\textit{Dots}) đánh dấu bữa ăn.
+            \item \texttt{SelectedDateSection}: Hiển thị chi tiết bữa sáng, trưa, tối của ngày được chọn.
+            \item \texttt{MealCard}: Chứa icon loại bữa ăn, tên món ăn và nút xóa.
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Gestures:} Vuốt ngang trên Calendar để chuyển tháng; Chạm vào một ngày để cập nhật danh sách bữa ăn bên dưới thông qua sự kiện \texttt{onDayPress}.
+            \item \textbf{Interactions:} Nhấn vào \texttt{FAB} "+" để mở màn hình chọn công thức nấu ăn thêm vào thực đơn ngày đang chọn.
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_lapkehoach_1.jpg}
+    \caption{Thiết kế giao diện quản lý dự định bữa ăn - 1}
+    \label{fig:app-screenshots-mealcalendar1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_lapkehoach_2.jpg}
+    \caption{Thiết kế giao diện quản lý dự định bữa ăn - 2}
+    \label{fig:app-screenshots-mealcalendar2}
+\end{figure}
+% --- UC3: TỦ LẠNH ---
+\paragraph{2. Nhóm UC-03: Quản lý thực phẩm trong bếp}
+Giao diện quản lý kho lương thực hiện có với cảnh báo hạn sử dụng thông minh.
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{View.filterSection}: Gồm \texttt{Searchbar} và hàng \texttt{Menu} lọc (Danh mục, Trạng thái, Sắp xếp).
+            \item \texttt{ScrollView} $\rightarrow$ \texttt{GridContainer}: Hiển thị các \texttt{ItemCard} theo dạng lưới 2 cột.
+            \item Trong mỗi \texttt{ItemCard}: Hình ảnh thực phẩm + \texttt{ExpiryRow} (Icon lịch + Text ngày hết hạn).
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{User Input:} Searchbar xử lý sự kiện \texttt{onChangeText} để lọc danh sách thực phẩm theo thời gian thực.
+            \item \textbf{Gestures:} Chạm giữ (Long press) vào một thực phẩm để mở menu thao tác nhanh (Sửa/Xóa).
+            \item \textbf{Visual Style:} Màu sắc của nhãn trạng thái (\textit{Chip}) thay đổi linh hoạt: Xanh ($>3$ ngày), Cam (Sắp hết hạn), Đỏ (Đã hết hạn).
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_khothucpham_1.jpg}
+    \caption{Thiết kế giao diện quản lý thực phẩm trong bếp - 1}
+    \label{fig:app-screenshots-pantry1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_khothucpham_2.jpg}
+    \caption{Thiết kế giao diện quản lý thực phẩm trong bếp - 2}
+    \label{fig:app-screenshots-pantry2}
+\end{figure}
+% --- UC04: Quản lý công thức nấu ăn --- %
+\paragraph{4. Nhóm UC-04: Quản lý công thức nấu ăn}
+Giao diện quản lý kho công thức nấu ăn.
+
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + Tiêu đề ``Công thức''.
+            \item \texttt{View.searchContainer}: \texttt{Searchbar} (react-native-paper) cho phép tìm kiếm công thức theo tên.
+            \item \texttt{View.filterContainer}: Hàng các \texttt{Menu} lọc gồm:
+                \begin{itemize}
+                    \item \texttt{Chip} ``Loại'' (COMMON/PERSONAL)
+                    \item \texttt{Chip} ``Độ khó'' (Dễ/Trung bình/Khó)
+                    \item \texttt{Chip} ``Sắp xếp'' (Mới nhất/Đánh giá/Thời gian/Tên)
+                \end{itemize}
+            \item \texttt{FlatList} $\rightarrow$ \texttt{GridContainer}: Hiển thị các \texttt{RecipeCard} theo dạng lưới 2 cột với \texttt{infinite scroll}.
+            \item Trong mỗi \texttt{RecipeCard}:
+                \begin{itemize}
+                    \item \texttt{Image}: Hình ảnh món ăn (hoặc placeholder icon \texttt{silverware-fork-knife}).
+                    \item \texttt{Text.recipeName}: Tên công thức.
+                    \item \texttt{StatsRow}: Icon + thời gian tổng | Icon sao + rating | Icon người + servings.
+                    \item \texttt{ChipsRow}: \texttt{DifficultyChip} + \texttt{PersonalChip} (nếu là công thức cá nhân).
+                    \item \texttt{IconButton.delete}: Nút xóa (chỉ hiện với PERSONAL).
+                \end{itemize}
+            \item \texttt{FAB}: Floating Action Button màu primary để thêm công thức mới.
+            \item \texttt{BottomNavBar}: Tab ``recipe'' đang active.
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{User Input:} \texttt{Searchbar} xử lý \texttt{onChangeText} để lọc công thức theo thời gian thực.
+            \item \textbf{Filter Menus:} Nhấn vào \texttt{Chip} mở \texttt{Menu} dropdown với các tùy chọn lọc.
+            \item \textbf{Infinite Scroll:} \texttt{FlatList} gọi \texttt{fetchNextPage()} khi scroll đến cuối danh sách.
+            \item \textbf{Navigation:} Nhấn vào \texttt{RecipeCard} gọi \texttt{onRecipePress(recipeId)} để xem chi tiết.
+            \item \textbf{Delete Action:} Nhấn nút xóa hiển thị \texttt{Alert.alert} xác nhận trước khi gọi \texttt{deleteRecipeMutation}.
+            \item \textbf{Pull-to-refresh:} \texttt{RefreshControl} cho phép kéo xuống để reload danh sách.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Màu sắc độ khó (\texttt{DifficultyChip}):}
+                \begin{itemize}
+                    \item Xanh lá (\texttt{\#66BB6A}) - Dễ (EASY)
+                    \item Cam (\texttt{\#FFA726}) - Trung bình (MEDIUM)
+                    \item Đỏ (\texttt{\#EF5350}) - Khó (HARD)
+                \end{itemize}
+            \item \textbf{Personal Badge:} \texttt{Chip} viền outline với text "Cá nhân" cho công thức riêng của nhóm.
+            \item \textbf{Rating Display:} Icon sao màu vàng + điểm đánh giá (0-5) + số lượt đánh giá.
+            \item \textbf{Time Format:} Hiển thị tổng thời gian (prepTime + cookTime) theo định dạng "X giờ Y phút" hoặc "X phút".
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{searchQuery}: Chuỗi tìm kiếm công thức.
+            \item \texttt{selectedType}: Lọc theo loại (COMMON/PERSONAL/undefined).
+            \item \texttt{selectedDifficulty}: Lọc theo độ khó (EASY/MEDIUM/HARD/undefined).
+            \item \texttt{sortBy}: Tiêu chí sắp xếp ('createdAt', 'rating', 'prepTime', 'name').
+            \item \texttt{useInfiniteRecipes}: React Query hook với infinite scroll pagination.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Chi tiết công thức}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Chi tiết công thức'' + nút Edit/Delete (chỉ PERSONAL).
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{Image}: Hình ảnh lớn của món ăn.
+                    \item \texttt{Card.InfoCard}: Tên + Mô tả + Tags + StatsRow (thời gian, servings, rating, difficulty).
+                    \item \texttt{Card.TimeDetails}: Hiển thị chi tiết thời gian chuẩn bị và thời gian nấu riêng biệt.
+                    \item \texttt{Card.MainIngredients}: Danh sách nguyên liệu chính với icon \texttt{food-variant}.
+                    \item \texttt{Card.SecondaryIngredients}: Danh sách nguyên liệu phụ với icon \texttt{food-apple}.
+                    \item \texttt{Card.Instructions}: Các bước làm được đánh số với icon \texttt{chef-hat}.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Data Display:}
+        \begin{itemize}
+            \item \textbf{Ingredients:} Phân loại thành MAIN và SECONDARY, hiển thị với bullet point màu sắc khác nhau.
+            \item \textbf{Instructions:} Danh sách các bước được đánh số thứ tự.
+            \item \textbf{Tags:} Hiển thị dạng \texttt{Chip} compact trong \texttt{tagsContainer}.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Thêm/Sửa công thức (AddRecipeScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{KeyboardAvoidingView}: Đảm bảo form không bị che khi mở bàn phím.
+            \item \texttt{ScrollView} chứa các section form:
+                \begin{itemize}
+                    \item \texttt{TextInput.name}: Tên công thức (required).
+                    \item \texttt{TextInput.description}: Mô tả (multiline).
+                    \item \texttt{TextInput.imageUrl}: URL hình ảnh.
+                    \item \texttt{Menu.type}: Chọn loại (COMMON/PERSONAL).
+                    \item \texttt{Menu.difficulty}: Chọn độ khó (Dễ/Trung bình/Khó).
+                    \item \texttt{Row}: \texttt{TextInput.prepTime} + \texttt{TextInput.cookTime} + \texttt{TextInput.servings}.
+                    \item \texttt{Section.mainIngredients}: Danh sách nguyên liệu chính với nút thêm/xóa.
+                    \item \texttt{Section.secondaryIngredients}: Danh sách nguyên liệu phụ với nút thêm/xóa.
+                    \item \texttt{Section.instructions}: Các bước làm với nút thêm/xóa bước.
+                    \item \texttt{Section.tags}: Input thêm tag + danh sách tags hiện có.
+                    \item \texttt{Button.save}: Nút lưu công thức.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Form:}
+        \begin{itemize}
+            \item \textbf{Dynamic Lists:} \texttt{addIngredient()}, \texttt{removeIngredient()}, \texttt{addInstruction()}, \texttt{removeInstruction()}.
+            \item \textbf{Validation:} Kiểm tra tất cả required fields trước khi submit.
+            \item \textbf{Edit Mode:} Nếu có \texttt{recipeId}, load dữ liệu từ \texttt{useRecipe()} và populate form.
+            \item \textbf{Submit:} Gọi \texttt{createMutation} hoặc \texttt{updateMutation} tùy theo mode.
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_congthuc_1.jpg}
+    \caption{Thiết kế giao diện quản lý công thức nấu ăn - 1}
+    \label{fig:app-screenshots-recipe1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_congthuc_2.jpg}
+    \caption{Thiết kế giao diện quản lý công thức nấu ăn - 2}
+    \label{fig:app-screenshots-recipe2}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_congthuc_3.jpg}
+    \caption{Thiết kế giao diện quản lý công thức nấu ăn - 3}
+    \label{fig:app-screenshots-recipe3}
+\end{figure}
+
+% --- UC05: Quản lý danh sách thực phẩm ---
+\paragraph{5. Nhóm UC-05: Quản lý danh sách thực phẩm}
+% --- UC06: Quản lý nhóm ---
+\paragraph{5. Nhóm UC-06: Quản lý nhóm}
+Giao diện quản lý nhóm gia đình/bạn bè để cùng chia sẻ tủ lạnh và thực đơn.
+
+\subparagraph{Màn hình Danh sách nhóm (GroupListScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Logo + Tiêu đề ``Nhóm của tôi'' + Nút Search.
+            \item \texttt{Surface.summaryCard}: Thống kê tổng quan:
+                \begin{itemize}
+                    \item \texttt{Avatar.Icon} + Tổng số nhóm
+                    \item \texttt{Divider} dọc
+                    \item \texttt{Avatar.Icon} + Tổng số thành viên (tổng hợp từ tất cả nhóm)
+                \end{itemize}
+            \item \texttt{View.content} $\rightarrow$ \texttt{FlatList}: Danh sách các \texttt{GroupCard}.
+            \item Trong mỗi \texttt{GroupCard}:
+                \begin{itemize}
+                    \item \texttt{Avatar.Icon} ``account-group'': Icon nhóm màu primary.
+                    \item \texttt{Text.groupName}: Tên nhóm.
+                    \item \texttt{Text.groupDescription}: Mô tả (tối đa 2 dòng).
+                    \item \texttt{IconButton.chevron-right}: Mũi tên điều hướng.
+                    \item \texttt{StatsRow}: Icon + số thành viên | Icon + ngày tạo.
+                    \item \texttt{MembersPreview}: Dãy avatar thành viên (tối đa 4 + badge ``+N'').
+                \end{itemize}
+            \item \texttt{FAB}: Floating Action Button ``Tạo nhóm'' màu primary.
+            \item \texttt{BottomNavBar}: Tab ``home'' đang active.
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Navigation:} Nhấn vào \texttt{GroupCard} gọi \texttt{selectGroup()} và \texttt{onGroupPress()} để xem chi tiết nhóm.
+            \item \textbf{Create Action:} Nhấn \texttt{FAB} gọi \texttt{onCreatePress()} để chuyển đến màn hình tạo nhóm.
+            \item \textbf{Pull-to-refresh:} \texttt{RefreshControl} cho phép kéo xuống gọi \texttt{refetch()} để reload danh sách.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Màu sắc theo số thành viên:}
+                \begin{itemize}
+                    \item Xanh lá (\texttt{colors.success}) - Từ 5 thành viên trở lên
+                    \item Xanh dương (\texttt{colors.info}) - Từ 3-4 thành viên
+                    \item Tím (\texttt{colors.tertiary}) - Dưới 3 thành viên
+                \end{itemize}
+            \item \textbf{Empty State:} Hiển thị icon lớn, text ``Chưa có nhóm nào'' và nút tạo nhóm khi danh sách rỗng.
+            \item \textbf{Date Format:} Ngày tạo hiển thị theo định dạng ``dd Tháng'' (vi-VN).
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{groups}: Danh sách nhóm từ \texttt{useGroups()} hook.
+            \item \texttt{refreshing}: Trạng thái đang refresh.
+            \item \texttt{selectGroup}: Action từ \texttt{useGroupState()} để chọn nhóm hiện tại.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Chi tiết nhóm (GroupDetailScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + ``Chi tiết nhóm'' + Nút Settings.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{Surface.infoCard}: Thông tin nhóm:
+                        \begin{itemize}
+                            \item \texttt{Avatar.Icon}: Icon nhóm lớn (70px).
+                            \item \texttt{Text.groupName}: Tên nhóm.
+                            \item \texttt{Text.description}: Mô tả nhóm.
+                            \item \texttt{StatsContainer}: 3 thẻ thống kê (Số thành viên | Ngày tạo | Vai trò).
+                        \end{itemize}
+                    \item \texttt{Section.members}: Danh sách thành viên:
+                        \begin{itemize}
+                            \item \texttt{SectionHeader}: Tiêu đề + Nút ``Thêm'' (nếu có quyền).
+                            \item \texttt{Card.membersCard}: Danh sách \texttt{MemberItem}.
+                        \end{itemize}
+                    \item \texttt{MemberItem} bao gồm:
+                        \begin{itemize}
+                            \item \texttt{Avatar.Image/Icon}: Avatar thành viên.
+                            \item \texttt{Text.memberName}: Tên thành viên.
+                            \item \texttt{Text.memberEmail}: Email thành viên.
+                            \item \texttt{RoleBadge}: Badge hiển thị vai trò.
+                            \item \texttt{Menu}: Menu tùy chọn (đổi vai trò, xóa - chỉ hiện với quyền quản lý).
+                        \end{itemize}
+                    \item \texttt{Actions}: Nút ``Xóa nhóm'' (Owner) hoặc ``Rời khỏi nhóm'' (Member).
+                \end{itemize}
+            \item \texttt{Portal.Dialog}: Dialog xác nhận xóa/rời nhóm.
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Add Member:} Nhấn nút ``Thêm'' gọi \texttt{onAddMember()} (yêu cầu quyền OWNER/ADMIN).
+            \item \textbf{Member Menu:} Nhấn icon 3 chấm mở \texttt{Menu} với các tùy chọn:
+                \begin{itemize}
+                    \item ``Thay đổi vai trò''
+                    \item ``Chuyển quyền chủ nhóm'' (chỉ OWNER)
+                    \item ``Xóa khỏi nhóm''
+                \end{itemize}
+            \item \textbf{Delete Group:} Nhấn nút ``Xóa nhóm'' $\rightarrow$ \texttt{Dialog} xác nhận $\rightarrow$ \texttt{deleteGroupMutation}.
+            \item \textbf{Leave Group:} Nhấn nút ``Rời khỏi nhóm'' $\rightarrow$ \texttt{Dialog} xác nhận $\rightarrow$ \texttt{leaveGroupMutation}.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Màu sắc vai trò (\texttt{RoleBadge}):}
+                \begin{itemize}
+                    \item Primary (\texttt{colors.primary}) - Chủ nhóm (OWNER)
+                    \item Tím (\texttt{colors.tertiary}) - Quản trị (ADMIN)
+                    \item Cam (\texttt{colors.accent}) - Thành viên (MEMBER)
+                \end{itemize}
+            \item \textbf{Icon vai trò:}
+                \begin{itemize}
+                    \item \texttt{crown} - Chủ nhóm
+                    \item \texttt{shield-account} - Quản trị viên
+                    \item \texttt{account} - Thành viên
+                \end{itemize}
+            \item \textbf{Nút hành động:}
+                \begin{itemize}
+                    \item ``Xóa nhóm'': Nền đỏ (\texttt{colors.error}), text trắng.
+                    \item ``Rời khỏi nhóm'': Nền trắng, viền đỏ, text đỏ.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{selectedGroup}: Nhóm đang xem từ \texttt{useGroupState()}.
+            \item \texttt{menuVisible}: ID thành viên đang mở menu (null nếu đóng).
+            \item \texttt{deleteDialogVisible}: Hiển thị dialog xóa nhóm.
+            \item \texttt{leaveDialogVisible}: Hiển thị dialog rời nhóm.
+            \item \texttt{currentMember}: Thông tin thành viên hiện tại để kiểm tra quyền.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Tạo nhóm (CreateGroupScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + ``Tạo nhóm mới''.
+            \item \texttt{KeyboardAvoidingView} $\rightarrow$ \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{Surface.heroCard}: Phần giới thiệu:
+                        \begin{itemize}
+                            \item \texttt{Avatar.Icon}: Icon nhóm lớn (80px).
+                            \item \texttt{Text.heroTitle}: ``Tạo nhóm của bạn''.
+                            \item \texttt{Text.heroSubtitle}: Mô tả ngắn về tính năng.
+                        \end{itemize}
+                    \item \texttt{Card.formCard}: Form nhập liệu:
+                        \begin{itemize}
+                            \item \texttt{FormInput.name}: Tên nhóm (required).
+                            \item \texttt{FormInput.description}: Mô tả (multiline, optional).
+                        \end{itemize}
+                    \item \texttt{View.buttonContainer}: Hàng nút hành động:
+                        \begin{itemize}
+                            \item \texttt{TouchableOpacity.cancelButton}: Nút ``Hủy''.
+                            \item \texttt{TouchableOpacity.createButton}: Nút ``Tạo nhóm'' với icon plus.
+                        \end{itemize}
+                    \item \texttt{Card.tipsCard}: Card mẹo hữu ích với bullet list.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Form:}
+        \begin{itemize}
+            \item \textbf{Validation:} Sử dụng \texttt{react-hook-form} với \texttt{zodResolver} và schema \texttt{createGroupSchema}.
+            \item \textbf{Submit:} Gọi \texttt{createGroupMutation.mutateAsync()} với dữ liệu \{name, description\}.
+            \item \textbf{Error Handling:} Hiển thị \texttt{errorContainer} khi mutation thất bại.
+            \item \textbf{Loading State:} Disable form và đổi text nút thành ``Đang tạo...'' khi đang submit.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Input Label:} Icon avatar nhỏ + text label, icon màu primary cho tên, secondary cho mô tả.
+            \item \textbf{Tips Card:} Nền \texttt{tertiaryContainer}, icon lightbulb, danh sách mẹo với bullet point.
+            \item \textbf{Button Style:}
+                \begin{itemize}
+                    \item ``Hủy'': Nền \texttt{surfaceVariant}, text \texttt{textSecondary}.
+                    \item ``Tạo nhóm'': Nền primary, text trắng, có icon plus.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{control}: Controller từ \texttt{useForm()}.
+            \item \texttt{isSubmitting}: Trạng thái đang submit form.
+            \item \texttt{createGroupMutation}: Mutation hook từ \texttt{useCreateGroup()}.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Thêm thành viên (AddMemberScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + ``Thêm thành viên''.
+            \item \texttt{KeyboardAvoidingView} $\rightarrow$ \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{Surface.groupInfoCard}: Thông tin nhóm đang thêm vào:
+                        \begin{itemize}
+                            \item \texttt{Avatar.Icon}: Icon nhóm.
+                            \item \texttt{Text.groupInfoLabel}: ``Thêm vào nhóm''.
+                            \item \texttt{Text.groupInfoName}: Tên nhóm.
+                        \end{itemize}
+                    \item \texttt{Card.formCard}: Form nhập liệu:
+                        \begin{itemize}
+                            \item \texttt{FormInput.email}: Email thành viên (required).
+                            \item \texttt{Section.roleSelection}: Chọn vai trò với \texttt{RadioButton.Group} gồm \texttt{TouchableOpacity.roleOption} cho Thành viên (icon \texttt{account}) và Quản trị viên (icon \texttt{shield-account}).
+                        \end{itemize}
+                    \item \texttt{View.buttonContainer}: Nút ``Hủy'' + ``Thêm thành viên''.
+                    \item \texttt{Card.infoCard}: Card giải thích quyền hạn vai trò.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Form:}
+        \begin{itemize}
+            \item \textbf{Validation:} Schema \texttt{addMemberSchema} kiểm tra email hợp lệ.
+            \item \textbf{Role Selection:} \texttt{RadioButton.Group} với state \texttt{selectedRole}.
+            \item \textbf{Submit:} Gọi \texttt{addMemberMutation.mutateAsync(\{groupId, data: \{email, role\}\})}.
+            \item \textbf{Success:} Hiển thị \texttt{Alert.alert} và gọi \texttt{onSuccess()}.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Role Option:}
+                \begin{itemize}
+                    \item Nền \texttt{surfaceVariant}, viền trong suốt khi chưa chọn.
+                    \item Nền \texttt{primaryContainer}, viền primary khi được chọn.
+                \end{itemize}
+            \item \textbf{Màu sắc vai trò:}
+                \begin{itemize}
+                    \item Tím (\texttt{colors.tertiary}) - Quản trị viên
+                    \item Cam (\texttt{colors.accent}) - Thành viên
+                \end{itemize}
+            \item \textbf{Info Card:} Nền \texttt{infoLight}, giải thích 3 loại vai trò với bullet màu tương ứng.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{selectedGroup}: Nhóm đang thêm thành viên từ \texttt{useGroupState()}.
+            \item \texttt{selectedRole}: Vai trò đã chọn (mặc định \texttt{MemberRole.MEMBER}).
+            \item \texttt{control}: Controller từ \texttt{useForm()}.
+            \item \texttt{addMemberMutation}: Mutation hook từ \texttt{useAddMember()}.
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_quanlynhom_1.jpg}
+    \caption{Thiết kế giao diện quản lý nhóm - 1}
+    \label{fig:app-screenshots-group1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_quanlynhom_2.jpg}
+    \caption{Thiết kế giao diện quản lý nhóm - 2}
+    \label{fig:app-screenshots-group2}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_quanlynhom_3.jpg}
+    \caption{Thiết kế giao diện quản lý nhóm - 3}
+    \label{fig:app-screenshots-group3}
+\end{figure}
+% --- UC07: Thống kê và báo cáo ---
+\paragraph{6. Nhóm UC-07: Thống kê và báo cáo}
+Giao diện xem thống kê và báo cáo về tủ lạnh, mua sắm và bữa ăn.
+
+\subparagraph{Màn hình Báo cáo (ReportScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + Tiêu đề ``Báo cáo'' + Nút Download.
+            \item \texttt{View.tabContainer} $\rightarrow$ \texttt{ScrollView} (horizontal):
+                \begin{itemize}
+                    \item \texttt{SegmentedButtons}: 4 tab chuyển đổi:
+                        \begin{itemize}
+                            \item ``Tổng quan'' (icon: \texttt{view-dashboard})
+                            \item ``Tủ lạnh'' (icon: \texttt{fridge})
+                            \item ``Mua sắm'' (icon: \texttt{cart})
+                            \item ``Bữa ăn'' (icon: \texttt{silverware})
+                        \end{itemize}
+                \end{itemize}
+            \item \texttt{ScrollView.content}: Nội dung thay đổi theo tab đang active.
+            \item \texttt{BottomNavBar}: Tab ``home'' đang active.
+        \end{itemize}
+    \item \textbf{Tab Tổng quan (Overview):}
+        \begin{itemize}
+            \item \texttt{View.summaryGrid}: Lưới 2x2 các \texttt{Surface.summaryCard}:
+                \begin{itemize}
+                    \item Card ``Trong tủ lạnh'': Icon \texttt{fridge}, nền \texttt{primaryContainer}.
+                    \item Card ``Sắp hết hạn'': Icon \texttt{alert-circle}, nền \texttt{warningLight}.
+                    \item Card ``Hết hạn'': Icon \texttt{close-circle}, nền \texttt{errorLight}.
+                    \item Card ``Lãng phí'': Icon \texttt{currency-usd}, nền \texttt{secondaryContainer}.
+                \end{itemize}
+            \item \texttt{Card.categoryDistribution}: Phân loại thực phẩm:
+                \begin{itemize}
+                    \item Header: Icon \texttt{chart-pie} + ``Phân loại thực phẩm''.
+                    \item Danh sách \texttt{CategoryItem}: Dot màu + Tên danh mục + Số lượng + \texttt{ProgressBar}.
+                \end{itemize}
+            \item \texttt{Card.topItems}: Thực phẩm phổ biến:
+                \begin{itemize}
+                    \item Header: Icon \texttt{star} + ``Thực phẩm phổ biến''.
+                    \item Danh sách \texttt{TopItem}: Rank badge + Tên + Category + Số lần.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Tab Tủ lạnh (Kitchen):}
+        \begin{itemize}
+            \item \texttt{Card.weeklyTrend}: Xu hướng tuần này:
+                \begin{itemize}
+                    \item Header: Icon \texttt{chart-bar} + ``Xu hướng tuần này''.
+                    \item \texttt{View.chartContainer}: Biểu đồ cột 7 ngày (T2-CN).
+                    \item \texttt{ChartBarFill}: Cột màu primary với chiều cao tỷ lệ theo giá trị.
+                    \item \texttt{ChartLegend}: Chú thích ``Chi tiêu theo ngày''.
+                \end{itemize}
+            \item \texttt{Card.kitchenDetails}: Chi tiết tủ lạnh:
+                \begin{itemize}
+                    \item Header: Icon \texttt{food-variant} + ``Chi tiết tủ lạnh''.
+                    \item \texttt{View.statsGrid}: Lưới 2x2 hiển thị:
+                        \begin{itemize}
+                            \item Tổng số món (màu mặc định)
+                            \item Còn tốt (màu \texttt{success})
+                            \item Sắp hết hạn (màu \texttt{warning})
+                            \item Hết hạn (màu \texttt{error})
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Tab Mua sắm (Shopping):}
+        \begin{itemize}
+            \item \texttt{Card.shoppingOverview}: Tổng quan mua sắm:
+                \begin{itemize}
+                    \item Header: Icon \texttt{cart} + ``Tổng quan mua sắm''.
+                    \item \texttt{View.shoppingStats}: 3 thẻ thống kê:
+                        \begin{itemize}
+                            \item ``Danh sách'': Icon \texttt{format-list-checks} (primary).
+                            \item ``Hoàn thành'': Icon \texttt{check-circle} (success).
+                            \item ``Món đã mua'': Icon \texttt{package-variant} (tertiary).
+                        \end{itemize}
+                \end{itemize}
+            \item \texttt{Card.spending}: Chi tiêu:
+                \begin{itemize}
+                    \item Header: Icon \texttt{cash-multiple} + ``Chi tiêu''.
+                    \item \texttt{View.spendingContainer}: Nền \texttt{surfaceVariant}:
+                        \begin{itemize}
+                            \item \texttt{SpendingMain}: Tổng chi tiêu tháng (font lớn, màu primary).
+                            \item \texttt{SpendingDetail}: Trung bình/danh sách + Tiết kiệm so với tháng trước.
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Tab Bữa ăn (Meal):}
+        \begin{itemize}
+            \item \texttt{Card.mealOverview}: Thống kê bữa ăn:
+                \begin{itemize}
+                    \item Header: Icon \texttt{silverware-fork-knife} + ``Thống kê bữa ăn''.
+                    \item \texttt{View.mealStatCircle}: Hình tròn lớn hiển thị tổng số bữa ăn.
+                    \item \texttt{View.mealStatDetails}: 3 thẻ chi tiết:
+                        \begin{itemize}
+                            \item ``Bữa sáng'': Icon \texttt{weather-sunny} (tertiary).
+                            \item ``Bữa trưa'': Icon \texttt{white-balance-sunny} (warning).
+                            \item ``Bữa tối'': Icon \texttt{weather-night} (secondary).
+                        \end{itemize}
+                \end{itemize}
+            \item \texttt{Card.recipeUsage}: Sử dụng công thức:
+                \begin{itemize}
+                    \item Header: Icon \texttt{book-open-variant} + ``Sử dụng công thức''.
+                    \item \texttt{View.recipeStats}: 2 cột với divider:
+                        \begin{itemize}
+                            \item Số công thức đã dùng.
+                            \item Tỷ lệ áp dụng (\%).
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Tab Navigation:} \texttt{SegmentedButtons.onValueChange} cập nhật \texttt{activeTab} để render nội dung tương ứng.
+            \item \textbf{Pull-to-refresh:} \texttt{RefreshControl} cho phép kéo xuống để reload dữ liệu báo cáo.
+            \item \textbf{Download Action:} Nút download trên header (chức năng đang phát triển).
+            \item \textbf{Horizontal Scroll:} Tab selector có thể cuộn ngang trên màn hình nhỏ.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Summary Cards:}
+                \begin{itemize}
+                    \item Nền gradient nhẹ theo ngữ cảnh (primary/warning/error/secondary).
+                    \item Icon tròn với màu nền tương ứng.
+                    \item Số liệu font lớn (24px), label font nhỏ (12px).
+                \end{itemize}
+            \item \textbf{Progress Bars:} Height 8px, border-radius 4px, màu theo danh mục.
+            \item \textbf{Bar Chart:}
+                \begin{itemize}
+                    \item Chiều cao tối đa 150px.
+                    \item Cột width 24px, border-radius 4px, màu primary.
+                    \item Label ngày ở dưới mỗi cột.
+                \end{itemize}
+            \item \textbf{Meal Circle:}
+                \begin{itemize}
+                    \item Kích thước 120x120px, border-radius 60px.
+                    \item Nền \texttt{primaryContainer}, số liệu font 36px màu primary.
+                \end{itemize}
+            \item \textbf{Currency Format:} Định dạng VND với \texttt{toLocaleString('vi-VN')}.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{activeTab}: Tab đang hiển thị ('overview' | 'kitchen' | 'shopping' | 'meal').
+            \item \texttt{refreshing}: Trạng thái đang refresh dữ liệu.
+            \item \texttt{mockReportData}: Dữ liệu báo cáo (mock data, sẽ thay bằng API call).
+            \item \texttt{maxWeeklySpent}: Giá trị max của tuần để tính tỷ lệ biểu đồ cột (useMemo).
+        \end{itemize}
+    \item \textbf{Dữ liệu hiển thị:}
+        \begin{itemize}
+            \item \textbf{Overview:}
+                \begin{itemize}
+                    \item Tổng số thực phẩm trong tủ lạnh.
+                    \item Số thực phẩm sắp hết hạn / đã hết hạn.
+                    \item Giá trị lãng phí (VND).
+                    \item Phân bố theo danh mục với tỷ lệ phần trăm.
+                    \item Top 5 thực phẩm được mua nhiều nhất.
+                \end{itemize}
+            \item \textbf{Kitchen:}
+                \begin{itemize}
+                    \item Biểu đồ xu hướng chi tiêu 7 ngày.
+                    \item Chi tiết trạng thái tủ lạnh (còn tốt/sắp hết hạn/hết hạn).
+                \end{itemize}
+            \item \textbf{Shopping:}
+                \begin{itemize}
+                    \item Số danh sách mua sắm / đã hoàn thành.
+                    \item Tổng số món đã mua.
+                    \item Tổng chi tiêu tháng.
+                    \item Trung bình chi tiêu mỗi danh sách.
+                    \item Phần trăm tiết kiệm so với tháng trước.
+                \end{itemize}
+            \item \textbf{Meal:}
+                \begin{itemize}
+                    \item Tổng số bữa ăn đã lên lịch.
+                    \item Phân bố theo bữa sáng/trưa/tối.
+                    \item Số công thức đã sử dụng.
+                    \item Tỷ lệ áp dụng công thức.
+                \end{itemize}
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_thongke_1.jpg}
+    \caption{Thiết kế giao diện thống kê và báo cáo - 1}
+    \label{fig:app-screenshots-report1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_thongke_2.jpg}
+    \caption{Thiết kế giao diện thống kê và báo cáo - 2}
+    \label{fig:app-screenshots-report2}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_thongke_3.jpg}
+    \caption{Thiết kế giao diện thống kê và báo cáo - 3}
+    \label{fig:app-screenshots-report3}
+\end{figure}
+% --- UC08: Quản trị người dùng ---
+\paragraph{8. Nhóm UC-08: Quản trị người dùng}
+\subparagraph{Màn hình Danh sách người dùng (UserManagementScreen)}
+
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Logo + Tiêu đề ``Quản trị người dùng'' + Icon Notification.
+            \item \texttt{View.searchContainer}: \texttt{Searchbar} (react-native-paper) cho phép tìm kiếm theo tên, email hoặc số điện thoại.
+            \item \texttt{View.filterContainer}: Hàng các \texttt{Chip} lọc gồm:
+                \begin{itemize}
+                    \item \texttt{Chip} ``Trạng thái'' (Tất cả/Hoạt động/Bị khóa)
+                    \item \texttt{Chip} ``Sắp xếp'' (Mới nhất/Tên A-Z/Tên Z-A)
+                    \item \texttt{IconButton} ``Làm mới'' để reload danh sách
+                \end{itemize}
+            \item \texttt{View.statsContainer}: Hiển thị thống kê tổng quan:
+                \begin{itemize}
+                    \item \texttt{Card.StatCard}: Tổng số người dùng với icon \texttt{account-group}
+                    \item \texttt{Card.StatCard}: Người dùng hoạt động với icon \texttt{account-check}
+                    \item \texttt{Card.StatCard}: Tài khoản bị khóa với icon \texttt{account-lock}
+                \end{itemize}
+            \item \texttt{FlatList} $\rightarrow$ \texttt{UserCard}: Hiển thị danh sách người dùng với \texttt{infinite scroll}.
+            \item Trong mỗi \texttt{UserCard}:
+                \begin{itemize}
+                    \item \texttt{Avatar}: Ảnh đại diện người dùng với fallback icon \texttt{account}.
+                    \item \texttt{View.userInfo}:
+                        \begin{itemize}
+                            \item \texttt{Text.userName}: Họ tên người dùng (bold).
+                            \item \texttt{Text.userEmail}: Email với icon \texttt{email}.
+                            \item \texttt{Text.userPhone}: Số điện thoại với icon \texttt{phone}.
+                            \item \texttt{Text.registeredDate}: Ngày đăng ký với icon \texttt{calendar}.
+                        \end{itemize}
+                    \item \texttt{Chip.statusChip}: Badge trạng thái (Hoạt động/Bị khóa):
+                        \begin{itemize}
+                            \item Màu xanh lá (\texttt{\#4CAF50}) - Hoạt động
+                            \item Màu đỏ (\texttt{\#F44336}) - Bị khóa
+                        \end{itemize}
+                    \item \texttt{View.actionsRow}: Hàng các nút hành động:
+                        \begin{itemize}
+                            \item \texttt{IconButton.view}: Icon \texttt{eye} để xem chi tiết.
+                            \item \texttt{IconButton.lock}: Icon \texttt{lock}/\texttt{lock-open} để khóa/mở khóa.
+                            \item \texttt{IconButton.delete}: Icon \texttt{delete} để xóa tài khoản.
+                        \end{itemize}
+                \end{itemize}
+            \item \texttt{Portal} $\rightarrow$ \texttt{Dialog.confirmDialog}: Dialog xác nhận cho các hành động quan trọng.
+            \item \texttt{BottomNavBar}: Tab ``admin'' đang active (chỉ hiện với QTV).
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{User Input:} \texttt{Searchbar} xử lý \texttt{onChangeText} với debounce 300ms để tìm kiếm.
+            \item \textbf{Filter Actions:} Nhấn vào \texttt{Chip} trạng thái để lọc danh sách theo trạng thái.
+            \item \textbf{Sort Actions:} Nhấn vào \texttt{Chip} sắp xếp mở \texttt{Menu} với các tùy chọn sắp xếp.
+            \item \textbf{Infinite Scroll:} \texttt{FlatList} gọi \texttt{fetchNextPage()} khi scroll đến cuối danh sách.
+            \item \textbf{View Details:} Nhấn vào \texttt{UserCard} hoặc nút \texttt{eye} gọi \texttt{onUserPress(userId)} để xem chi tiết.
+            \item \textbf{Lock/Unlock:} Nhấn nút khóa hiển thị \texttt{Dialog.confirm} xác nhận trước khi gọi \texttt{toggleUserStatusMutation}.
+            \item \textbf{Delete Action:} Nhấn nút xóa hiển thị \texttt{Dialog.confirm} với cảnh báo nghiêm trọng trước khi gọi \texttt{deleteUserMutation}.
+            \item \textbf{Pull-to-refresh:} \texttt{RefreshControl} cho phép kéo xuống để reload danh sách.
+            \item \textbf{Empty State:} Hiển thị \texttt{EmptyState} khi không có kết quả tìm kiếm hoặc chưa có người dùng.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Card Layout:} Mỗi \texttt{UserCard} có elevation nhẹ, padding 16, borderRadius 8, margin vertical 8.
+            \item \textbf{Status Colors:}
+                \begin{itemize}
+                    \item Xanh lá (\texttt{\#4CAF50}) - Tài khoản hoạt động (ACTIVE)
+                    \item Đỏ (\texttt{\#F44336}) - Tài khoản bị khóa (LOCKED)
+                \end{itemize}
+            \item \textbf{Avatar:} Size 56x56 với fallback background màu primary.
+            \item \textbf{Action Buttons:} IconButton size 24 với màu theo ngữ cảnh:
+                \begin{itemize}
+                    \item View: màu primary (\texttt{\#007AFF})
+                    \item Lock/Unlock: màu warning (\texttt{\#FF9800})
+                    \item Delete: màu error (\texttt{\#F44336})
+                \end{itemize}
+            \item \textbf{Typography:} userName size 16 bold, email/phone size 14 regular, date size 12 muted.
+            \item \textbf{Stats Cards:} Grid 3 cột với background gradient nhẹ, icon size 32, số liệu size 24 bold.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{searchQuery}: Chuỗi tìm kiếm người dùng (debounced).
+            \item \texttt{statusFilter}: Lọc theo trạng thái ('ALL'/'ACTIVE'/'LOCKED').
+            \item \texttt{sortBy}: Tiêu chí sắp xếp ('createdAt', 'name\_asc', 'name\_desc').
+            \item \texttt{useInfiniteUsers}: React Query hook với infinite scroll pagination.
+            \item \texttt{selectedUser}: User đang được chọn cho action (lock/delete).
+            \item \texttt{dialogVisible}: Boolean điều khiển hiển thị dialog xác nhận.
+            \item \texttt{dialogType}: Loại action đang xác nhận ('lock', 'unlock', 'delete').
+        \end{itemize}
+    \item \textbf{API Integration:}
+        \begin{itemize}
+            \item \texttt{useInfiniteQuery}: Fetch danh sách người dùng với pagination.
+            \item \texttt{useMutation}: Toggle status (UC-08.2 - Khóa/Mở khóa tài khoản).
+            \item \texttt{useMutation}: Delete user (UC-08.3 - Xóa tài khoản).
+            \item \textbf{Invalidation:} Sau mỗi mutation thành công, invalidate query 'users' để refresh danh sách.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Chi tiết người dùng (UserDetailsScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Chi tiết người dùng'' + Menu actions.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{View.profileHeader}: Section header với gradient background:
+                        \begin{itemize}
+                            \item \texttt{Avatar.large}: Ảnh đại diện size 120x120.
+                            \item \texttt{Text.userName}: Họ tên size 24 bold.
+                            \item \texttt{Chip.statusChip}: Badge trạng thái lớn với icon.
+                        \end{itemize}
+                    \item \texttt{Card.basicInfo}: Thông tin cơ bản:
+                        \begin{itemize}
+                            \item \texttt{List.Item}: Email với icon \texttt{email} (copyable).
+                            \item \texttt{List.Item}: Số điện thoại với icon \texttt{phone} (copyable).
+                            \item \texttt{List.Item}: ID người dùng với icon \texttt{identifier}.
+                            \item \texttt{List.Item}: Ngày đăng ký với icon \texttt{calendar}.
+                        \end{itemize}
+                    \item \texttt{Card.groupsInfo}: Thông tin nhóm:
+                        \begin{itemize}
+                            \item \texttt{Text.sectionTitle}: ``Nhóm tham gia'' với icon \texttt{account-group}.
+                            \item \texttt{FlatList}: Danh sách các nhóm người dùng tham gia, mỗi nhóm hiển thị \texttt{Chip.groupChip} (tên nhóm + vai trò Leader/Member) và \texttt{Text.groupMembers} (số thành viên).
+                        \end{itemize}
+                    \item \texttt{Card.activityStats}: Thống kê hoạt động:
+                        \begin{itemize}
+                            \item \texttt{View.statRow}: Tổng số bữa ăn đã lên lịch với icon \texttt{food}.
+                            \item \texttt{View.statRow}: Số công thức cá nhân đã tạo với icon \texttt{chef-hat}.
+                            \item \texttt{View.statRow}: Số lần đi chợ đã thực hiện với icon \texttt{cart}.
+                            \item \texttt{View.statRow}: Lần hoạt động cuối với icon \texttt{clock}.
+                        \end{itemize}
+                    \item \texttt{Card.accountHistory}: Lịch sử tài khoản:
+                        \begin{itemize}
+                            \item \texttt{Timeline}: Các sự kiện quan trọng bao gồm ngày tạo tài khoản, các lần bị khóa/mở khóa (nếu có), và các lần thay đổi thông tin quan trọng.
+                        \end{itemize}
+                    \item \texttt{View.actionsContainer}: Các nút hành động chính:
+                        \begin{itemize}
+                            \item \texttt{Button.toggleStatus}: Nút khóa/mở khóa tài khoản (màu warning).
+                            \item \texttt{Button.sendNotification}: Nút gửi thông báo cho người dùng (màu info).
+                            \item \texttt{Button.delete}: Nút xóa tài khoản (màu error, outlined).
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Copy Actions:} Nhấn giữ vào email/phone để copy vào clipboard với \texttt{Snackbar} xác nhận.
+            \item \textbf{Navigation to Groups:} Nhấn vào \texttt{groupChip} để navigate đến chi tiết nhóm.
+            \item \textbf{Toggle Status:} Nhấn nút khóa/mở khóa hiển thị \texttt{Dialog} xác nhận với lý do (TextInput multiline).
+            \item \textbf{Send Notification:} Nhấn nút gửi thông báo mở \texttt{Dialog} nhập tiêu đề và nội dung thông báo.
+            \item \textbf{Delete Action:} Nhấn nút xóa hiển thị \texttt{Dialog} với cảnh báo nghiêm trọng và yêu cầu nhập mật khẩu admin xác nhận.
+            \item \textbf{Menu Actions:} Menu phía trên phải với options:
+                \begin{itemize}
+                    \item ``Gửi email reset mật khẩu''
+                    \item ``Xem log hoạt động''
+                    \item ``Export dữ liệu người dùng''
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Profile Header:} Gradient background từ primary đến primary-dark, text màu trắng.
+            \item \textbf{Info Cards:} Các Card riêng biệt với elevation 2, margin vertical 8, padding 16.
+            \item \textbf{List Items:} Icon size 24 bên trái, text size 16, description size 14 muted.
+            \item \textbf{Timeline:} Đường dọc màu primary, circle nodes, text timestamp size 12.
+            \item \textbf{Action Buttons:} Full width, height 48, borderRadius 8, spacing 12 giữa các nút.
+            \item \textbf{Group Chips:} Màu khác nhau cho role:
+                \begin{itemize}
+                    \item Leader: Gold (\texttt{\#FFD700})
+                    \item Member: Blue (\texttt{\#2196F3})
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{userId}: ID người dùng được truyền từ navigation params.
+            \item \texttt{useUser(userId)}: React Query hook fetch chi tiết người dùng.
+            \item \texttt{useUserGroups(userId)}: Fetch danh sách nhóm của user.
+            \item \texttt{useUserActivity(userId)}: Fetch thống kê hoạt động.
+            \item \texttt{useUserHistory(userId)}: Fetch lịch sử tài khoản.
+            \item \texttt{dialogState}: Object chứa state của các dialog (visible, type, data).
+            \item \texttt{reason}: String lưu lý do khóa/mở khóa tài khoản.
+        \end{itemize}
+    \item \textbf{Data Display:}
+        \begin{itemize}
+            \item \textbf{Date Formatting:} Hiển thị ngày theo format "dd/MM/yyyy HH:mm".
+            \item \textbf{Status Badge:} Icon + text + background color tùy theo trạng thái.
+            \item \textbf{Empty States:} Hiển thị message thích hợp khi user chưa có nhóm/hoạt động.
+            \item \textbf{Loading States:} Skeleton loaders cho mỗi section trong khi fetch data.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Dialog xác nhận Khóa/Mở khóa tài khoản}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{Portal} $\rightarrow$ \texttt{Dialog.lockDialog}:
+                \begin{itemize}
+                    \item \texttt{Dialog.Title}: ``Khóa tài khoản'' hoặc ``Mở khóa tài khoản''.
+                    \item \texttt{Dialog.Content}:
+                        \begin{itemize}
+                            \item \texttt{Text}: Thông báo xác nhận hành động.
+                            \item \texttt{Text.userName}: Tên người dùng bị ảnh hưởng (bold).
+                            \item \texttt{TextInput.reason}: Input lý do khóa/mở khóa (multiline, required).
+                            \item \texttt{Checkbox}: ``Gửi email thông báo cho người dùng'' (checked mặc định).
+                        \end{itemize}
+                    \item \texttt{Dialog.Actions}:
+                        \begin{itemize}
+                            \item \texttt{Button.cancel}: Nút ``Hủy''.
+                            \item \texttt{Button.confirm}: Nút ``Xác nhận'' (disabled nếu reason rỗng).
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Lý do phải có ít nhất 10 ký tự.
+            \item Hiển thị error message bên dưới TextInput nếu không hợp lệ.
+        \end{itemize}
+    \item \textbf{Submit Action:}
+        \begin{itemize}
+            \item Gọi \texttt{toggleUserStatusMutation.mutate(\{userId, status, reason, sendEmail\})}.
+            \item Hiển thị loading spinner trong khi xử lý.
+            \item Sau khi thành công: đóng dialog, hiển thị \texttt{Snackbar} thông báo, invalidate queries.
+            \item Nếu lỗi: hiển thị error message trong dialog.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Dialog xác nhận Xóa tài khoản}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{Portal} $\rightarrow$ \texttt{Dialog.deleteDialog}:
+                \begin{itemize}
+                    \item \texttt{Dialog.Icon}: Icon cảnh báo \texttt{alert-circle} màu đỏ.
+                    \item \texttt{Dialog.Title}: ``Xóa tài khoản người dùng'' (màu error).
+                    \item \texttt{Dialog.Content}:
+                        \begin{itemize}
+                            \item \texttt{Text.warning}: Cảnh báo nghiêm trọng về việc xóa tài khoản (màu error, bold).
+                            \item \texttt{List}: Danh sách dữ liệu sẽ bị xóa gồm tất cả thông tin cá nhân, tất cả nhóm mà user là leader (sẽ bị giải tán), tất cả công thức cá nhân đã tạo, và tất cả lịch sử hoạt động.
+                            \item \texttt{Text.confirmation}: ``Để xác nhận, vui lòng nhập mật khẩu admin:''.
+                            \item \texttt{TextInput.adminPassword}: Input mật khẩu (secureTextEntry).
+                            \item \texttt{TextInput.confirmText}: Input text xác nhận ``XÓA TÀI KHOẢN'' (all caps).
+                        \end{itemize}
+                    \item \texttt{Dialog.Actions}:
+                        \begin{itemize}
+                            \item \texttt{Button.cancel}: Nút ``Hủy''.
+                            \item \texttt{Button.confirm}: Nút ``Xóa vĩnh viễn'' (màu error, disabled until validated).
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Mật khẩu admin không được rỗng.
+            \item Text xác nhận phải chính xác là ``XÓA TÀI KHOẢN'' (case-sensitive).
+            \item Nút xác nhận chỉ enable khi cả hai điều kiện đều thỏa mãn.
+        \end{itemize}
+    \item \textbf{Submit Action:}
+        \begin{itemize}
+            \item Gọi \texttt{deleteUserMutation.mutate(\{userId, adminPassword\})}.
+            \item Hiển thị loading spinner trong khi xử lý.
+            \item Sau khi thành công: 
+                \begin{itemize}
+                    \item Đóng dialog
+                    \item Hiển thị \texttt{Snackbar} xác nhận xóa thành công
+                    \item Navigate về màn hình danh sách
+                    \item Invalidate queries 'users'
+                \end{itemize}
+            \item Nếu lỗi (mật khẩu sai, lỗi server): hiển thị error message trong dialog.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item Dialog có maxWidth 400, borderRadius 12.
+            \item Icon cảnh báo size 64, màu error, ở giữa.
+            \item Warning text với background màu error nhạt, padding 12, borderRadius 8.
+            \item List items với bullet màu error, spacing 8.
+            \item TextInput có helperText hướng dẫn.
+            \item Confirm button có variant 'contained', backgroundColor error.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Dialog Gửi thông báo cho người dùng}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{Portal} $\rightarrow$ \texttt{Dialog.notificationDialog}:
+                \begin{itemize}
+                    \item \texttt{Dialog.Title}: ``Gửi thông báo'' với icon \texttt{bell}.
+                    \item \texttt{Dialog.Content}:
+                        \begin{itemize}
+                            \item \texttt{TextInput.title}: Tiêu đề thông báo (required, maxLength 100).
+                            \item \texttt{TextInput.body}: Nội dung thông báo (multiline, required, maxLength 500).
+                            \item \texttt{Checkbox}: ``Gửi qua email'' (optional).
+                            \item \texttt{Checkbox}: ``Gửi push notification'' (checked mặc định).
+                            \item \texttt{Text.charCount}: Hiển thị số ký tự đã nhập/tối đa.
+                        \end{itemize}
+                    \item \texttt{Dialog.Actions}:
+                        \begin{itemize}
+                            \item \texttt{Button.cancel}: Nút ``Hủy''.
+                            \item \texttt{Button.send}: Nút ``Gửi'' (disabled nếu title hoặc body rỗng).
+                        \end{itemize}
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Tiêu đề không được rỗng, tối đa 100 ký tự.
+            \item Nội dung không được rỗng, tối đa 500 ký tự.
+            \item Ít nhất một phương thức gửi (email hoặc push) phải được chọn.
+        \end{itemize}
+    \item \textbf{Submit Action:}
+        \begin{itemize}
+            \item Gọi \texttt{sendNotificationMutation.mutate(\{userId, title, body, sendEmail, sendPush\})}.
+            \item Hiển thị loading trong khi xử lý.
+            \item Sau khi thành công: đóng dialog, hiển thị \texttt{Snackbar} ``Đã gửi thông báo''.
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_quantringuoidung_1.jpg}
+    \caption{Thiết kế giao diện quản trị người dùng}
+    \label{fig:app-screenshots-useradmin1}
+\end{figure}
+% --- UC09: XÁC THỰC ---
+\paragraph{4. Nhóm UC-09: Xác thực (Login/Register)}
+\subparagraph{Màn hình Đăng nhập}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{KeyboardAvoidingView}: Tránh bàn phím che form.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{View.logoContainer}: Logo app + Text slogan.
+                    \item \texttt{TextInput.email}: Input email với icon \texttt{email}.
+                    \item \texttt{TextInput.password}: Input mật khẩu với icon \texttt{lock} (secureTextEntry).
+                    \item \texttt{TouchableOpacity.forgotPassword}: Link ``Quên mật khẩu?''.
+                    \item \texttt{Button.login}: Nút ``Đăng nhập'' (primary).
+                    \item \texttt{View.divider}: Đường kẻ với text ``hoặc''.
+                    \item \texttt{Button.register}: Nút ``Đăng ký tài khoản mới'' (outlined).
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Validation email format và mật khẩu không rỗng.
+            \item Nhấn ``Đăng nhập'' gọi \texttt{loginMutation}.
+            \item Nhấn ``Quên mật khẩu'' navigate đến ForgotPasswordScreen.
+            \item Nhấn ``Đăng ký'' navigate đến RegisterScreen.
+            \item Sau login thành công: lưu token, navigate đến HomeScreen.
+            \item Hiển thị error message nếu sai email/password.
+        \end{itemize}
+    \item \textbf{State:} \texttt{email}, \texttt{password}, \texttt{showPassword}, \texttt{loginMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Đăng ký}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Đăng ký''.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{TextInput.fullName}: Họ tên (required).
+                    \item \texttt{TextInput.email}: Email (required, email format).
+                    \item \texttt{TextInput.phone}: Số điện thoại (required, 10 số).
+                    \item \texttt{TextInput.password}: Mật khẩu (required, min 8 ký tự, có chữ hoa + số).
+                    \item \texttt{TextInput.confirmPassword}: Xác nhận mật khẩu (phải giống password).
+                    \item \texttt{View.passwordRules}: Hiển thị yêu cầu mật khẩu với icon check/uncheck:
+                        \begin{itemize}
+                            \item Ít nhất 8 ký tự
+                            \item Có chữ hoa
+                            \item Có chữ số
+                        \end{itemize}
+                    \item \texttt{Checkbox.terms}: ``Tôi đồng ý với Điều khoản sử dụng'' (required).
+                    \item \texttt{Button.register}: Nút ``Đăng ký'' (disabled khi không hợp lệ).
+                    \item \texttt{View.loginLink}: Text ``Đã có tài khoản?'' + Link ``Đăng nhập''.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Họ tên không rỗng.
+            \item Email đúng format và chưa tồn tại.
+            \item SĐT 10 số và chưa tồn tại.
+            \item Password min 8 ký tự, có chữ hoa, số.
+            \item Confirm password khớp với password.
+            \item Terms phải được check.
+            \item Hiển thị error realtime dưới mỗi field.
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Nhấn ``Đăng ký'' gọi \texttt{registerMutation}.
+            \item Sau register thành công: gửi email xác thực, navigate đến VerificationScreen.
+            \item Nếu email/SĐT đã tồn tại: hiển thị error message.
+        \end{itemize}
+    \item \textbf{State:} \texttt{formData}, \texttt{errors}, \texttt{termsAccepted}, \texttt{registerMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Xác thực OTP}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Xác thực tài khoản''.
+            \item \texttt{View.content}:
+                \begin{itemize}
+                    \item \texttt{Icon}: Icon \texttt{email-check} lớn.
+                    \item \texttt{Text.instruction}: ``Nhập mã xác thực đã gửi đến \{email\}''.
+                    \item \texttt{View.otpInputs}: 6 ô input OTP (1 số/ô, auto-focus).
+                    \item \texttt{View.timer}: Text ``Mã có hiệu lực trong \{countdown\}s''.
+                    \item \texttt{Button.verify}: Nút ``Xác thực'' (disabled khi chưa đủ 6 số).
+                    \item \texttt{TouchableOpacity.resend}: Link ``Gửi lại mã'' (disabled khi countdown > 0).
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Auto-focus ô tiếp theo khi nhập số.
+            \item Nhấn ``Xác thực'' gọi \texttt{verifyOtpMutation}.
+            \item Sau verify thành công: navigate đến HomeScreen.
+            \item Nếu mã sai: hiển thị error, xóa input.
+            \item Nhấn ``Gửi lại'': reset countdown 60s, gọi \texttt{resendOtpMutation}.
+        \end{itemize}
+    \item \textbf{State:} \texttt{otpCode}, \texttt{countdown}, \texttt{canResend}, \texttt{verifyMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Quên mật khẩu}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Quên mật khẩu''.
+            \item \texttt{View.content}:
+                \begin{itemize}
+                    \item \texttt{Icon}: Icon \texttt{lock-reset} lớn.
+                    \item \texttt{Text.instruction}: ``Nhập email đăng ký để nhận mã khôi phục''.
+                    \item \texttt{TextInput.email}: Input email.
+                    \item \texttt{Button.send}: Nút ``Gửi mã'' (disabled khi email không hợp lệ).
+                    \item \texttt{TouchableOpacity.backToLogin}: Link ``Quay lại đăng nhập''.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Validate email format.
+            \item Nhấn ``Gửi mã'' gọi \texttt{sendResetCodeMutation}.
+            \item Sau gửi thành công: navigate đến ResetPasswordScreen với email.
+            \item Nếu email không tồn tại: hiển thị error.
+        \end{itemize}
+    \item \textbf{State:} \texttt{email}, \texttt{emailError}, \texttt{sendCodeMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Đặt lại mật khẩu}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Đặt lại mật khẩu''.
+            \item \texttt{View.content}:
+                \begin{itemize}
+                    \item \texttt{Text.instruction}: ``Nhập mã xác thực và mật khẩu mới''.
+                    \item \texttt{TextInput.code}: Mã xác thực (6 số).
+                    \item \texttt{TextInput.newPassword}: Mật khẩu mới (min 8 ký tự).
+                    \item \texttt{TextInput.confirmPassword}: Xác nhận mật khẩu.
+                    \item \texttt{View.passwordRules}: Yêu cầu mật khẩu với icon check/uncheck.
+                    \item \texttt{Button.reset}: Nút ``Đặt lại mật khẩu''.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Mã xác thực 6 số.
+            \item Password min 8 ký tự, có chữ hoa, số.
+            \item Confirm password khớp.
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Nhấn ``Đặt lại'' gọi \texttt{resetPasswordMutation}.
+            \item Sau reset thành công: hiển thị success message, navigate đến LoginScreen.
+            \item Nếu mã sai/hết hạn: hiển thị error.
+        \end{itemize}
+    \item \textbf{State:} \texttt{code}, \texttt{newPassword}, \texttt{confirmPassword}, \texttt{resetMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Đổi mật khẩu (trong app)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Đổi mật khẩu''.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{TextInput.currentPassword}: Mật khẩu hiện tại (secureTextEntry).
+                    \item \texttt{TextInput.newPassword}: Mật khẩu mới (min 8 ký tự).
+                    \item \texttt{TextInput.confirmPassword}: Xác nhận mật khẩu mới.
+                    \item \texttt{View.passwordRules}: Yêu cầu mật khẩu.
+                    \item \texttt{Button.change}: Nút ``Đổi mật khẩu''.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Validation:}
+        \begin{itemize}
+            \item Current password không rỗng.
+            \item New password khác current password.
+            \item New password min 8 ký tự, có chữ hoa, số.
+            \item Confirm password khớp với new password.
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Nhấn ``Đổi mật khẩu'' gọi \texttt{changePasswordMutation}.
+            \item Sau thành công: gửi email thông báo, hiển thị success, navigate back.
+            \item Nếu current password sai: hiển thị error.
+        \end{itemize}
+    \item \textbf{State:} \texttt{passwords}, \texttt{errors}, \texttt{changePasswordMutation}.
+\end{itemize}
+
+\subparagraph{Màn hình Cập nhật thông tin cá nhân}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + ``Thông tin cá nhân'' + Nút Save.
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{View.avatarSection}:
+                        \begin{itemize}
+                            \item \texttt{Avatar.large}: Ảnh đại diện size 120x120.
+                            \item \texttt{IconButton.edit}: Nút edit overlay trên avatar.
+                        \end{itemize}
+                    \item \texttt{Card.personalInfo}:
+                        \begin{itemize}
+                            \item \texttt{TextInput.fullName}: Họ tên (editable).
+                            \item \texttt{TextInput.email}: Email (disabled).
+                            \item \texttt{TextInput.phone}: SĐT (editable).
+                        \end{itemize}
+                    \item \texttt{Card.security}:
+                        \begin{itemize}
+                            \item \texttt{List.Item}: ``Đổi mật khẩu'' với icon \texttt{chevron-right}.
+                            \item \texttt{List.Item}: ``Xác thực 2 bước'' với \texttt{Switch}.
+                        \end{itemize}
+                    \item \texttt{Card.preferences}:
+                        \begin{itemize}
+                            \item \texttt{List.Item}: ``Thông báo push'' với \texttt{Switch}.
+                            \item \texttt{List.Item}: ``Thông báo email'' với \texttt{Switch}.
+                        \end{itemize}
+                    \item \texttt{Button.logout}: Nút ``Đăng xuất'' (outlined, màu error).
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Input:}
+        \begin{itemize}
+            \item Nhấn avatar edit mở \texttt{ImagePicker} (camera/gallery).
+            \item Nhấn Save gọi \texttt{updateProfileMutation}.
+            \item Nhấn ``Đổi mật khẩu'' navigate đến ChangePasswordScreen.
+            \item Toggle switches gọi \texttt{updateSettingsMutation}.
+            \item Nhấn ``Đăng xuất'' hiển thị \texttt{Dialog} xác nhận, sau đó logout và navigate về LoginScreen.
+        \end{itemize}
+    \item \textbf{State:} \texttt{userData}, \texttt{settings}, \texttt{hasChanges}, \texttt{updateMutation}.
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_dangnhap_1.jpg}
+    \caption{Thiết kế giao diện đăng nhập}
+    \label{fig:app-screenshots-auth1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_dangky_1.jpg}
+    \caption{Thiết kế giao diện đăng ký}
+    \label{fig:app-screenshots-auth2}
+\end{figure}

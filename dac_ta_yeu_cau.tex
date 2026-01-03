@@ -51,6 +51,8 @@ Xác định các ca sử dụng
         7 & UC007 & Thống kê và báo cáo & Hệ thống tạo báo cáo về mua sắm và tiêu thụ thực phẩm. & Người dùng & Trung bình \\ \hline
         
         8 & UC008 & Quản trị người dùng & Quản trị viên quản lý tài khoản người dùng. & Quản trị viên & Thấp \\ \hline
+        
+        9 & UC009 & Xác thực và phân quyền & Người dùng đăng ký, đăng nhập, đăng xuất, quên mật khẩu, cập nhật thông tin cá nhân và đổi mật khẩu. & Người dùng & Trung bình \\ \hline
     \end{tabularx}
     \caption{Bảng tổng hợp danh mục Use Case của hệ thống}
     \label{tab:danh-muc-usecase}
@@ -99,6 +101,35 @@ Xác định các ca sử dụng
         \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Danh sách mua sắm được tạo ra, người đảm nhiệm nhận được thông báo} \\ \hline
     \end{tabularx}
     \caption{Đặc tả ca sử dụng UC001.1: Tạo danh sách mua sắm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc001-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC001.2} & \textbf{Tên UC: Chỉnh sửa danh sách mua sắm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Group đã có danh sách mua sắm tạo trước đó} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Nếu cần thêm thực phẩm mới, điền thực phẩm cần mua. \\ \hline
+        2 & Người dùng & Nếu cần xóa thực phẩm có sẵn, chọn xóa thực phẩm. \\ \hline
+        3 & Người dùng & Nếu cần chỉnh sửa thực phẩm có sẵn, sửa lại thông tin thực phẩm. \\ \hline
+        4 & Người dùng & Nếu cần chỉnh sửa người đảm nhận, sửa lại trường người đảm nhận. \\ \hline
+        5 & Người dùng & Hoàn thành chỉnh sửa danh sách. \\ \hline
+        6 & Hệ thống & Update trong database. \\ \hline
+        7 & Hệ thống & Gửi thông báo cho người đảm nhận và cả người đảm nhận cũ (nếu có). \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        1a & Hệ thống & \textbf{Điều kiện:} Trong group có thực đơn lên sẵn \newline \textbf{Hành động:} Thực hiện Usecase UC001.4 (Gợi ý bổ sung thực phẩm) \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Danh sách mua sắm được chỉnh sửa, người đảm nhiệm nhận được thông báo} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC001.2: Chỉnh sửa danh sách mua sắm}
 \end{table}
 
 \begin{table}[H]
@@ -273,6 +304,76 @@ Xác định các ca sử dụng
     \end{tabularx}
     \caption{Đặc tả ca sử dụng UC003.2: Chỉnh sửa thực phẩm trong bếp}
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc003-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC003.3} & \textbf{Tên UC: Xóa thực phẩm khỏi bếp} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Trong bếp đã có sẵn thực phẩm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn thực phẩm cần xóa. \\ \hline
+        2 & Hệ thống & Hiển thị xác nhận xóa. \\ \hline
+        3 & Người dùng & Xác nhận xóa. \\ \hline
+        4 & Hệ thống & Xóa thực phẩm khỏi database. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Người dùng hủy bỏ \newline \textbf{Hành động:} Quay lại danh sách thực phẩm \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thực phẩm được xóa khỏi danh sách thực phẩm trong bếp} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC003.3: Xóa thực phẩm khỏi bếp}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc003-4}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC003.4} & \textbf{Tên UC: Nhắc nhở thực phẩm sắp hết hạn} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Hệ thống (tự động)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Trong bếp có thực phẩm với ngày hết hạn được thiết lập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Hệ thống & Kiểm tra định kỳ (mỗi ngày) danh sách thực phẩm trong bếp. \\ \hline
+        2 & Hệ thống & Xác định các thực phẩm có ngày hết hạn trong vòng 3 ngày tới. \\ \hline
+        3 & Hệ thống & Tạo thông báo đẩy (push notification) cho tất cả thành viên trong nhóm. \\ \hline
+        4 & Hệ thống & Hiển thị nội dung thông báo theo template. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Người dùng nhận được thông báo về thực phẩm sắp hết hạn} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC003.4: Nhắc nhở thực phẩm sắp hết hạn}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc003-5}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC003.5} & \textbf{Tên UC: Xem danh sách thực phẩm trong bếp} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập và tham gia nhóm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình quản lý bếp. \\ \hline
+        2 & Hệ thống & Hiển thị danh sách thực phẩm (tên, số lượng, đơn vị, ngày hết hạn, trạng thái). \\ \hline
+        3 & Người dùng & Có thể lọc theo danh mục, sắp xếp theo ngày hết hạn. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Danh sách thực phẩm được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC003.5: Xem danh sách thực phẩm trong bếp}
+\end{table}
+
 \textbf{Quản lý công thức nấu ăn}
 \begin{figure}[H]
     \centering 
@@ -301,6 +402,34 @@ Xác định các ca sử dụng
     \end{tabularx}
     \caption{Đặc tả ca sử dụng UC004.1: Tạo công thức nấu ăn chung}
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc004-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC004.2} & \textbf{Tên UC: Chỉnh sửa công thức nấu ăn} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{X|}{Người dùng (công thức cá nhân), QTV (công thức chung)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Công thức nấu ăn đã tồn tại} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng/QTV & Chọn công thức nấu ăn cần chỉnh sửa. \\ \hline
+        2 & Hệ thống & Hiển thị thông tin công thức hiện tại. \\ \hline
+        3 & Người dùng/QTV & Chỉnh sửa các trường thông tin công thức. \\ \hline
+        4 & Người dùng/QTV & Hoàn thành chỉnh sửa. \\ \hline
+        5 & Hệ thống & Cập nhật dữ liệu vào database. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        1a & Hệ thống & \textbf{Điều kiện:} Người dùng không có quyền chỉnh sửa công thức (công thức chung hoặc công thức của nhóm khác) \newline \textbf{Hành động:} Hiển thị thông báo lỗi \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Công thức nấu ăn được cập nhật} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC004.2: Chỉnh sửa công thức nấu ăn}
+\end{table}
+
 \begin{table}[H]
     \centering
     \label{tab:uc004-3}
@@ -322,6 +451,34 @@ Xác định các ca sử dụng
     \end{tabularx}
     \caption{Đặc tả ca sử dụng UC004.3: Tạo công thức nấu ăn cá nhân}
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc004-4}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC004.4} & \textbf{Tên UC: Xóa công thức nấu ăn} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{X|}{Người dùng (công thức cá nhân), QTV (công thức chung)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Công thức nấu ăn đã tồn tại} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng/QTV & Chọn công thức nấu ăn cần xóa. \\ \hline
+        2 & Hệ thống & Hiển thị xác nhận xóa. \\ \hline
+        3 & Người dùng/QTV & Xác nhận xóa. \\ \hline
+        4 & Hệ thống & Xóa công thức khỏi database. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        1a & Hệ thống & \textbf{Điều kiện:} Người dùng không có quyền xóa công thức \newline \textbf{Hành động:} Hiển thị thông báo lỗi \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Người dùng/QTV hủy bỏ \newline \textbf{Hành động:} Quay lại danh sách công thức \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Công thức nấu ăn được xóa khỏi hệ thống} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC004.4: Xóa công thức nấu ăn}
+\end{table}
+
 \begin{table}[H]
     \centering
     \label{tab:uc004-5}
@@ -370,6 +527,103 @@ Xác định các ca sử dụng
     \end{tabularx}
     \caption{Đặc tả ca sử dụng UC005.1: Tạo thực phẩm cá nhân}
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc005-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC005.2} & \textbf{Tên UC: Tạo thực phẩm chung} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Quản trị viên} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{QTV đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & QTV & Chọn tạo thực phẩm chung. \\ \hline
+        2 & QTV & Điền đầy đủ thông tin thực phẩm. \\ \hline
+        3 & Hệ thống & Kiểm tra tên thực phẩm có trùng không. \\ \hline
+        4 & QTV & Hoàn thành tạo thực phẩm mới. \\ \hline
+        5 & Hệ thống & Lưu dữ liệu vào database. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thực phẩm chung được tạo ra, có thể sử dụng bởi tất cả người dùng} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC005.2: Tạo thực phẩm chung}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc005-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC005.3} & \textbf{Tên UC: Chỉnh sửa thực phẩm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{X|}{Người dùng (thực phẩm cá nhân), QTV (thực phẩm chung)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Thực phẩm đã tồn tại} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng/QTV & Chọn thực phẩm cần chỉnh sửa. \\ \hline
+        2 & Hệ thống & Hiển thị thông tin hiện tại. \\ \hline
+        3 & Người dùng/QTV & Chỉnh sửa các trường thông tin. \\ \hline
+        4 & Hệ thống & Kiểm tra tên thực phẩm có trùng không. \\ \hline
+        5 & Người dùng/QTV & Hoàn thành chỉnh sửa. \\ \hline
+        6 & Hệ thống & Cập nhật dữ liệu vào database. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thông tin thực phẩm được cập nhật} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC005.3: Chỉnh sửa thực phẩm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc005-4}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC005.4} & \textbf{Tên UC: Xóa thực phẩm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{X|}{Người dùng (thực phẩm cá nhân), QTV (thực phẩm chung)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Thực phẩm đã tồn tại và không được sử dụng trong bất kỳ công thức hoặc bếp nào} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng/QTV & Chọn thực phẩm cần xóa. \\ \hline
+        2 & Hệ thống & Kiểm tra xem thực phẩm có đang được sử dụng không. \\ \hline
+        3 & Hệ thống & Hiển thị xác nhận xóa. \\ \hline
+        4 & Người dùng/QTV & Xác nhận xóa. \\ \hline
+        5 & Hệ thống & Xóa thực phẩm khỏi database. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        2a & Hệ thống & \textbf{Điều kiện:} Thực phẩm đang được sử dụng trong công thức hoặc bếp \newline \textbf{Hành động:} Hiển thị thông báo không thể xóa \\ \hline
+        4a & Hệ thống & \textbf{Điều kiện:} Người dùng/QTV hủy bỏ \newline \textbf{Hành động:} Quay lại danh sách thực phẩm \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thực phẩm được xóa khỏi hệ thống} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC005.4: Xóa thực phẩm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc005-5}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC005.5} & \textbf{Tên UC: Tìm kiếm thực phẩm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Nhập từ khóa tìm kiếm (tên thực phẩm hoặc danh mục). \\ \hline
+        2 & Hệ thống & Tìm kiếm trong thực phẩm chung và thực phẩm của nhóm. \\ \hline
+        3 & Hệ thống & Hiển thị danh sách kết quả. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Danh sách thực phẩm phù hợp được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC005.5: Tìm kiếm thực phẩm}
+\end{table}
+
 \textbf{Quản lý nhóm}
 \begin{figure}[H]
     \centering 
@@ -377,13 +631,493 @@ Xác định các ca sử dụng
     \caption{Biểu đồ Use Case quản lý nhóm}
     \label{fig:usecase-06}
 \end{figure}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-1}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.1} & \textbf{Tên UC: Tạo nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn tạo nhóm mới. \\ \hline
+        2 & Người dùng & Điền thông tin nhóm (tên nhóm, mô tả). \\ \hline
+        3 & Người dùng & Hoàn thành tạo nhóm. \\ \hline
+        4 & Hệ thống & Tạo nhóm và gán người dùng làm trưởng nhóm. \\ \hline
+        5 & Hệ thống & Lưu dữ liệu vào database. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Nhóm mới được tạo ra, người dùng trở thành trưởng nhóm} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.1: Tạo nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.2} & \textbf{Tên UC: Thêm thành viên vào nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Trưởng nhóm hoặc thành viên có quyền} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Nhóm đã tồn tại, người dùng là trưởng nhóm hoặc có quyền thêm thành viên} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn thêm thành viên. \\ \hline
+        2 & Người dùng & Nhập email/số điện thoại của thành viên mới. \\ \hline
+        3 & Hệ thống & Tìm kiếm tài khoản trong hệ thống. \\ \hline
+        4 & Hệ thống & Hiển thị thông tin tài khoản tìm được. \\ \hline
+        5 & Người dùng & Xác nhận thêm thành viên. \\ \hline
+        6 & Hệ thống & Gửi lời mời tham gia nhóm. \\ \hline
+        7 & Thành viên mới & Nhận thông báo và chấp nhận lời mời. \\ \hline
+        8 & Hệ thống & Thêm thành viên vào nhóm. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Không tìm thấy tài khoản \newline \textbf{Hành động:} Hiển thị thông báo ``Không tìm thấy người dùng'' \\ \hline
+        7a & Hệ thống & \textbf{Điều kiện:} Thành viên từ chối lời mời \newline \textbf{Hành động:} Thông báo cho người gửi lời mời \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thành viên mới được thêm vào nhóm, nhận được thông báo} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.2: Thêm thành viên vào nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.3} & \textbf{Tên UC: Xóa thành viên khỏi nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Trưởng nhóm} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Nhóm có ít nhất 2 thành viên} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Trưởng nhóm & Chọn thành viên cần xóa. \\ \hline
+        2 & Hệ thống & Hiển thị xác nhận xóa. \\ \hline
+        3 & Trưởng nhóm & Xác nhận xóa. \\ \hline
+        4 & Hệ thống & Xóa thành viên khỏi nhóm. \\ \hline
+        5 & Hệ thống & Gửi thông báo cho thành viên bị xóa. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        1a & Hệ thống & \textbf{Điều kiện:} Không thể xóa trưởng nhóm \newline \textbf{Hành động:} Hiển thị thông báo lỗi \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thành viên bị xóa khỏi nhóm, nhận được thông báo} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.3: Xóa thành viên khỏi nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-4}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.4} & \textbf{Tên UC: Rời khỏi nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng (thành viên nhóm)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng là thành viên của nhóm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn rời khỏi nhóm. \\ \hline
+        2 & Hệ thống & Hiển thị xác nhận. \\ \hline
+        3 & Người dùng & Xác nhận rời nhóm. \\ \hline
+        4 & Hệ thống & Xóa người dùng khỏi nhóm. \\ \hline
+        5 & Hệ thống & Gửi thông báo cho các thành viên còn lại. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Người dùng là trưởng nhóm và nhóm có thành viên khác \newline \textbf{Hành động:} Yêu cầu chuyển quyền trưởng nhóm trước \\ \hline
+        3b & Hệ thống & \textbf{Điều kiện:} Người dùng là thành viên duy nhất \newline \textbf{Hành động:} Nhóm sẽ bị xóa \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Người dùng rời khỏi nhóm, các thành viên còn lại nhận được thông báo} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.4: Rời khỏi nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-5}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.5} & \textbf{Tên UC: Chuyển quyền trưởng nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Trưởng nhóm} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Nhóm có ít nhất 2 thành viên} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Trưởng nhóm & Chọn chuyển quyền. \\ \hline
+        2 & Trưởng nhóm & Chọn thành viên mới làm trưởng nhóm. \\ \hline
+        3 & Hệ thống & Hiển thị xác nhận. \\ \hline
+        4 & Trưởng nhóm & Xác nhận. \\ \hline
+        5 & Hệ thống & Cập nhật vai trò. \\ \hline
+        6 & Hệ thống & Gửi thông báo cho tất cả thành viên. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Quyền trưởng nhóm được chuyển cho thành viên khác} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.5: Chuyển quyền trưởng nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-6}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.6} & \textbf{Tên UC: Xem thông tin nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng (thành viên nhóm)} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng là thành viên của nhóm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình thông tin nhóm. \\ \hline
+        2 & Hệ thống & Hiển thị thông tin (tên nhóm, trưởng nhóm, số thành viên, danh sách thành viên, ngày tạo). \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thông tin nhóm được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.6: Xem thông tin nhóm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc006-7}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC006.7} & \textbf{Tên UC: Xóa nhóm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Trưởng nhóm} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng là trưởng nhóm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Trưởng nhóm & Chọn xóa nhóm. \\ \hline
+        2 & Hệ thống & Hiển thị cảnh báo về việc xóa tất cả dữ liệu. \\ \hline
+        3 & Trưởng nhóm & Xác nhận xóa. \\ \hline
+        4 & Hệ thống & Xóa nhóm và dữ liệu liên quan. \\ \hline
+        5 & Hệ thống & Gửi thông báo cho tất cả thành viên. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Nhóm và tất cả dữ liệu liên quan bị xóa, thành viên nhận thông báo} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC006.7: Xóa nhóm}
+\end{table}
+
+\textbf{Thống kê và báo cáo}
+\begin{table}[H]
+    \centering
+    \label{tab:uc007-1}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC007.1} & \textbf{Tên UC: Xem báo cáo mua sắm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã tham gia nhóm và có dữ liệu mua sắm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình báo cáo. \\ \hline
+        2 & Người dùng & Chọn loại báo cáo ``Mua sắm''. \\ \hline
+        3 & Người dùng & Chọn khoảng thời gian (tuần/tháng/năm). \\ \hline
+        4 & Hệ thống & Tính toán và hiển thị báo cáo (tổng số lần đi chợ, top 10 thực phẩm mua nhiều nhất, biểu đồ xu hướng, thành viên đi chợ nhiều nhất). \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Báo cáo mua sắm được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC007.1: Xem báo cáo mua sắm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc007-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC007.2} & \textbf{Tên UC: Xem báo cáo tiêu thụ thực phẩm} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã tham gia nhóm và có dữ liệu thực phẩm} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình báo cáo. \\ \hline
+        2 & Người dùng & Chọn loại báo cáo ``Tiêu thụ''. \\ \hline
+        3 & Người dùng & Chọn khoảng thời gian (tuần/tháng/năm). \\ \hline
+        4 & Hệ thống & Tính toán và hiển thị báo cáo (tổng số thực phẩm đã tiêu thụ, tỷ lệ lãng phí, top món ăn được nấu nhiều nhất, biểu đồ phân bổ danh mục). \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Báo cáo tiêu thụ được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC007.2: Xem báo cáo tiêu thụ thực phẩm}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc007-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC007.3} & \textbf{Tên UC: Xem báo cáo thực đơn} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã tham gia nhóm và có dữ liệu thực đơn} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình báo cáo. \\ \hline
+        2 & Người dùng & Chọn loại báo cáo ``Thực đơn''. \\ \hline
+        3 & Người dùng & Chọn khoảng thời gian (tuần/tháng). \\ \hline
+        4 & Hệ thống & Hiển thị thống kê (tổng số bữa ăn đã lên lịch, tỷ lệ hoàn thành, món ăn phổ biến, thống kê theo bữa). \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Báo cáo thực đơn được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC007.3: Xem báo cáo thực đơn}
+\end{table}
+
 \textbf{Quản trị người dùng}
 \begin{figure}[H]
     \centering 
     \includegraphics[width=0.9\textwidth]{UC_quanly_nguoidung.png}
     \caption{Biểu đồ Use Case quản lý người dùng}
-    \label{fig:usecase-07}
+    \label{fig:usecase-08}
 \end{figure}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc008-1}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC008.1} & \textbf{Tên UC: Xem danh sách người dùng} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Quản trị viên} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{QTV đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & QTV & Mở màn hình quản lý người dùng. \\ \hline
+        2 & Hệ thống & Hiển thị danh sách người dùng (ID, tên, email, số điện thoại, trạng thái, ngày đăng ký). \\ \hline
+        3 & QTV & Có thể tìm kiếm, lọc theo trạng thái. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Danh sách người dùng được hiển thị} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC008.1: Xem danh sách người dùng}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc008-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC008.2} & \textbf{Tên UC: Khóa/Mở khóa tài khoản} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Quản trị viên} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Tài khoản người dùng tồn tại} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & QTV & Chọn tài khoản cần khóa/mở khóa. \\ \hline
+        2 & QTV & Chọn hành động (khóa/mở khóa). \\ \hline
+        3 & Hệ thống & Hiển thị xác nhận. \\ \hline
+        4 & QTV & Xác nhận. \\ \hline
+        5 & Hệ thống & Cập nhật trạng thái tài khoản. \\ \hline
+        6 & Hệ thống & Gửi email thông báo cho người dùng. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Trạng thái tài khoản được thay đổi} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC008.2: Khóa/Mở khóa tài khoản}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc008-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC008.3} & \textbf{Tên UC: Xóa tài khoản} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Quản trị viên} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Tài khoản người dùng tồn tại} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & QTV & Chọn tài khoản cần xóa. \\ \hline
+        2 & Hệ thống & Hiển thị cảnh báo về việc xóa dữ liệu. \\ \hline
+        3 & QTV & Xác nhận xóa. \\ \hline
+        4 & Hệ thống & Xóa tài khoản và dữ liệu liên quan. \\ \hline
+        5 & Hệ thống & Ghi log hành động. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Tài khoản và dữ liệu liên quan bị xóa} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC008.3: Xóa tài khoản}
+\end{table}
+
+\textbf{Xác thực và phân quyền}
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-1}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.1} & \textbf{Tên UC: Đăng ký tài khoản} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng chưa có tài khoản} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Không có} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn đăng ký tài khoản. \\ \hline
+        2 & Người dùng & Điền thông tin (họ tên, email, số điện thoại, mật khẩu, xác nhận mật khẩu). \\ \hline
+        3 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu. \\ \hline
+        4 & Hệ thống & Kiểm tra email/số điện thoại đã tồn tại chưa. \\ \hline
+        5 & Hệ thống & Gửi mã xác thực qua email/SMS. \\ \hline
+        6 & Người dùng & Nhập mã xác thực. \\ \hline
+        7 & Hệ thống & Xác thực mã và tạo tài khoản. \\ \hline
+        8 & Hệ thống & Gửi email chào mừng. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        4a & Hệ thống & \textbf{Điều kiện:} Email/số điện thoại đã tồn tại \newline \textbf{Hành động:} Hiển thị thông báo lỗi \\ \hline
+        6a & Hệ thống & \textbf{Điều kiện:} Mã không đúng hoặc hết hạn \newline \textbf{Hành động:} Cho phép gửi lại mã \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Tài khoản mới được tạo, người dùng có thể đăng nhập} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.1: Đăng ký tài khoản}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-2}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.2} & \textbf{Tên UC: Đăng nhập} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã có tài khoản} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở ứng dụng. \\ \hline
+        2 & Người dùng & Nhập email và mật khẩu. \\ \hline
+        3 & Hệ thống & Xác thực thông tin. \\ \hline
+        4 & Hệ thống & Tạo token và lưu session. \\ \hline
+        5 & Hệ thống & Chuyển người dùng vào màn hình chính. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Thông tin không đúng \newline \textbf{Hành động:} Hiển thị thông báo lỗi \\ \hline
+        3b & Hệ thống & \textbf{Điều kiện:} Tài khoản bị khóa \newline \textbf{Hành động:} Hiển thị thông báo tài khoản bị khóa \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Người dùng được xác thực và truy cập vào hệ thống} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.2: Đăng nhập}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-3}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.3} & \textbf{Tên UC: Đăng xuất} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn đăng xuất. \\ \hline
+        2 & Hệ thống & Hiển thị xác nhận. \\ \hline
+        3 & Người dùng & Xác nhận. \\ \hline
+        4 & Hệ thống & Xóa token và session. \\ \hline
+        5 & Hệ thống & Chuyển về màn hình đăng nhập. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Session bị xóa, người dùng về màn hình đăng nhập} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.3: Đăng xuất}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-4}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.4} & \textbf{Tên UC: Quên mật khẩu} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã có tài khoản} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn ``Quên mật khẩu''. \\ \hline
+        2 & Người dùng & Nhập email đăng ký. \\ \hline
+        3 & Hệ thống & Kiểm tra email có tồn tại không. \\ \hline
+        4 & Hệ thống & Gửi mã xác thực qua email. \\ \hline
+        5 & Người dùng & Nhập mã xác thực. \\ \hline
+        6 & Hệ thống & Xác thực mã. \\ \hline
+        7 & Người dùng & Nhập mật khẩu mới. \\ \hline
+        8 & Hệ thống & Cập nhật mật khẩu. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Email không tồn tại \newline \textbf{Hành động:} Hiển thị thông báo \\ \hline
+        5a & Hệ thống & \textbf{Điều kiện:} Mã không đúng \newline \textbf{Hành động:} Cho phép thử lại (tối đa 3 lần) \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Mật khẩu được đặt lại} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.4: Quên mật khẩu}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-5}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.5} & \textbf{Tên UC: Cập nhật thông tin cá nhân} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Mở màn hình thông tin cá nhân. \\ \hline
+        2 & Hệ thống & Hiển thị thông tin hiện tại. \\ \hline
+        3 & Người dùng & Chỉnh sửa thông tin (tên, số điện thoại, avatar). \\ \hline
+        4 & Người dùng & Xác nhận cập nhật. \\ \hline
+        5 & Hệ thống & Lưu thông tin mới. \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Thông tin cá nhân được cập nhật} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.5: Cập nhật thông tin cá nhân}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{tab:uc009-6}
+    \begin{tabularx}{\textwidth}{|c|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headergreen} 
+        \textbf{Mã UC} & \textbf{UC009.6} & \textbf{Tên UC: Đổi mật khẩu} \\ \hline
+        \textbf{Tác nhân} & \multicolumn{2}{l|}{Người dùng} \\ \hline
+        \textbf{Điều kiện trước} & \multicolumn{2}{X|}{Người dùng đã đăng nhập} \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi chính}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động} \\ \hline
+        1 & Người dùng & Chọn đổi mật khẩu. \\ \hline
+        2 & Người dùng & Nhập mật khẩu hiện tại. \\ \hline
+        3 & Hệ thống & Xác thực mật khẩu hiện tại. \\ \hline
+        4 & Người dùng & Nhập mật khẩu mới và xác nhận. \\ \hline
+        5 & Hệ thống & Kiểm tra mật khẩu mới hợp lệ. \\ \hline
+        6 & Hệ thống & Cập nhật mật khẩu. \\ \hline
+        7 & Hệ thống & Gửi email thông báo đổi mật khẩu. \\ \hline
+        
+        \multicolumn{3}{|c|}{\cellcolor{headerorange}\textbf{Luồng thực thi mở rộng}} \\ \hline
+        \rowcolor{graybg} \textbf{STT} & \textbf{Thực hiện} & \textbf{Hành động và Điều kiện} \\ \hline
+        3a & Hệ thống & \textbf{Điều kiện:} Mật khẩu hiện tại không đúng \newline \textbf{Hành động:} Hiển thị lỗi \\ \hline
+        5a & Hệ thống & \textbf{Điều kiện:} Mật khẩu mới không hợp lệ \newline \textbf{Hành động:} Hiển thị yêu cầu \\ \hline
+        
+        \textbf{Điều kiện sau} & \multicolumn{2}{X|}{Mật khẩu được thay đổi} \\ \hline
+    \end{tabularx}
+    \caption{Đặc tả ca sử dụng UC009.6: Đổi mật khẩu}
+\end{table}
+
 \subsection{Các yêu cầu phi chức năng}
 \subsubsection{Tính dễ dùng}
 \begin{itemize}
