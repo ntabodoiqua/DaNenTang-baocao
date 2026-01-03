@@ -1,6 +1,41 @@
 \newpage
 \section{Xây dựng ứng dụng đa nền tảng}
 \subsection{Kiến trúc ứng dụng}
+
+\subsubsection{Lựa chọn kiến trúc phần mềm và giải thích sơ bộ}
+
+Ứng dụng \textbf{``Đi chợ tiện lợi''} được xây dựng theo mô hình \textbf{Client-Server Architecture} kết hợp với \textbf{RESTful API}, trong đó:
+
+\begin{itemize}
+    \item \textbf{Client (Frontend):} Ứng dụng di động đa nền tảng phát triển bằng React Native + Expo.
+    \item \textbf{Server (Backend):} Hệ thống API server xây dựng bằng Spring Boot (Java).
+    \item \textbf{Database:} PostgreSQL để lưu trữ dữ liệu.
+\end{itemize}
+
+\paragraph{Kiến trúc Backend: Clean Architecture}
+Phía Backend được thiết kế theo \textbf{Clean Architecture} với nguyên tắc \textbf{Dependency Inversion} - các lớp bên trong không phụ thuộc vào các lớp bên ngoài. Các đặc điểm chính:
+\begin{itemize}
+    \item \textbf{Độc lập với Framework:} Logic nghiệp vụ không phụ thuộc vào framework cụ thể.
+    \item \textbf{Có thể kiểm thử (Testable):} Business logic có thể test độc lập.
+    \item \textbf{Độc lập với Database:} Có thể thay đổi database mà không ảnh hưởng nghiệp vụ.
+\end{itemize}
+
+\paragraph{Kiến trúc Frontend: Component-Based Architecture}
+Phía Frontend sử dụng \textbf{Component-Based Architecture} kết hợp với \textbf{React Query} cho server state và \textbf{Zustand} cho client state:
+\begin{itemize}
+    \item \textbf{Component-Based:} Giao diện được chia thành các component độc lập, tái sử dụng.
+    \item \textbf{Unidirectional Data Flow:} Luồng dữ liệu một chiều với State Management.
+\end{itemize}
+
+\subsubsection{Các cải tiến so với lý thuyết}
+
+\begin{enumerate}
+    \item \textbf{Tách biệt JPA Entity và Domain Entity:} Domain Entity là pure Java object, JPA Model chứa các annotations. Mapper class chịu trách nhiệm chuyển đổi qua lại, giúp lõi nghiệp vụ hoàn toàn sạch (clean).
+    \item \textbf{Use Case Pattern:} Thay vì một Service class khổng lồ, mỗi UseCase tập trung vào một nhóm chức năng cụ thể, giúp tuân thủ nguyên tắc Single Responsibility.
+    \item \textbf{Repository Pattern với Interface Segregation:} Domain layer định nghĩa interface, Infrastructure layer triển khai thực tế. Điều này cho phép dễ dàng thay đổi công nghệ lưu trữ (ví dụ từ SQL sang NoSQL) mà không sửa đổi logic nghiệp vụ.
+    \item \textbf{React Query cho Server State:} Thay vì quản lý mọi thứ trong Global State (như Redux), ứng dụng dùng React Query để tối ưu hóa việc caching, đồng bộ dữ liệu và giảm thiểu số lượng API call không cần thiết.
+\end{enumerate}
+
 \subsection{Tổ chức thư mục của dự án}
 \subsection{Thiết kế chi tiết các gói}
 \subsection{Thiết kế chi tiết lớp}
