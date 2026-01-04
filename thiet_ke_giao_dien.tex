@@ -36,6 +36,24 @@
     \label{fig:lowfidelity-4.1}
 \end{figure}
 \subsubsection{UC5: Quản lý danh sách thực phẩm}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.4\textwidth]{UC5.1.jpg}
+    \caption{Thiết kế giao diện cho UC5: Quản lý danh sách thực phẩm}
+    \label{fig:lowfidelity-5.1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.4\textwidth]{UC5.2.jpg}
+    \caption{Thiết kế giao diện cho UC5: Chi tiết thực phẩm}
+    \label{fig:lowfidelity-5.2}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.4\textwidth]{UC5.3.jpg}
+    \caption{Thiết kế giao diện cho UC5: Thêm thực phẩm mới}
+    \label{fig:lowfidelity-5.3}
+\end{figure}
 \subsubsection{UC6: Quản lý nhóm}
 \begin{figure}[H]
     \centering 
@@ -333,6 +351,170 @@ Giao diện quản lý kho công thức nấu ăn.
 
 % --- UC05: Quản lý danh sách thực phẩm ---
 \paragraph{5. Nhóm UC-05: Quản lý danh sách thực phẩm}
+Giao diện quản lý thực phẩm giúp người dùng tạo, xem, chỉnh sửa và xóa thực phẩm trong hệ thống.
+
+\subparagraph{Màn hình Danh sách thực phẩm (FoodListScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + Tiêu đề ``Thực phẩm'' + Nút Plus (thêm).
+            \item \texttt{Surface.searchContainer}: Thanh tìm kiếm:
+                \begin{itemize}
+                    \item \texttt{Avatar.Icon} ``magnify'': Icon tìm kiếm.
+                    \item \texttt{TextInput}: Nhập từ khóa tìm kiếm.
+                    \item \texttt{Avatar.Icon} ``close-circle'': Nút xóa từ khóa (hiển thị khi có nội dung).
+                \end{itemize}
+            \item \texttt{ScrollView} horizontal $\rightarrow$ \texttt{Chip} filters: Bộ lọc danh mục ngang:
+                \begin{itemize}
+                    \item \texttt{Chip} ``Tất cả'': Hiển thị tất cả thực phẩm.
+                    \item \texttt{Chip[categoryId]}: Các danh mục từ API (Rau củ, Thịt, Hải sản, v.v.).
+                \end{itemize}
+            \item \texttt{ScrollView} vertical $\rightarrow$ \texttt{FoodList}: Danh sách các \texttt{FoodCard}.
+            \item Trong mỗi \texttt{FoodCard}:
+                \begin{itemize}
+                    \item \texttt{Image/Avatar.Icon}: Hình ảnh thực phẩm hoặc placeholder icon ``food-apple''.
+                    \item \texttt{Text.foodName}: Tên thực phẩm.
+                    \item \texttt{Text.foodCategory}: Tên danh mục (với icon ``tag'').
+                    \item \texttt{Chip.systemBadge}: Badge ``Hệ thống'' nếu \texttt{isSystemFood = true}.
+                    \item \texttt{IconButton.chevron-right}: Mũi tên điều hướng chi tiết.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Search:} Nhập văn bản vào \texttt{TextInput} gọi \texttt{setSearchQuery()} để lọc theo tên.
+            \item \textbf{Clear Search:} Nhấn icon ``close-circle'' để xóa trắng từ khóa tìm kiếm.
+            \item \textbf{Category Filter:} Nhấn vào \texttt{Chip} gọi \texttt{setSelectedCategoryId()} để lọc theo danh mục.
+            \item \textbf{Navigation:} Nhấn vào \texttt{FoodCard} gọi \texttt{onFoodPress(foodId)} để xem chi tiết.
+            \item \textbf{Create Action:} Nhấn nút Plus trong header gọi \texttt{onAddFood()} để tạo thực phẩm mới.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Màu sắc Chip:}
+                \begin{itemize}
+                    \item Trắng (\texttt{colors.white}) - Trạng thái chưa chọn, viền \texttt{colors.border}.
+                    \item Primary (\texttt{colors.primary}) - Trạng thái đã chọn, text trắng, elevation 2.
+                \end{itemize}
+            \item \textbf{System Badge:} Nền xanh (\texttt{colors.info}), text trắng, icon ``shield-check''.
+            \item \textbf{Empty State:} Hiển thị icon ``food-apple-outline'' kích thước lớn, text ``Chưa có thực phẩm'' và nút hành động.
+            \item \textbf{Placeholder Image:} Nền \texttt{surfaceVariant}, icon ``food-apple'' kích thước 40px.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{searchQuery}: Từ khóa tìm kiếm từ \texttt{useState()}.
+            \item \texttt{selectedCategoryId}: ID danh mục đang lọc từ \texttt{useState()}.
+            \item \texttt{foods}: Danh sách thực phẩm từ \texttt{useFoods()} hook với tham số \texttt{\{name, categoryId\}}.
+            \item \texttt{categories}: Danh sách danh mục từ \texttt{useCategories()} hook.
+        \end{itemize}
+\end{itemize}
+
+
+
+\subparagraph{Màn hình Chi tiết thực phẩm (FoodDetailScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + ``Chi tiết thực phẩm'' + Nút Edit (chỉ hiện nếu không phải thực phẩm hệ thống).
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{Surface.imageSection}: Khu vực hình ảnh:
+                        \begin{itemize}
+                            \item \texttt{Image}: Ảnh thực phẩm (chiều cao 250px).
+                            \item \texttt{Avatar.Icon}: Placeholder icon ``food-apple'' nếu thiếu ảnh.
+                        \end{itemize}
+                    \item \texttt{Surface.infoSection}: Thông tin thực phẩm:
+                        \begin{itemize}
+                            \item \texttt{Text.foodName}: Tên thực phẩm (24px, bold).
+                            \item \texttt{View.metaRow}: \texttt{Avatar.Icon} ``tag'' + Text danh mục.
+                            \item \texttt{Chip.systemBadge}: Badge hiển thị nếu là thực phẩm hệ thống.
+                            \item \texttt{View.dateInfo}: Ngày tạo định dạng vi-VN.
+                        \end{itemize}
+                    \item \texttt{View.actions}: Nút ``Xóa thực phẩm'' (chỉ hiện nếu không phải thực phẩm hệ thống).
+                \end{itemize}
+            \item \texttt{Portal.Dialog}: Dialog xác nhận trước khi xóa thực phẩm.
+        \end{itemize}
+    \item \textbf{Xử lý cử chỉ và Input:}
+        \begin{itemize}
+            \item \textbf{Edit Action:} Nhấn nút ``pencil'' trong header gọi \texttt{onEdit(foodId)}.
+            \item \textbf{Delete Action:} Nhấn nút ``Xóa thực phẩm'' $\rightarrow$ \texttt{Dialog} xác nhận $\rightarrow$ \texttt{deleteMutation.mutateAsync()}.
+            \item \textbf{Navigation:} Nút Back gọi \texttt{onBack()} để quay lại danh sách.
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Image Section:} Nền trắng, bo góc 16px, elevation 2.
+            \item \textbf{Info Section:} Padding 20px, bo góc 16px.
+            \item \textbf{Delete Button:} Nền trắng, viền đỏ (\texttt{colors.error}), text đỏ, icon ``delete''.
+            \item \textbf{System Badge:} Nền xanh (\texttt{colors.info}), height 32px, icon ``shield-check''.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{food}: Thông tin chi tiết thực phẩm từ \texttt{useFood(foodId)} hook.
+            \item \texttt{deleteDialogVisible}: Trạng thái ẩn/hiển dialog xác nhận xóa.
+            \item \texttt{deleteMutation}: Mutation hook từ \texttt{useDeleteFood()}.
+        \end{itemize}
+\end{itemize}
+
+\subparagraph{Màn hình Thêm/Sửa thực phẩm (AddFoodScreen)}
+\begin{itemize}
+    \item \textbf{Cấu trúc cây Component:}
+        \begin{itemize}
+            \item \texttt{SafeAreaView} $\rightarrow$ \texttt{Header}: Nút Back + Logo + Tiêu đề động (Thêm/Sửa thực phẩm).
+            \item \texttt{ScrollView}:
+                \begin{itemize}
+                    \item \texttt{View.section} (Hình ảnh): 
+                        \begin{itemize}
+                            \item \texttt{View.imageContainer}: \texttt{Image.preview} hoặc \texttt{TouchableOpacity.placeholder}.
+                            \item \texttt{TouchableOpacity.removeImageButton}: Icon ``close-circle'' trên nền đỏ.
+                        \end{itemize}
+                    \item \texttt{View.section} (Thông tin):
+                        \begin{itemize}
+                            \item \texttt{TextInput}: Nhập tên thực phẩm (outlined mode, maxLength 100).
+                            \item \texttt{Menu} $\rightarrow$ \texttt{TouchableOpacity.selector}: Chọn danh mục.
+                        \end{itemize}
+                    \item \texttt{View.buttonContainer}: Nút ``Hủy'' (outlined) + Nút ``Lưu'' (contained).
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Xử lý Form:}
+        \begin{itemize}
+            \item \textbf{Image Picker:} Gọi \texttt{ImagePicker.launchImageLibraryAsync()} với tỉ lệ 1:1.
+            \item \textbf{Validation:} Kiểm tra bắt buộc nhập tên và chọn danh mục trước khi submit.
+            \item \textbf{Submit Action:} 
+                \begin{itemize}
+                    \item Create: Gọi \texttt{createMutation.mutateAsync()}.
+                    \item Edit: Gọi \texttt{updateMutation.mutateAsync()}.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Visual Style:}
+        \begin{itemize}
+            \item \textbf{Image Preview:} Bo góc 12px, kích thước 200x200px.
+            \item \textbf{Image Placeholder:} Viền đứt nét (\textit{dashed}) 2px, nền \texttt{surfaceVariant}.
+            \item \textbf{Input Style:} Active outline màu \texttt{primary}, hiển thị counter độ dài ký tự.
+            \item \textbf{Selector:} Nền trắng, viền \texttt{colors.border}, biểu tượng ``chevron-down'' bên phải.
+        \end{itemize}
+    \item \textbf{State Management:}
+        \begin{itemize}
+            \item \texttt{isEdit}: Boolean xác định chế độ Thêm mới hay Chỉnh sửa.
+            \item \texttt{imageUri} \& \texttt{imageFile}: Quản lý dữ liệu hình ảnh được chọn.
+            \item \texttt{createMutation/updateMutation}: Các mutation hook xử lý gửi dữ liệu lên Server.
+        \end{itemize}
+\end{itemize}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_danhsach_tp_1.jpg}
+    \caption{Thiết kế giao diện quản lý thực phẩm - 1}
+    \label{fig:app-screenshots-food1}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_danhsach_tp_2.jpg}
+    \caption{Thiết kế giao diện quản lý thực phẩm - 2}
+    \label{fig:app-screenshots-food2}
+\end{figure}
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.3\textwidth]{screenshot/TK_danhsach_tp_3.jpg}
+    \caption{Thiết kế giao diện quản lý thực phẩm - 3}
+    \label{fig:app-screenshots-food3}
+\end{figure}
 % --- UC06: Quản lý nhóm ---
 \paragraph{5. Nhóm UC-06: Quản lý nhóm}
 Giao diện quản lý nhóm gia đình/bạn bè để cùng chia sẻ tủ lạnh và thực đơn.

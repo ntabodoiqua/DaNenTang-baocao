@@ -1,1 +1,48 @@
-\section*{Kết luận và hướng phát triển}
+\section*{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+Trong khuôn khổ học phần \textbf{IT4788 - Phát triển ứng dụng đa nền tảng}, dự án xây dựng ứng dụng \textbf{FreshFridge - ``Đi chợ tiện lợi''} đã hoàn thành các mục tiêu đề ra về việc tạo ra một giải pháp quản lý thực phẩm và mua sắm thông minh. Dưới đây là những tổng kết chi tiết về quá trình thực hiện và lộ trình cải tiến hệ thống trong tương lai.
+
+\subsection*{1. Kết luận}
+
+\subsubsection*{1.1. Những kết quả đã đạt được}
+Dự án đã hiện thực hóa thành công một hệ thống quản lý tích hợp với các kết quả cụ thể sau:
+\begin{itemize}
+    \item \textbf{Về chức năng:} Hoàn thiện các module cốt lõi bao gồm: quản lý kho thực phẩm (theo dõi vị trí, số lượng, hạn sử dụng), danh sách mua sắm nhóm, kế hoạch bữa ăn và hệ thống thông báo đẩy (Push Notifications) nhắc nhở thông minh.
+    \item \textbf{Về kỹ thuật:} Xây dựng hệ thống ổn định dựa trên kiến trúc \textbf{Clean Architecture} (Back-end Spring Boot) và kiến trúc \textbf{Component-based} (Front-end React Native + Expo). Hệ thống đảm bảo tính nhất quán dữ liệu thông qua PostgreSQL và khả năng đồng bộ thời gian thực với React Query.
+    \item \textbf{Về bảo mật và lưu trữ:} Triển khai cơ chế xác thực JWT, mã hóa dữ liệu nhạy cảm trên thiết bị (Secure Store) và tối ưu hóa hình ảnh qua Cloudinary.
+\end{itemize}
+
+\subsubsection*{1.2. Ưu điểm và hạn chế}
+\begin{itemize}
+    \item \textbf{Ưu điểm:} Ứng dụng có giao diện thân thiện, tính thực tiễn cao trong việc giải quyết bài toán lãng phí thực phẩm. Cấu trúc mã nguồn được tổ chức chặt chẽ, sử dụng TypeScript giúp giảm thiểu lỗi runtime và dễ dàng bảo trì.
+    \item \textbf{Hạn chế:} Hệ thống chưa triển khai cơ chế Caching (Redis) để tối ưu hóa hiệu năng API. Ngoài ra, việc thiếu kiểm thử tự động (E2E Testing) và các tính năng thông minh dựa trên AI/ML là những điểm cần được khắc phục trong các phiên bản tiếp theo.
+\end{itemize}
+
+
+
+\subsection*{2. Hướng phát triển}
+
+Dựa trên những hạn chế đã nêu, lộ trình phát triển của FreshFridge được định hướng theo ba giai đoạn:
+
+\subsubsection*{2.1. Ngắn hạn: Tối ưu hóa và Bảo mật}
+\begin{itemize}
+    \item Triển khai \textbf{Redis Caching} và tối ưu hóa truy vấn cơ sở dữ liệu để nâng cao tốc độ phản hồi.
+    \item Tăng tỷ lệ bao phủ kiểm thử (Unit Test \& Integration Test) lên trên 80\%.
+    \item Bổ sung cơ chế bảo mật nâng cao như \textbf{Refresh Token Rotation} và \textbf{Rate Limiting} để bảo vệ tài nguyên hệ thống.
+\end{itemize}
+
+\subsubsection*{2.2. Trung hạn: Tính năng thông minh và Đa ngữ}
+\begin{itemize}
+    \item Tích hợp \textbf{Barcode Scanner} và công nghệ \textbf{OCR} để hỗ trợ người dùng nhập liệu thực phẩm từ hóa đơn hoặc mã vạch sản phẩm.
+    \item Xây dựng mô hình \textbf{AI Suggestion} để đề xuất món ăn dựa trên nguyên liệu thực tế và thói quen dinh dưỡng của người dùng.
+    \item Hoàn thiện hệ thống đa ngôn ngữ (Internationalization) để tiếp cận người dùng quốc tế.
+\end{itemize}
+
+\subsubsection*{2.3. Dài hạn: Hệ sinh thái IoT và Cộng đồng}
+\begin{itemize}
+    \item Kết nối với các thiết bị \textbf{Smart Fridge} và các thiết bị gia dụng IoT để tự động hóa quy trình kiểm kê thực phẩm.
+    \item Phát triển mạng xã hội chia sẻ công thức nấu ăn và các giải pháp quản lý chi tiêu thực phẩm dành cho doanh nghiệp nhỏ (nhà hàng, canteen).
+    \item Triển khai hệ thống trên hạ tầng đám mây chuyên nghiệp với quy trình \textbf{CI/CD} và giám sát tập trung (ELK Stack).
+\end{itemize}
+
+\subsection*{3. Tổng kết cuối cùng}
+Ứng dụng FreshFridge không chỉ là một sản phẩm kỹ thuật mà còn là giải pháp thực tế hướng tới lối sống hiện đại và bền vững. Với nền tảng kiến trúc hiện có, hệ thống hoàn toàn đủ tiềm năng để mở rộng thành một hệ sinh thái quản lý gia đình thông minh, mang lại giá trị thiết thực cho cộng đồng người dùng.

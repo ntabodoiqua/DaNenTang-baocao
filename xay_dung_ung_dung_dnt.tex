@@ -1287,3 +1287,73 @@ deleteUser(...) & void & Xóa người dùng \\
 \end{table}
 
 \subsection{Các giải pháp khác đã xây dựng trong chương trình}
+Trong quá trình phát triển ứng dụng, bên cạnh các tính năng cốt lõi, nhóm đã triển khai một loạt các giải pháp kỹ thuật bổ trợ nhằm tối ưu hóa hiệu suất, tăng cường tính bảo mật và nâng cao trải nghiệm người dùng. Phần này trình bày chi tiết về cách thức xử lý giao tiếp hệ thống, quản lý dữ liệu và tận dụng các dịch vụ nền tảng của thiết bị di động.
+
+\subsubsection{Cơ chế giao tiếp với Back-end và xử lý truy vấn API}
+
+Trong môi trường ứng dụng di động, việc quản lý các luồng dữ liệu thông qua HTTP Request đòi hỏi sự tập trung để xử lý các vấn đề về xác thực và đồng bộ hóa. Hệ thống đã triển khai giải pháp dựa trên Axios và React Query:
+
+\begin{itemize}
+    \item \textbf{Axios Interceptors:} Thiết lập một instance Axios tập trung để quản lý logic giao tiếp. 
+    \begin{itemize}
+        \item \textit{Request Interceptor:} Tự động trích xuất JWT Token từ kho lưu trữ bảo mật và đính kèm vào header \texttt{Authorization} cho mọi yêu cầu.
+        \item \textit{Response Interceptor:} Xử lý lỗi hệ thống tập trung. Đặc biệt, cơ chế tự động làm mới mã xác thực (Auto-refresh Token) được kích hoạt khi nhận mã lỗi 401, giúp duy trì phiên làm việc của người dùng mà không cần đăng nhập lại.
+    \end{itemize}
+    \item \textbf{Quản lý trạng thái Server với React Query:} Thay vì quản lý dữ liệu API bằng các biến state thông thường, dự án sử dụng \texttt{@tanstack/react-query} để tối ưu hóa hiệu suất thông qua:
+    \begin{itemize}
+        \item Cơ chế \textit{Caching} dữ liệu giúp giảm thiểu số lượng Request không cần thiết.
+        \item \textit{Optimistic Updates} để cập nhật giao diện ngay lập tức trước khi nhận phản hồi từ Server, tạo cảm giác mượt mà cho người dùng.
+        \item Tự động thực hiện truy vấn lại (Background Refetching) khi thiết bị kết nối mạng trở lại.
+    \end{itemize}
+    \item \textbf{Đảm bảo an toàn kiểu dữ liệu (Type-safety):} Toàn bộ các Endpoint được định nghĩa dưới dạng module hóa trong TypeScript, áp dụng Generic Types cho cả Request và Response, giúp hạn chế tối đa lỗi Runtime.
+\end{itemize}
+
+\subsubsection{Chiến lược quản lý trạng thái ứng dụng (State Management)}
+
+Ứng dụng sở hữu cấu trúc dữ liệu phức tạp bao gồm quản lý nhóm, kho thực phẩm và lịch ăn uống. Tác giả đã áp dụng mô hình quản lý trạng thái phân tầng:
+
+\begin{itemize}
+    \item \textbf{Trạng thái phía Client (Zustand):} Sử dụng thư viện Zustand với ưu điểm nhẹ và hiệu suất cao hơn so với Redux. Các trạng thái về phiên đăng nhập (\textit{Auth State}), bộ lọc dữ liệu (\textit{Filters}) và tùy chỉnh người dùng được tổ chức thành các Slice riêng biệt.
+    \item \textbf{Trạng thái phía Server (React Query):} Đóng vai trò là nguồn dữ liệu tin cậy (Single Source of Truth) cho các thông tin từ cơ sở dữ liệu.
+    \item \textbf{Cơ chế duy trì trạng thái (Persistence):} Tích hợp Middleware \texttt{persist} của Zustand kết hợp với \texttt{AsyncStorage} để duy trì các trạng thái quan trọng ngay cả khi ứng dụng bị đóng hoặc khởi động lại thiết bị.
+\end{itemize}
+
+\subsubsection{Giải pháp lưu trữ dữ liệu cục bộ và bảo mật}
+
+Để đáp ứng các yêu cầu khác nhau về bảo mật và hiệu suất, hệ thống lưu trữ phía Client được thiết kế theo mô hình hai tầng:
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Loại lưu trữ} & \textbf{Công nghệ sử dụng} & \textbf{Dữ liệu quản lý} \\ \hline
+\textbf{Secure Storage} & Expo Secure Store (AES-256) & JWT Tokens, Credentials. \\ \hline
+\textbf{Standard Storage} & AsyncStorage & User Profile, Settings, Caches. \\ \hline
+\end{tabular}
+\caption{Phân tầng lưu trữ dữ liệu cục bộ}
+\end{table}
+
+Giải pháp này đảm bảo tuân thủ các tiêu chuẩn bảo mật cho ứng dụng di động (như OWASP Mobile Top 10) bằng cách mã hóa các thông tin nhạy cảm ở cấp độ phần cứng (Keychain trên iOS và EncryptedSharedPreferences trên Android).
+
+\subsubsection{Hệ thống đa ngôn ngữ và chuẩn hóa hiển thị}
+
+Mặc dù mục tiêu hiện tại là thị trường Việt Nam, kiến trúc ứng dụng vẫn được thiết kế để sẵn sàng mở rộng đa ngôn ngữ (Internationalization) thông qua giải pháp \textit{Constants-based Mapping}:
+
+\begin{itemize}
+    \item \textbf{Ánh xạ Enum:} Chuyển đổi các giá trị Enum từ Backend (thường là tiếng Anh như \texttt{VEGETABLES}, \texttt{FRIDGE}) sang ngôn ngữ hiển thị tương ứng thông qua một lớp Utility tập trung.
+    \item \textbf{Quản lý thông báo tập trung:} Toàn bộ các thông điệp lỗi và thông báo thành công được định nghĩa trong các hằng số, giúp đảm bảo tính nhất quán về thuật ngữ trên toàn bộ giao diện người dùng.
+\end{itemize}
+
+\subsubsection{Tích hợp dịch vụ nền tảng (Native Features)}
+
+Thông qua Expo SDK, ứng dụng đã khai thác tối đa các tính năng đặc trưng của thiết bị di động để nâng cao trải nghiệm người dùng:
+
+\begin{itemize}
+    \item \textbf{Push Notifications:} Triển khai thông báo đẩy nhằm nhắc nhở người dùng về thực phẩm sắp hết hạn và lịch trình bữa ăn. Hệ thống hỗ trợ xử lý thông báo cả khi ứng dụng đang chạy nền hoặc đã đóng hoàn toàn.
+    \item \textbf{Xử lý hình ảnh (Camera \& Image Picker):} Cho phép người dùng cập nhật ảnh thực phẩm và công thức nấu ăn. Hình ảnh trước khi tải lên được xử lý nén (Compression) và định lại kích cỡ (Resizing) để tiết kiệm băng thông và không gian lưu trữ của Server.
+    \item \textbf{Tối ưu hóa hiển thị hình ảnh:} Sử dụng thư viện \texttt{expo-image} hỗ trợ các định dạng thế hệ mới như WebP và AVIF, kết hợp với cơ chế hiển thị \textit{Blurhash} giúp cải thiện tốc độ tải trang và chỉ số trải nghiệm người dùng (UX).
+\end{itemize}
+
+\paragraph{Kết luận chung về các giải pháp kỹ thuật:} ~\\
+
+Các giải pháp nêu trên đã tạo ra một nền tảng kỹ thuật vững chắc cho ứng dụng Fresh Fridge. Việc kết hợp giữa các công nghệ hiện đại như React Query, Zustand và Expo SDK không chỉ giải quyết được bài toán về hiệu suất và bảo mật ở thời điểm hiện tại mà còn đảm bảo khả năng mở rộng và bảo trì hệ thống trong tương lai.
